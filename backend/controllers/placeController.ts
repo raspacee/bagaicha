@@ -1,0 +1,244 @@
+import { Request, Response, NextFunction } from "express";
+import { v2 as cloudinary } from "cloudinary";
+import { v4 as uuidv4 } from "uuid";
+
+import Place from "../models/placeModel";
+import { Distances } from "../lib/enums";
+
+const get_place_info = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const place_id = req.params.place_id as string;
+  console.log(place_id);
+  try {
+    const place = await Place.get_place_by_uuid(place_id);
+    return res.status(200).send({
+      status: "ok",
+      place,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+interface ImageInterface {
+  thumbnail_img?: any;
+  cover_img?: any;
+  displayPic?: any;
+}
+
+const update_place_info = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const place_id = req.params.place_id as string;
+  const {
+    open_days,
+    opening_time,
+    closing_time,
+    place_features,
+    thumbnail_img_old,
+    cover_img_old,
+  } = req.body;
+
+  try {
+    const files = req.files as ImageInterface;
+    let thumbnail_img: string = thumbnail_img_old;
+    let cover_img: string = cover_img_old;
+    if (files.thumbnail_img) {
+      const picture_upload = await cloudinary.uploader.upload(
+        files.thumbnail_img[0].path,
+      );
+      thumbnail_img = picture_upload.secure_url;
+    }
+    if (files.cover_img) {
+      const picture_upload = await cloudinary.uploader.upload(
+        files.cover_img[0].path,
+      );
+      cover_img = picture_upload.secure_url;
+    }
+
+    await Place.update_place(
+      place_id,
+      JSON.parse(open_days),
+      JSON.parse(opening_time) || null,
+      JSON.parse(closing_time) || null,
+      JSON.parse(place_features),
+      thumbnail_img,
+      cover_img,
+    );
+    return res.status(200).send({
+      status: "ok",
+      message: "Place information updated successfully",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      status: "error",
+      err,
+    });
+  }
+};
+
+const get_review = async (req: Request, res: Response, next: NextFunction) => {
+  const place_id = req.params.place_id;
+  const rating = req.params.rating;
+
+  try {
+    const reviews = await Place.get_review_by_rating(place_id, rating);
+    if (reviews == null) {
+      return res
+        .status(200)
+        .send({ status: "error", message: "Reviews not found" });
+    }
+    return res.status(200).send({
+      status: "ok",
+      reviews: reviews,
+    });
+  } catch (err) {
+    return res.status(500).send({
+      status: "error",
+      error: err,
+    });
+  }
+};
+
+export const place_features = [
+  { key: "delivery", value: 0 },
+  { key: "takeout", value: 1 },
+  { key: "pet_friendly", value: 2 },
+  { key: "very_clean", value: 3 },
+  { key: "affordable", value: 4 },
+];
+
+const top_places = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const category = req.query.category as string;
+    const suggested = req.query.suggested as string;
+    const lat = req.query.lat as string;
+    const long = req.query.long as string;
+    if (lat == "" || long == "") {
+      return res.status(400).send({
+        status: "error",
+        message: "Please provide user latitude and longitude",
+      });
+    }
+
+    let categories: string[] | null;
+    if (category == "") categories = null;
+    else categories = category.split(",");
+
+    let suggestions: number[] | null;
+    if (suggested == "") suggestions = null;
+    else {
+      let tmp: any = suggested.split(",");
+      /* Map strings to number representations */
+      tmp = tmp.map((s: any) => {
+        for (let i = 0; i < place_features.length; i++) {
+          if (place_features[i].key == s) return place_features[i].value;
+        }
+        return null;
+      });
+      suggestions = tmp!.filter((s: any) => s != null);
+    }
+
+    let distance: Distances | null = parseInt(req.query.distance as string);
+    if (distance == Distances.NONE) distance = null;
+    const places = await Place.get_top_places(
+      parseFloat(lat),
+      parseFloat(long),
+      categories,
+      suggestions,
+      distance,
+    );
+    return res.status(200).send({
+      status: "ok",
+      places,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      status: "error",
+      error: err,
+    });
+  }
+};
+
+const create_place = async (req: Request, res: Response) => {
+  try {
+    const {
+      placeName,
+      placeLat,
+      placeLong,
+      foods,
+      drinks,
+      relation,
+      alcoholAllowed,
+    } = req.body;
+    const files = req.files as ImageInterface;
+    const picture_upload = await cloudinary.uploader.upload(
+      files.displayPic[0].path,
+    );
+    let foods_offered = JSON.parse(foods);
+    foods_offered.concat(JSON.parse(drinks));
+    const displayPic = picture_upload.secure_url;
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${placeLat}&lon=${placeLong}&format=json`,
+    );
+    const data = await response.json();
+    const owned_by = relation == "owner" ? res.locals.user.user_id : null;
+    await Place.add_place(
+      uuidv4(),
+      placeName,
+      placeLat,
+      placeLong,
+      foods_offered,
+      data.display_name,
+      displayPic,
+      owned_by,
+      JSON.parse(alcoholAllowed),
+      data.place_id,
+    );
+    return res.status(200).send({
+      status: "ok",
+      message: "Successfully created the place",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      status: "error",
+      error: err,
+    });
+  }
+};
+
+const search_place = async (req: Request, res: Response) => {
+  try {
+    const q = req.query.q as string;
+    const places = await Place.search_place(q);
+    return res.status(200).send({
+      status: "ok",
+      places,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      status: "error",
+      error: err,
+    });
+  }
+};
+
+const exporter = {
+  get_place_info,
+  get_review,
+  top_places,
+  update_place_info,
+  create_place,
+  search_place,
+};
+
+export default exporter;
