@@ -2,6 +2,7 @@ import { IoSadOutline } from "@react-icons/all-files/io5/IoSadOutline";
 
 import { useState, useEffect } from "react";
 import Cookies from "universal-cookie";
+import Typography from "@mui/material/Typography";
 
 import { AUTH_TOKEN } from "../lib/cookie_names";
 import ReviewModal from "../components/modal/ReviewModal";
@@ -70,9 +71,15 @@ export default function Bookmarks() {
       <div className="col-span-2">
         <div className="w-full bg-white py-3 px-3 my-3 rounded-lg shadow-lg">
           <p className="font-bold text-2xl text-center mb-3">Bookmarks</p>
-          {bookmarks.map((bookmark: any) => (
-            <Post review={bookmark} key={bookmark.review_id} />
-          ))}
+          {bookmarks != null ? (
+            bookmarks.map((bookmark: any) => (
+              <Post review={bookmark} key={bookmark.review_id} />
+            ))
+          ) : (
+            <div className="min-h-[15rem] flex justify-center items-center">
+              <Typography variant="h4">You don't have any bookmark</Typography>
+            </div>
+          )}
         </div>
       </div>
     </div>

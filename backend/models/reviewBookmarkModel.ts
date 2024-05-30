@@ -37,6 +37,7 @@ const get_bookmarks = async (user_id: string) => {
 from review_bookmark as b inner join user_ as u on b.user_id = u.id
 inner join review as r on r.id = b.review_id
 	inner join place as pl on r.place_id = pl.id 
+where b.user_id = $1
   order by b.created_at desc;`;
   const values = [user_id];
   const res = await pool.query(text, values);

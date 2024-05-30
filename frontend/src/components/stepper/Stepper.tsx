@@ -72,6 +72,24 @@ export default function HorizontalLinearStepper({ steps }) {
     if (activeStep == steps.length - 1) {
       submitForm();
     }
+
+    if (activeStep == 0) {
+      if (state.relation == null) return;
+    }
+
+    if (activeStep == 1) {
+      if (
+        state.placeName == "" ||
+        state.placeLat == "" ||
+        state.placeLong == "" ||
+        state.relation == null ||
+        state.displayPic == null ||
+        state.foods.length == 0 ||
+        state.drinks.length == 0
+      ) {
+        return;
+      }
+    }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 

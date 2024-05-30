@@ -91,11 +91,12 @@ export default function PostCreate() {
         `${import.meta.env.VITE_API_URL}/place/search?q=${query}`,
       );
       const result = await response.json();
+      console.log(result);
       if (result.places != null) {
         setSuggestions((oldSugges) => {
           const newSugges: Place[] = [];
           for (let i = 0; i < result.places.length; i++) {
-            const tmp = result.places[i].display_name.split(",");
+            const tmp = result.places[i].name.split(",");
             newSugges.push({
               id: result.places[i].openmaps_place_id,
               name: result.places[i].name,
@@ -134,16 +135,16 @@ export default function PostCreate() {
   };
 
   const onSubmit: SubmitHandler<ReviewSchemaType> = async (data: any) => {
-    if (placeInfo != null && rating != "null") {
+    if (placeInfo != null && rating && [1, 2, 3, 4, 5].includes(rating)) {
       const formData = new FormData();
-      formData.append("picture", pictureRef.current!.files![0]);
+      formData.append("picture", data.picture);
       formData.append("comment", data.comment);
       formData.append("place_id", placeInfo.id);
       formData.append("place_name", placeInfo.name);
       formData.append("display_name", placeInfo.display_name);
       formData.append("place_lat", placeInfo.lat);
       formData.append("place_long", placeInfo.long);
-      formData.append("rating", rating);
+      formData.append("rating", rating.toString());
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/review`, {
           method: "POST",

@@ -18,7 +18,7 @@ const signup_handler = async (
     const created_at = new Date().toISOString();
 
     const default_profile_picture_url =
-      "https://res.cloudinary.com/dqiqiczlk/image/upload/v1712744937/dub6gcp7xqu14hp1klnl.jpg";
+      "https://t3.ftcdn.net/jpg/02/10/49/86/360_F_210498655_ywivjjUe6cgyt52n4BxktRgDCfFg8lKx.jpg";
 
     await User.create_user(
       id,

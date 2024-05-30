@@ -171,7 +171,7 @@ export default function ReviewModal() {
         <div className="col-span-1 h-full">
           <img
             src={state.reviewImageUrl}
-            className="object-coverz h-full"
+            className="object-cover h-full"
             style={{ height: "100%" }}
           />
         </div>
