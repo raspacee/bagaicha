@@ -47,6 +47,9 @@ export type ModalType = {
     authorImageUrl: string;
     authorEmail: string;
     createdAt: string;
+    placeName: string;
+    placeId: string;
+    rating: number;
   };
 };
 

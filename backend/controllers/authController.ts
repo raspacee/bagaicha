@@ -88,9 +88,10 @@ const auth_handler = async (
   next: NextFunction,
 ) => {
   try {
+    const user = await User.get_info_by_id(res.locals.user.user_id);
     return res.status(200).send({
       status: "ok",
-      user: res.locals.user,
+      user,
     });
   } catch (err) {
     console.log(err);

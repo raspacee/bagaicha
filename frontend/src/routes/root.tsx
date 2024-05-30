@@ -11,7 +11,6 @@ import { setLocation } from "../slice/locationSlice";
 
 export default function Root() {
   const user = useLoaderData() as UserInterface;
-  console.log("user", user);
 
   const dispatch = useAppDispatch();
   dispatch(setUser(user));

@@ -2,12 +2,14 @@ import { MdCancel } from "@react-icons/all-files/md/MdCancel";
 import { IoLocationSharp } from "@react-icons/all-files/io5/IoLocationSharp";
 import { IoImagesOutline } from "@react-icons/all-files/io5/IoImagesOutline";
 
+import Avatar from "@mui/material/Avatar";
 import { useState, useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import Cookies from "universal-cookie";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { motion } from "framer-motion";
+import Rating from "@mui/material/Rating";
 
 import { useAppSelector, useAppDispatch } from "../../hooks.ts";
 import {
@@ -32,6 +34,7 @@ export default function PostCreate() {
   const display = useAppSelector(
     (state) => state.modal.postCreateModal.display,
   );
+  const user = useAppSelector((state) => state.user);
   const cookies = new Cookies(null, {
     path: "/",
   });
@@ -40,7 +43,7 @@ export default function PostCreate() {
   const [placeInfo, setPlaceInfo] = useState<Place | null>(null);
   const pictureRef = useRef<HTMLInputElement>(null);
   const [image, setImage] = useState<string | null>(null);
-  const [rating, setRating] = useState<string>("null");
+  const [rating, setRating] = useState<number | null>(null);
   const {
     register,
     setError,
@@ -178,12 +181,10 @@ export default function PostCreate() {
       >
         <div className="w-full px-4 py-2 flex justify-between row-span-1">
           <div className="flex items-center">
-            <img
-              src="https://wallpapers.com/images/featured/cool-profile-picture-87h46gcobjl5e4xu.webp"
-              style={{ width: "50px", height: "50px" }}
-              className="rounded-full"
-            />
-            <h1 className="font-bold text-lg ml-2">Bijay Khapung</h1>
+            <Avatar alt={user.first_name} src={user.profile_picture_url} />
+            <h1 className="font-bold text-lg ml-2">
+              {user.first_name} {user.last_name}
+            </h1>
           </div>
           <motion.div
             onClick={closeModal}
@@ -238,11 +239,15 @@ export default function PostCreate() {
                 >
                   Rate the food
                 </label>
-                <StarRatingInput
-                  rating={rating}
-                  setRating={(newValue: string) => {
-                    setRating(newValue);
-                    setValue("rating", newValue, { shouldValidate: true });
+                <Rating
+                  name="rating"
+                  value={rating}
+                  size="large"
+                  onChange={(event, newValue) => {
+                    setRating(newValue!);
+                    setValue("rating", newValue!.toString(), {
+                      shouldValidate: true,
+                    });
                   }}
                 />
                 <input id="rating" type="text" {...register("rating")} hidden />

@@ -31,15 +31,13 @@ const user_has_bookmarked_review = async (
 
 const get_bookmarks = async (user_id: string) => {
   const text = `
-
-select b.id as bookmark_id, u.first_name || ' ' || u.last_name as author_name, u.email as author_email,
-(select exists (select * from review_like as l where l.liker_id=$1 and l.review_id=b.review_id limit 1)) as has_liked,
-u.profile_picture_url, r.id as review_id, r.body, 
-	r.picture, r.rating, r.created_at from review_bookmark as b
-	inner join review as r on b.review_id = r.id
-	inner join user_ as u on r.author_id = u.id
-	where b.user_id=$1 order by b.created_at desc;
-`;
+ select r.*, u.first_name, u.last_name, u.profile_picture_url, u.email, pl.lat, pl.long, pl.name, pl.openmaps_place_id,
+(select exists (select * from review_like as l where l.liker_id=$1 and l.review_id=r.id limit 1)) as user_has_liked,
+(select exists (select * from review_bookmark as b where b.user_id=$1 and b.review_id=r.id limit 1)) as user_has_bookmarked_review
+from review_bookmark as b inner join user_ as u on b.user_id = u.id
+inner join review as r on r.id = b.review_id
+	inner join place as pl on r.place_id = pl.id 
+  order by b.created_at desc;`;
   const values = [user_id];
   const res = await pool.query(text, values);
   if (res.rowCount == 0) return null;

@@ -6,6 +6,7 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 import { modMiddleware } from "../middlewares/modMiddleware";
 import upload from "../multer";
 
+/* Create a new place */
 router.post(
   "/",
   authMiddleware,
@@ -17,7 +18,14 @@ router.post(
 router.get("/search", placeController.search_place);
 
 router.get("/top_places", placeController.top_places);
-router.get("/:place_id", placeController.get_place_info);
+
+/* Get a place reviews */
+router.get("/review", authMiddleware, placeController.get_place_review);
+
+/* Create a review for a place */
+router.post("/review", authMiddleware, placeController.create_place_review);
+
+/* Update place information */
 router.put(
   "/:place_id",
   authMiddleware,
@@ -29,5 +37,6 @@ router.put(
   placeController.update_place_info,
 );
 router.get("/:place_id/rating/:rating", placeController.get_review);
-
+/* Get place data */
+router.get("/:place_id", placeController.get_place_info);
 export default router;

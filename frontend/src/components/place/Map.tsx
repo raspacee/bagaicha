@@ -12,7 +12,6 @@ const Map = ({
     long: number;
   };
 }) => {
-  console.log(placeLocation);
   const position: LatLngExpression = [placeLocation.lat, placeLocation.long];
   return (
     <MapContainer

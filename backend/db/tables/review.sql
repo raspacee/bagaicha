@@ -6,7 +6,7 @@ create table if not exists review (
     like_count integer default 0,
     place_id uuid not null,
     foods_ate varchar(30)[],
-    created_at timestamp not null,
+    created_at timestamptz not null,
     rating smallint not null,
     
     constraint fk_author

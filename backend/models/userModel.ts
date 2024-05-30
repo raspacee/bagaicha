@@ -43,6 +43,15 @@ const get_user_all_info = async (email: string) => {
   return user.rows[0];
 };
 
+const get_info_by_id = async (user_id: string) => {
+  const text =
+    "select id, first_name, last_name, profile_picture_url, bio, moderation_lvl, email from user_ where id=$1;";
+  const values = [user_id];
+  const user = await pool.query(text, values);
+  if (user.rowCount == 0) return null;
+  return user.rows[0];
+};
+
 const change_profile_pic_url = async (user_id: string, new_url: string) => {
   await pool.query(
     "update user_ set profile_picture_url = $1 \
@@ -51,11 +60,35 @@ const change_profile_pic_url = async (user_id: string, new_url: string) => {
   );
 };
 
+const update_profile = async (
+  user_id: string,
+  first_name: string,
+  last_name: string,
+  bio: string,
+  profile_pic: string | null,
+) => {
+  if (profile_pic == null) {
+    await pool.query(
+      `update user_ set first_name = $1, last_name = $2, bio = $3
+    where id = $4;`,
+      [first_name, last_name, bio, user_id],
+    );
+  } else {
+    await pool.query(
+      `update user_ set first_name = $1, last_name = $2, bio = $3, profile_picture_url = $4
+    where id = $5;`,
+      [first_name, last_name, bio, profile_pic, user_id],
+    );
+  }
+};
+
 const exporter = {
   create_user,
   get_user_all_info,
+  get_info_by_id,
   change_profile_pic_url,
   is_moderator,
+  update_profile,
 };
 
 export default exporter;

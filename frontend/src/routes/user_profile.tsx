@@ -1,16 +1,32 @@
+import { HiOutlineDotsHorizontal } from "@react-icons/all-files/hi/HiOutlineDotsHorizontal";
+import { BsBookmarkDash } from "@react-icons/all-files/bs/BsBookmarkDash";
+import { BsBookmarkDashFill } from "@react-icons/all-files/bs/BsBookmarkDashFill";
+import { AiFillHeart } from "@react-icons/all-files/ai/AiFillHeart";
+import { AiOutlineHeart } from "@react-icons/all-files/ai/AiOutlineHeart";
+
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { DateTime } from "luxon";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import Cookies from "universal-cookie";
+import Divider from "@mui/material/Divider";
+
+import Post from "../components/review/Post";
+import { AUTH_TOKEN } from "../lib/cookie_names";
+import ReviewModal from "../components/modal/ReviewModal";
 
 export default function Profile() {
   const { slug } = useParams();
   const [user, setUser] = useState<any>(null);
+  const [reviews, setReviews] = useState<any[] | null>(null);
+  const cookies = new Cookies(null, {
+    path: "/",
+  });
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         const res = await fetch(
           `${import.meta.env.VITE_API_URL}/user/${slug}`,
           {
@@ -25,7 +41,28 @@ export default function Profile() {
         console.error(err);
       }
     };
+
+    const fetchActivity = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/user/${slug}/reviews`,
+          {
+            mode: "cors",
+            headers: {
+              authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+            },
+          },
+        );
+        const data = await res.json();
+        if (data.status == "ok") {
+          setReviews(data.reviews);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
     fetchUser();
+    fetchActivity();
   }, [slug]);
 
   if (user == null) {
@@ -52,8 +89,9 @@ export default function Profile() {
   return (
     <>
       <div className="grid grid-cols-3 gap-1">
+        <ReviewModal />
         <div className="col-span-2 px-4 my-4">
-          <div className="w-full bg-white py-2 px-3 rounded-md flex justify-center">
+          <div className="w-full bg-white py-2 px-3 rounded-md flex flex-col items-center shadow-lg">
             <div className="flex flex-row justify-around w-3/4 ">
               <div>
                 <img
@@ -79,9 +117,27 @@ export default function Profile() {
                 </h2>
               </div>
             </div>
+            <div className="col-span-2 min-h-14 w-full text-center mt-3">
+              <p className="text-gray-600 font-medium">
+                {user.bio ? user.bio : "User has not written any bio"}
+              </p>
+            </div>
           </div>
-          <div className="w-full bg-white my-2 py-2 px-3 rounded-md flex justify-center">
-            <h2>User's activity</h2>
+          <div className="w-full bg-white my-2 py-2 px-3 rounded-md min-h-[300px] shadow-lg">
+            <h2 className="text-xl font-medium text-center w-full mb-3">
+              User's activity
+            </h2>
+            {reviews == null ? (
+              <div className="w-full h-[250px] flex justify-center items-center">
+                <p className="text-gray-600 font-medium">User has no posts</p>
+              </div>
+            ) : (
+              <div>
+                {reviews.map((review) => {
+                  return <Post key={review.id} review={review} />;
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>

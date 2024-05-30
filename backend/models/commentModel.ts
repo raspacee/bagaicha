@@ -26,9 +26,15 @@ const create_comment = async (
   reply_to: number | null,
 ) => {
   const text = `
+with inserted as (
 insert into review_comment (review_id, author_id, body, created_at, reply_to)
 	values ($1, $2, $3, $4, $5)
-returning *
+returning *)
+
+select io.*, u.first_name || ' ' || u.last_name as author_name,
+u.email as author_email, u.profile_picture_url as author_picture_url
+from inserted as io
+inner join user_ as u on u.id = io.author_id 
 `;
   const values = [
     review_id,

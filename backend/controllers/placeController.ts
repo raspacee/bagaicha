@@ -3,6 +3,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { v4 as uuidv4 } from "uuid";
 
 import Place from "../models/placeModel";
+import PlaceReview from "../models/placeReviewModel";
 import { Distances } from "../lib/enums";
 
 const get_place_info = async (
@@ -11,7 +12,6 @@ const get_place_info = async (
   next: NextFunction,
 ) => {
   const place_id = req.params.place_id as string;
-  console.log(place_id);
   try {
     const place = await Place.get_place_by_uuid(place_id);
     return res.status(200).send({
@@ -232,6 +232,49 @@ const search_place = async (req: Request, res: Response) => {
   }
 };
 
+const create_place_review = async (req: Request, res: Response) => {
+  try {
+    const { place_id, rating, textbody } = req.body;
+
+    const created_at = new Date().toISOString();
+    await PlaceReview.create_review(
+      place_id,
+      res.locals.user.user_id,
+      textbody,
+      rating,
+      created_at,
+    );
+    return res.status(201).send({
+      status: "ok",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      status: "error",
+      error: err,
+    });
+  }
+};
+
+const get_place_review = async (req: Request, res: Response) => {
+  try {
+    const rating = (req.query.rating as string) || "5";
+    const place_id = req.query.place_id as string;
+
+    const reviews = await PlaceReview.get_reviews(place_id, rating);
+    return res.status(200).send({
+      status: "ok",
+      reviews,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      status: "error",
+      error: err,
+    });
+  }
+};
+
 const exporter = {
   get_place_info,
   get_review,
@@ -239,6 +282,8 @@ const exporter = {
   update_place_info,
   create_place,
   search_place,
+  create_place_review,
+  get_place_review,
 };
 
 export default exporter;

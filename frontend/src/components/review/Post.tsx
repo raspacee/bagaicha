@@ -3,11 +3,12 @@ import { AiFillHeart } from "@react-icons/all-files/ai/AiFillHeart";
 import { BsDot } from "@react-icons/all-files/bs/BsDot";
 import { BsBookmarkDash } from "@react-icons/all-files/bs/BsBookmarkDash";
 import { BsBookmarkDashFill } from "@react-icons/all-files/bs/BsBookmarkDashFill";
-import { TfiComment } from "@react-icons/all-files/tfi/TfiComment";
+import ForumIcon from "@mui/icons-material/Forum";
 
 import { Link } from "react-router-dom";
 import { DateTime } from "luxon";
 import { motion } from "framer-motion";
+import Tooltip from "@mui/material/Tooltip";
 
 import { haversine } from "../../lib/helpers";
 import { useAppSelector, useAppDispatch } from "../../hooks";
@@ -36,6 +37,9 @@ export default function Post({ review }: { review: any }) {
     createdAt: string,
     reviewBody: string,
     authorEmail: string,
+    placeName: string,
+    placeId: string,
+    rating: number,
   ) => {
     dispatch(
       openReviewModal({
@@ -46,6 +50,9 @@ export default function Post({ review }: { review: any }) {
         createdAt,
         reviewBody,
         authorEmail,
+        placeName,
+        placeId,
+        rating,
       }),
     );
   };
@@ -89,20 +96,21 @@ export default function Post({ review }: { review: any }) {
         )}
       </div>
       <div className="mt-2">
-        <img
-          src={`${review.picture}`}
-          alt="Food picture"
-          height="400"
-          width="550"
-          onClick={() =>
-            dispatch(
-              setImgModal({
-                value: true,
-                src: review.picture,
-              }),
-            )
-          }
-        />
+        <Tooltip title="Open image">
+          <img
+            src={`${review.picture}`}
+            alt="Food picture"
+            onClick={() =>
+              dispatch(
+                setImgModal({
+                  value: true,
+                  src: review.picture,
+                }),
+              )
+            }
+            className="w-4/5 h-[20rem] object-cover cursor-pointer"
+          />
+        </Tooltip>
       </div>
       <div className="my-3">
         <p>{review.body}</p>
@@ -135,9 +143,8 @@ export default function Post({ review }: { review: any }) {
           )}
         </div>
         <div className="mx-2">
-          <TfiComment
-            size={23}
-            onClick={() =>
+          <span
+            onClick={() => {
               openReview(
                 review.id,
                 review.picture,
@@ -146,10 +153,15 @@ export default function Post({ review }: { review: any }) {
                 date.toRelative()!,
                 review.body,
                 review.email,
-              )
-            }
+                review.name,
+                review.place_id,
+                parseInt(review.rating),
+              );
+            }}
             className="cursor-pointer"
-          />
+          >
+            <ForumIcon style={{ fontSize: 25 }} />
+          </span>
         </div>
         <div className="mx-2">
           {hasBookmarked ? (
@@ -162,14 +174,14 @@ export default function Post({ review }: { review: any }) {
               }}
             >
               <BsBookmarkDashFill
-                size={25}
+                size={23}
                 className="cursor-pointer"
                 onClick={() => bookmarkHandler()}
               />
             </motion.div>
           ) : (
             <BsBookmarkDash
-              size={25}
+              size={23}
               className="cursor-pointer"
               onClick={() => bookmarkHandler()}
             />

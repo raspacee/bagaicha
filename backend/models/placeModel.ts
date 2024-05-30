@@ -28,11 +28,11 @@ const get_place_by_uuid = async (uuid: string) => {
     if (result.rowCount == 1) {
       const total_count = await pool.query(
         "select count(*) as total_count from \
-      review where place_id=$1",
+      place_review where place_id=$1",
         [uuid],
       );
       const text = `
-with counts as (select count(*) as reviews_count, rating as rating_star from review 
+with counts as (select count(*) as reviews_count, rating as rating_star from place_review 
 where place_id=$1 group by rating order by rating_star asc)
 
 select star as rating_star, 
@@ -163,7 +163,9 @@ select *, haversine(place.lat::decimal, place.long::decimal, $1, $2) as distance
 };
 
 const search_place = async (name: string) => {
-  const text = `select * from place where name ilike $1;`;
+  const text = `select *, (select avg(rating) from review where place_id=place.id) as avg_rating,
+	(select count(*) from review where place_id=place.id) as total_reviews
+ from place where name ilike $1;`;
   const data = await pool.query(text, [`%${name}%`]);
   if (data.rowCount == 0) return null;
   return data.rows;

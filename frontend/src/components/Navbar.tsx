@@ -1,9 +1,12 @@
 import { IoIosNotifications } from "@react-icons/all-files/io/IoIosNotifications";
 
-import { Link } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Button from "@mui/material/Button";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 
 import { AUTH_TOKEN } from "../lib/cookie_names";
 import NotificationModel from "./modal/NotificationModal";
@@ -12,6 +15,9 @@ import { setNotificationModal, setSearchModal } from "../slice/modalSlice";
 import SearchModal from "./modal/SearchModal";
 
 export default function Navbar() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
   const isLoggedIn = true;
   const notifications = useAppSelector(
     (state) => state.modal.notificationModal.notifications,
@@ -59,7 +65,6 @@ export default function Navbar() {
           },
         );
         const data = await res.json();
-        console.log(data);
         if (data.status == "ok") {
           dispatch(
             setNotificationModal({
@@ -73,13 +78,23 @@ export default function Navbar() {
       }
     };
     fetchNotifications();
-
-    //const interval = setInterval(fetchNotifications, 10000);
-
-    /*return () => {
-      clearInterval(interval);
-    };*/
   }, []);
+
+  const logout = () => {
+    cookies.remove(AUTH_TOKEN);
+    navigate("/login");
+  };
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleSearch = (e) => {};
 
   return (
     <div>
@@ -98,11 +113,22 @@ export default function Navbar() {
             focus:z-50"
               placeholder="search something"
               onFocus={() => dispatch(setSearchModal({ value: true }))}
-              onBlur={() => dispatch(setSearchModal({ value: false }))}
+              value={searchQuery}
+              onChange={(e) => {
+                //setSearchParams({ q: e.target.value });
+                setSearchQuery(e.target.value);
+              }}
+              onKeyPress={(e) => {
+                if (e.key == "Enter" && searchQuery.trim() != "") {
+                  navigate("/search?q=" + searchQuery);
+                  dispatch(setSearchModal({ value: false }));
+                  (e.target as HTMLInputElement).blur();
+                }
+              }}
             />
           </div>
         </div>
-        <div className="col-span-6">
+        <div className="col-span-6 flex justify-evenly">
           <div className="relative">
             <div className="relative w-fit">
               <motion.div
@@ -124,21 +150,45 @@ export default function Navbar() {
             </div>
             <NotificationModel />
           </div>
-        </div>
-        {!isLoggedIn && (
-          <div className="h-full">
-            <Link to="/login">
-              <button className="h-full px-4 bg-blue-500 text-white mr-3 font-medium text-lg">
-                Log In
-              </button>
-            </Link>
-            <Link to="/signup">
-              <button className="px-4 h-full bg-green-500 text-white font-medium text-lg">
-                Sign Up
-              </button>
-            </Link>
+
+          <div>
+            <Button
+              id="basic-button"
+              aria-controls={open ? "basic-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? "true" : undefined}
+              onClick={handleClick}
+            >
+              My account
+            </Button>
+            <Menu
+              id="basic-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              MenuListProps={{
+                "aria-labelledby": "basic-button",
+              }}
+            >
+              <MenuItem
+                onClick={() => {
+                  navigate("/user/edit-profile");
+                  handleClose();
+                }}
+              >
+                Account Settings
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  logout();
+                }}
+              >
+                Logout
+              </MenuItem>
+            </Menu>
           </div>
-        )}
+        </div>
       </nav>
       <div className="relative">
         <SearchModal />

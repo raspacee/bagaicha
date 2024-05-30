@@ -124,6 +124,7 @@ export const place_features = [
 
 const get_handler = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const sort = req.query.sort;
     const lat = req.query.lat as string;
     const long = req.query.long as string;
     const reviews: any[] | null = await Review.get_feed(
@@ -131,6 +132,13 @@ const get_handler = async (req: Request, res: Response, next: NextFunction) => {
     );
     if (reviews == null) {
       return res.status(404).send({
+        status: "ok",
+        reviews,
+      });
+    }
+
+    if (sort == "recent") {
+      return res.status(200).send({
         status: "ok",
         reviews,
       });
@@ -188,6 +196,7 @@ const like_review = async (req: Request, res: Response, next: NextFunction) => {
       res.locals.user.user_id,
       review_id,
     );
+    console.log(review_id, has_liked);
     if (!has_liked) {
       await Like.create_like(res.locals.user.user_id, review_id);
       const victim = await pool.query(
@@ -277,6 +286,7 @@ const get_bookmarks = async (
       bookmarks,
     });
   } catch (err) {
+    console.log(err);
     return res.status(500).send({
       status: "error",
       message: err,

@@ -1,16 +1,71 @@
 import express, { Request, Response, NextFunction } from "express";
+import Place from "../models/placeModel";
+import Review from "../models/reviewModel";
+import Search from "../models/searchModel";
 // import { query, pool } from "../db/index.ts";
 
-const get_handler = (req: Request, res: Response, next: NextFunction) => {
-  return res
-    .status(200)
-    .send(
-      "Linux was first named FREAX, fortunately someone convinced him to change the name to Linux. phew!"
-    );
+const search_results = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const q = req.query.q as string;
+
+    const places = await Place.search_place(q);
+    const reviews = await Review.search_reviews(res.locals.user.user_id, q);
+
+    await Search.add_to_history(res.locals.user.user_id, q);
+
+    return res.status(200).send({
+      status: "ok",
+      places,
+      reviews,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      status: "error",
+      message: err,
+    });
+  }
+};
+
+const get_search_history = async (req: Request, res: Response) => {
+  try {
+    const user = res.locals.user;
+
+    const results = await Search.get_history(user.user_id);
+    return res.status(200).send({
+      status: "ok",
+      results,
+    });
+  } catch (err) {
+    return res.status(500).send({
+      status: "error",
+      message: err,
+    });
+  }
+};
+
+const delete_search_history = async (req: Request, res: Response) => {
+  try {
+    await Search.delete_history(res.locals.user.user_id);
+    return res.status(200).send({
+      status: "ok",
+    });
+  } catch (err) {
+    return res.status(500).send({
+      status: "error",
+      message: err,
+    });
+  }
 };
 
 const exporter = {
-  get_handler,
+  search_results,
+  get_search_history,
+  delete_search_history,
 };
 
 export default exporter;

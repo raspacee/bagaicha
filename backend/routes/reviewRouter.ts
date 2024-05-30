@@ -29,6 +29,7 @@ router.get(
   commentController.get_review_comments,
 );
 
+/* Create a comment */
 router.post(
   "/:review_id/comments",
   authMiddleware,

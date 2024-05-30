@@ -9,12 +9,16 @@ import Login from "./routes/login";
 import Signup from "./routes/signup";
 import ReviewCreate from "./routes/review_create";
 import Bookmarks from "./routes/bookmarks";
-import Place from "./routes/place";
+//import Place from "./routes/place_archived";
 import FindPlaces from "./routes/find_places";
 import EditPlace from "./routes/edit_place";
 import AddPlace from "./routes/add_place";
+import Search from "./routes/search";
+import EditProfile from "./routes/edit_profile";
 import Notification from "./routes/notifications";
 import NotAuthorized from "./routes/not_authorized";
+import Suggestions from "./routes/suggestions";
+import Place from "./routes/place";
 import { getUserData, notAuthenticated, isModerator } from "./lib/loaders";
 import { store } from "./store";
 import { Provider } from "react-redux";
@@ -39,7 +43,7 @@ const router = createBrowserRouter([
       },
       {
         path: "user/edit-profile",
-        element: <h1>Edit</h1>,
+        element: <EditProfile />,
       },
       {
         path: "user/:slug",
@@ -69,6 +73,14 @@ const router = createBrowserRouter([
       {
         path: "notification/",
         element: <Notification />,
+      },
+      {
+        path: "search/",
+        element: <Search />,
+      },
+      {
+        path: "suggestions/",
+        element: <Suggestions />,
       },
     ],
   },

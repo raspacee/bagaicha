@@ -25,6 +25,9 @@ const initialState: ModalType = {
     authorEmail: "",
     authorName: "",
     createdAt: "",
+    placeName: "",
+    placeId: "",
+    rating: 0,
   },
 };
 
@@ -70,6 +73,9 @@ export const modalSlice = createSlice({
         authorImageUrl: string;
         createdAt: string;
         authorEmail: string;
+        placeName: string;
+        placeId: string;
+        rating: number;
       }>,
     ) => {
       const {
@@ -80,6 +86,9 @@ export const modalSlice = createSlice({
         createdAt,
         reviewBody,
         authorEmail,
+        placeName,
+        placeId,
+        rating,
       } = action.payload;
       state.reviewModal.display = true;
       state.reviewModal.reviewId = reviewId;
@@ -89,6 +98,9 @@ export const modalSlice = createSlice({
       state.reviewModal.authorImageUrl = authorImageUrl;
       state.reviewModal.createdAt = createdAt;
       state.reviewModal.reviewBody = reviewBody;
+      state.reviewModal.placeName = placeName;
+      state.reviewModal.placeId = placeId;
+      state.reviewModal.rating = rating;
     },
     closeReviewModal: (state) => {
       state.reviewModal.display = false;

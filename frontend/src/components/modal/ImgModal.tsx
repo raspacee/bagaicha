@@ -22,8 +22,7 @@ export default function ImgModal() {
     >
       <img
         src={imgSrc}
-        className="fixed top-1/2 left-1/2 z-20 -translate-x-1/2 -translate-y-1/2 object-cover pointer-events-none"
-        style={{ width: "800px", height: "600px" }}
+        className="fixed top-1/2 left-1/2 z-20 -translate-x-1/2 -translate-y-1/2 object-contain pointer-events-none w-full h-full"
         id="modal-img"
       />
     </div>

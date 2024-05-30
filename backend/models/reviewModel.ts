@@ -42,9 +42,41 @@ from review as r inner join user_ as u on r.author_id = u.id
   return result.rows;
 };
 
+const search_reviews = async (user_id: string, query: string) => {
+  const text = ` select r.*, u.first_name, u.last_name, u.profile_picture_url, u.email, pl.lat, pl.long, pl.name, pl.openmaps_place_id,
+(select exists (select * from review_like as l where l.liker_id=$1 and l.review_id=r.id limit 1)) as user_has_liked,
+(select exists (select * from review_bookmark as b where b.user_id=$1 and b.review_id=r.id limit 1)) as user_has_bookmarked_review
+from review as r inner join user_ as u on r.author_id = u.id
+	inner join place as pl on r.place_id = pl.id 
+	 where r.body ilike $2 or r.foods_ate @> $3 
+  order by created_at desc limit 20;`;
+  const values = [user_id, `%${query}%`, Array.from(query)];
+  const result = await pool.query(text, values);
+  if (result.rowCount == 0) return null;
+  return result.rows;
+};
+
+const get_reviews_by_email = async (user_id: string, email: string) => {
+  const text = `
+ select r.*, u.first_name, u.last_name, u.profile_picture_url, u.email, pl.lat, pl.long, pl.name, pl.openmaps_place_id,
+(select exists (select * from review_like as l where l.liker_id=$1 and l.review_id=r.id limit 1)) as user_has_liked,
+(select exists (select * from review_bookmark as b where b.user_id=$1 and b.review_id=r.id limit 1)) as user_has_bookmarked_review
+from review as r inner join user_ as u on r.author_id = u.id
+	inner join place as pl on r.place_id = pl.id 
+where u.email = $2
+  order by created_at desc limit 20;
+`;
+  const values = [user_id, email];
+  const result = await pool.query(text, values);
+  if (result.rowCount == 0) return null;
+  return result.rows;
+};
+
 const exporter = {
   create_review,
   get_feed,
+  search_reviews,
+  get_reviews_by_email,
 };
 
 export default exporter;

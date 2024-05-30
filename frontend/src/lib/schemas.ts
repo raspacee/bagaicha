@@ -65,6 +65,20 @@ export const FormSchema = z.object({
     .max(20),
 });
 
+export const UserSettingSchema = z.object({
+  first_name: z
+    .string()
+    .min(2, { message: "First name should be atleast 2 character" })
+    .max(20, { message: "First name cannot be longer than 20 characters" }),
+  last_name: z
+    .string()
+    .min(2, { message: "Last name should be atleast 2 character" })
+    .max(20, { message: "Last name cannot be longer than 20 characters" }),
+  bio: z
+    .string()
+    .max(500, { message: "Bio cannot be longer than 500 characters" }),
+});
+
 export const LoginSchema = FormSchema.omit({
   first_name: true,
   last_name: true,
@@ -75,3 +89,4 @@ export const SignupSchema = FormSchema;
 export type SignupSchemaType = z.infer<typeof SignupSchema>;
 export type LoginSchemaType = z.infer<typeof LoginSchema>;
 export type ReviewSchemaType = z.infer<typeof ReviewSchema>;
+export type UserSettingType = z.infer<typeof UserSettingSchema>;

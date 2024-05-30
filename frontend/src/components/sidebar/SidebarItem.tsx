@@ -25,14 +25,17 @@ export default function Item({
     <div>
       {isButton ? (
         <form onSubmit={logout}>
-          <button type="submit" className="flex items-center my-5">
+          <button
+            type="submit"
+            className="flex items-center justify-between my-5"
+          >
             {children}
             <span className="ml-4">{text}</span>
           </button>
         </form>
       ) : (
         <Link to={link}>
-          <div className="flex items-center my-5">
+          <div className="flex items-center justify-start my-5">
             {children}
             <span className="ml-4 select-none">{text}</span>
           </div>

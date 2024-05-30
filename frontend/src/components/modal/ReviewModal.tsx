@@ -2,11 +2,15 @@ import { AiOutlineHeart } from "@react-icons/all-files/ai/AiOutlineHeart";
 import { AiFillHeart } from "@react-icons/all-files/ai/AiFillHeart";
 import { TfiComment } from "@react-icons/all-files/tfi/TfiComment";
 import { IoCloseOutline } from "@react-icons/all-files/io5/IoCloseOutline";
+import PlaceIcon from "@mui/icons-material/Place";
 
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Cookies from "universal-cookie";
 import { motion } from "framer-motion";
+import Rating from "@mui/material/Rating";
+import Divider from "@mui/material/Divider";
 
 import { useAppSelector, useAppDispatch } from "../../hooks";
 import { closeReviewModal } from "../../slice/modalSlice";
@@ -20,6 +24,7 @@ export default function ReviewModal() {
   const cookies = new Cookies(null, {
     path: "/",
   });
+  const navigate = useNavigate();
   const [comments, setComments] = useState<any[] | null>(null);
   const [commentInput, setCommentInput] = useState<string>("");
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
@@ -80,17 +85,25 @@ export default function ReviewModal() {
       const data = await res.json();
       if (data.status == "ok") {
         clearCommentInput();
+        console.log(data);
         if (replyingToId != null) {
           setComments((prev) => {
             if (prev == null) return null;
 
-            for (let i = 0; i < prev.length; i++) {
-              if (prev[i].id == replyingToId && prev[i].replies)
-                prev[i].replies.push(data.reply);
-              else if (prev[i].id == replyingToId)
-                prev[i].replies = [data.reply];
-            }
-            return prev;
+            return prev.map((comment) => {
+              if (comment.id == replyingToId && comment.replies) {
+                return {
+                  ...comment,
+                  replies: [...comment.replies, data.reply],
+                };
+              } else if (comment.id == replyingToId && !comment.replies) {
+                return {
+                  ...comment,
+                  replies: [data.reply],
+                };
+              }
+              return comment;
+            });
           });
           setReplyingToId(null);
           setReplyingToName(null);
@@ -131,11 +144,15 @@ export default function ReviewModal() {
       );
       const data = await res.json();
       setComments((prev) => {
-        return prev!.map((c) => {
-          if (c.id == commentId) c.replies = data.replies;
+        if (!prev) return prev;
+        return prev.map((c) => {
+          if (c.id === commentId) {
+            return { ...c, replies: data.replies };
+          }
           return c;
         });
       });
+      console.log(comments);
     } catch (err) {
       console.log(err);
     }
@@ -149,13 +166,13 @@ export default function ReviewModal() {
       <motion.div
         initial={{ scale: 0.5 }}
         animate={{ scale: 1 }}
-        className="bg-white rounded-md w-4/5 h-[90%] grid grid-cols-2"
+        className="bg-white rounded-md w-full h-full grid grid-cols-2"
       >
         <div className="col-span-1 h-full">
           <img
             src={state.reviewImageUrl}
-            style={{ width: "100%", height: "100%" }}
-            className="object-cover"
+            className="object-coverz h-full"
+            style={{ height: "100%" }}
           />
         </div>
         <div className="col-span-1 h-full">
@@ -164,11 +181,17 @@ export default function ReviewModal() {
               <img
                 src={state.authorImageUrl}
                 style={{ width: "40px", height: "40px" }}
-                className="rounded-full"
+                className="rounded-full object-cover"
               />
-              <Link to={`/user/${state.authorEmail}`}>
-                <p className="ml-2 font-medium">{state.authorName}</p>
-              </Link>
+              <button
+                className="ml-2 font-medium"
+                onClick={() => {
+                  dispatch(closeReviewModal());
+                  navigate(`/user/${state.authorEmail}`);
+                }}
+              >
+                {state.authorName}
+              </button>
             </div>
             <div className="flex items-center">
               <p className="font-regular text-gray-600">{state.createdAt}</p>
@@ -180,8 +203,23 @@ export default function ReviewModal() {
             </div>
           </div>
           <div className="border-t px-2 py-1 h-[480px] overflow-y-scroll">
-            <p className="">{state.reviewBody}</p>
-            <div className="border-t-2 my-2 z-50 h-full">
+            <p className="">
+              <PlaceIcon fontSize="large" style={{ color: "#239B56" }} />
+              <Link to={"/place/" + state.placeId}>
+                <span className="font-bold">{state.placeName}</span>
+              </Link>
+            </p>
+            <div>
+              <Rating
+                name="half-rating-read"
+                value={state.rating}
+                precision={0.5}
+                readOnly
+              />
+            </div>
+            <p className="mb-2">{state.reviewBody}</p>
+            <Divider />
+            <div className="my-2 z-50 h-full">
               {comments == null ? (
                 <h1>No comments on here...</h1>
               ) : (

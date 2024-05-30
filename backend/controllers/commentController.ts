@@ -52,7 +52,6 @@ const create_comment = async (req: Request, res: Response) => {
         "comment",
       );
     }
-    comment[0].author_picture_url = res.locals.user.profile_picture_url;
     return res.status(201).send({
       status: "ok",
       comment: comment[0],
@@ -82,7 +81,6 @@ const reply_comment = async (
       comment_body,
       parseInt(comment_id),
     );
-    reply[0].author_picture_url = res.locals.user.profile_picture_url;
     return res.status(201).send({
       status: "ok",
       reply: reply[0],

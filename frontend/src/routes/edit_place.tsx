@@ -14,8 +14,8 @@ const checkboxes = [
 ];
 
 export const place_features = [
-  { label: "Offers delivery", value: 0 },
-  { label: "Offers takeout", value: 1 },
+  { label: "Delivery", value: 0 },
+  { label: "Takeout", value: 1 },
   { label: "Pet friendly", value: 2 },
   { label: "Very clean", value: 3 },
   { label: "Affordable", value: 4 },
