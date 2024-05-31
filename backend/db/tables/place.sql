@@ -24,6 +24,6 @@ create table if not exists place (
     owned_by uuid,
 
     constraint fk_owned_by
-      foreign key owned_by
+      foreign key (owned_by)
       references user_(id)
 )
