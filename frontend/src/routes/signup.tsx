@@ -16,7 +16,7 @@ export default function Signup() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const onSubmit: SubmitHandler = async (data: any) => {
+  const onSubmit = async (data: any) => {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/auth/signup`,

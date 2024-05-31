@@ -122,7 +122,9 @@ const PlaceDetailsForm = () => {
             id="display-picture"
             accept="image/*"
             onChange={(e) =>
-              dispatch(updateState({ ...state, displayPic: e.target.files[0] }))
+              dispatch(
+                updateState({ ...state, displayPic: e.target.files![0] }),
+              )
             }
           />
         </span>
@@ -304,7 +306,7 @@ const WrapUp = () => {
       </div>
       <Divider />
       <div className="px-8 py-3">
-        <img src={URL.createObjectURL(state.displayPic)} alt="Picture here" />
+        <img src={URL.createObjectURL(state.displayPic as Blob)} alt="Picture here" />
       </div>
       <Divider />
       <div className="px-8 py-3">

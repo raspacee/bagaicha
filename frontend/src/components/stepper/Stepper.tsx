@@ -14,7 +14,7 @@ import { useAppSelector, useAppDispatch } from "../../hooks";
 import { AUTH_TOKEN } from "../../lib/cookie_names";
 import { clearState } from "../../slice/addPlaceSlice";
 
-export default function HorizontalLinearStepper({ steps }) {
+export default function HorizontalLinearStepper({ steps }: { steps: any }) {
   const [activeStep, setActiveStep] = useState(0);
   const [showSnack, setShowSnack] = useState(false);
   const [showError, setShowError] = useState<boolean>(false);
@@ -125,7 +125,7 @@ export default function HorizontalLinearStepper({ steps }) {
         </Alert>
       </Snackbar>
       <Stepper activeStep={activeStep}>
-        {steps.map((item, index) => {
+        {steps.map((item: any) => {
           const stepProps: { completed?: boolean } = {};
           return (
             <Step key={item.label} {...stepProps}>
@@ -136,7 +136,7 @@ export default function HorizontalLinearStepper({ steps }) {
       </Stepper>
       <Typography sx={{ mt: 2, mb: 1 }}>Step {activeStep + 1}</Typography>
       <div className="w-full flex flex-col items-center">
-        {steps.map((step, index) => {
+        {steps.map((step: any, index: number) => {
           if (index == activeStep) {
             return step.component;
           }

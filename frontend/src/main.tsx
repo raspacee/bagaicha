@@ -15,7 +15,6 @@ import EditPlace from "./routes/edit_place";
 import AddPlace from "./routes/add_place";
 import Search from "./routes/search";
 import EditProfile from "./routes/edit_profile";
-import Notification from "./routes/notifications";
 import NotAuthorized from "./routes/not_authorized";
 import Suggestions from "./routes/suggestions";
 import Place from "./routes/place";
@@ -69,10 +68,6 @@ const router = createBrowserRouter([
         path: "edit-place/:place_id",
         loader: isModerator,
         element: <EditPlace />,
-      },
-      {
-        path: "notification/",
-        element: <Notification />,
       },
       {
         path: "search/",

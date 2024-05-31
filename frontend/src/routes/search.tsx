@@ -20,7 +20,7 @@ import { useLike } from "../hooks/useLike";
 import { setImgModal } from "../slice/modalSlice";
 import { AUTH_TOKEN } from "../lib/cookie_names";
 
-const ReviewSearchResult = ({ review }) => {
+const ReviewSearchResult = ({ review }: { review: any }) => {
   const dispatch = useAppDispatch();
   const [hasBookmarked, callBookmarkHandler] = useBookmark(false, review.id);
   const [hasLiked, likeHandler] = useLike(review.has_liked, review.id);
@@ -123,7 +123,7 @@ const ReviewSearchResult = ({ review }) => {
   );
 };
 
-const PlaceSearchResult = ({ place }) => {
+const PlaceSearchResult = ({ place }: { place: any }) => {
   const handleBrokenImg = (e: any) => {
     e.target.src = "https://www.usm.edu/images/image-not-available_1.jpg";
   };

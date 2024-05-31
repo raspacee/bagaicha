@@ -53,7 +53,7 @@ export default function CreateReview() {
   const pictureRef = useRef<HTMLInputElement>(null);
   const ratingRef = useRef<HTMLSelectElement>(null);
 
-  const onSubmit: SubmitHandler = async (data: any) => {
+  const onSubmit = async (data: any) => {
     if (placeInfo == null) {
       setPlaceError(
         "You can only choose places that show in the suggestion box. Please choose from that only.",

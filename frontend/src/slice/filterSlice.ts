@@ -7,12 +7,16 @@ const initialState: FilterType = {
     openNow: false,
     delivery: false,
     takeout: false,
+    petFriendly: false,
+    veryClean: false,
+    affordable: false,
   },
   category: {
     burger: false,
     sekuwa: false,
     momo: false,
     lafing: false,
+    coffee: false,
   },
   distance: {
     distancePicked: Distances.NONE,

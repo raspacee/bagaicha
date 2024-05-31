@@ -94,8 +94,6 @@ export default function Navbar() {
     setAnchorEl(null);
   };
 
-  const handleSearch = (e) => {};
-
   return (
     <div>
       <nav className="bg-white w-full h-16 px-10 items-center grid grid-cols-12 shadow-lg border-b-gray-900">

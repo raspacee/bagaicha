@@ -7,7 +7,7 @@ import Alert from "@mui/material/Alert";
 
 export default function Suggestions() {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const ref = useRef<HTMLTextAreaElement | null>(null);
 
   const handleClick = () => {
     ref!.current!.value = "";

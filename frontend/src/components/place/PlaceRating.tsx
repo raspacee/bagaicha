@@ -6,7 +6,7 @@ import RatingStar from "./RatingStar";
 import { useAppDispatch } from "../../hooks";
 import { setImgModal } from "../../slice/modalSlice";
 
-export default function RatingReview({ review }) {
+export default function RatingReview({ review }: { review: any }) {
   const dispatch = useAppDispatch();
   const date = DateTime.fromISO(review.created_at);
 

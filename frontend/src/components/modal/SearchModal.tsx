@@ -41,7 +41,7 @@ export default function SearchModal() {
     fetchHistory();
   }, [display]);
 
-  const clearHistory = async (e) => {
+  const clearHistory = async (e: any) => {
     e.stopPropagation();
 
     try {
@@ -72,7 +72,7 @@ export default function SearchModal() {
     <div
       className="absolute left-0 top-0 w-screen h-screen bg-black bg-opacity-80 z-50"
       onClick={(e) => {
-        if (e.target.id == "closeModal") {
+        if ((e.target as HTMLElement).id == "closeModal") {
           dispatch(setSearchModal({ value: false }));
         }
       }}

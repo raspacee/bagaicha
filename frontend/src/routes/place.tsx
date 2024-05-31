@@ -234,7 +234,9 @@ export default function Place() {
               <span className="w-1/4">
                 <PhoneIcon fontSize="medium" style={{ color: "#0d47a1" }} />
               </span>
-              <span className="w-full ml-2">{place.phone_no ? place.phone_no : 'Not available'}</span>
+              <span className="w-full ml-2">
+                {place.phone_no ? place.phone_no : "Not available"}
+              </span>
             </div>
             <div className="w-full">
               <span className="w-1/4">
@@ -460,7 +462,7 @@ export default function Place() {
           size="large"
           getLabelText={getLabelText}
           onChange={(event, newValue) => {
-            setRating(newValue);
+            setRating(newValue!);
           }}
           onChangeActive={(event, newHover) => {
             setHover(newHover);
@@ -521,7 +523,7 @@ export default function Place() {
   );
 }
 
-const PlaceReviewItem = ({ review }) => {
+const PlaceReviewItem = ({ review }: { review: any }) => {
   return (
     <div className="border my-2 px-3 py-2 rounded-md">
       <div className="flex">

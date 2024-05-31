@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FaUser } from "@react-icons/all-files/fa/FaUser";
 import { Link, useNavigate } from "react-router-dom";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { LoginSchema, type LoginSchemaType } from "../lib/schemas";
 import Cookies from "universal-cookie";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,7 +22,7 @@ export default function Login() {
 
   const [formMsg, setFormMsg] = useState<string | null>(null);
 
-  const onSubmit: SubmitHandler = async (data: any) => {
+  const onSubmit = async (data: any) => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
         method: "POST",
