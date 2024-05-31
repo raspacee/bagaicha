@@ -2,7 +2,7 @@ create table if not exists notification_object (
   id serial primary key,
   object_type varchar(20) not null,
   object_url varchar(500)
-)
+);
 
 create table if not exists notification (
 	id serial primary key,
