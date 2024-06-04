@@ -19,6 +19,7 @@ async function main() {
     await create_place_review(client);
     await create_bookmark(client);
     await create_search(client);
+    await create_functions(client);
     client.query("end transaction");
     console.log("Transaction ended");
   } catch (err) {
@@ -45,6 +46,15 @@ async function create_comment(client: PoolClient) {
   );
   await client.query(file2);
   console.log("Comment like table created");
+}
+
+async function create_functions(client: PoolClient) {
+  const file = fs.readFileSync(
+    path.join(__dirname, "..", "functions", "haversine.sql"),
+    "utf-8",
+  );
+  await client.query(file);
+  console.log("Database procedures created");
 }
 
 async function create_notification(client: PoolClient) {

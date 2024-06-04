@@ -1,6 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from "react-router-dom";
 import "./index.css";
 import Root from "./routes/root";
 import Feed from "./routes/feed";
@@ -28,6 +32,10 @@ const router = createBrowserRouter([
     element: <Root />,
     loader: getUserData,
     children: [
+      {
+        path: "/",
+        element: <Navigate to="/feed" replace />,
+      },
       {
         path: "/not-authorized",
         element: <NotAuthorized />,
