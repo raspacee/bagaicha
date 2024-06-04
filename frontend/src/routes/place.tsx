@@ -340,7 +340,7 @@ export default function Place() {
                     return (
                       <OpenDayItem
                         day={day}
-                        open={place.open_days.includes(day.toLowerCase())}
+                        open={place.open_days ? place.open_days.includes(day.toLowerCase()) : false}
                       />
                     );
                   })}
