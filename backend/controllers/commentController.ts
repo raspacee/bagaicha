@@ -10,6 +10,7 @@ const get_review_comments = async (
   res: Response,
   next: NextFunction,
 ) => {
+  console.log("Hitting get_review_comments");
   try {
     const comments = await Comment.get_comments(
       req.params.review_id as string,

@@ -9,11 +9,16 @@ const create_review = async (
   picture_url: string,
   place_id: string,
   foods_ate: string[],
-  created_at: string,
+  created_at: string
 ) => {
   let text =
-    "insert into review (id, author_id, body, rating, picture, place_id, \
-        foods_ate, created_at) values ($1, $2, $3, $4, $5, $6, $7, $8)";
+    "with inserted_review as (insert into review (id, author_id, body, rating, picture, place_id, \
+        foods_ate, created_at) values ($1, $2, $3, $4, $5, $6, $7, $8) returning *) \
+      select inserted_review.*, u.first_name, u.last_name, u.profile_picture_url, u.email, \
+      false as user_has_liked, false as user_has_bookmarked_review, pl.* \
+      from inserted_review \
+      inner join user_ as u on inserted_review.author_id = u.id \
+      inner join place as pl on inserted_review.place_id = pl.id";
   let values = [
     id,
     author_id,

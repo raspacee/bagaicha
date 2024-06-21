@@ -15,7 +15,7 @@ import { pool } from "../db";
 const create_handler = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const {
@@ -36,7 +36,7 @@ const create_handler = async (
       place_lat,
       place_long,
       null,
-      display_name,
+      display_name
     );
     const openmaps_place_id = place_id;
 
@@ -51,7 +51,7 @@ const create_handler = async (
         place_name,
         place_lat,
         place_long,
-        display_name,
+        display_name
       );
     } else {
       place_uuid = place.id;
@@ -67,7 +67,7 @@ const create_handler = async (
     /* create the review */
     const review_uuid = uuidv4();
     const created_at = new Date().toISOString();
-    await Review.create_review(
+    const review = await Review.create_review(
       review_uuid,
       res.locals.user.user_id,
       comment,
@@ -75,11 +75,12 @@ const create_handler = async (
       picture_upload.secure_url,
       place_uuid,
       [],
-      created_at,
+      created_at
     );
-    return res.status(200).send({
+    return res.status(201).send({
       status: "ok",
       message: "Your review was posted successfully",
+      review: review.rows[0],
     });
   } catch (err) {
     console.error(err);
@@ -94,7 +95,7 @@ function haversine(
   lat1: number,
   lon1: number,
   lat2: number,
-  lon2: number,
+  lon2: number
 ): number {
   // distance between latitudes
   // and longitudes in km
@@ -128,7 +129,7 @@ const get_handler = async (req: Request, res: Response, next: NextFunction) => {
     const lat = req.query.lat as string;
     const long = req.query.long as string;
     const reviews: any[] | null = await Review.get_feed(
-      res.locals.user.user_id,
+      res.locals.user.user_id
     );
     if (reviews == null) {
       return res.status(404).send({
@@ -154,7 +155,7 @@ const get_handler = async (req: Request, res: Response, next: NextFunction) => {
             parseFloat(lat),
             parseFloat(long),
             parseFloat(reviews[i].lat),
-            parseFloat(reviews[i].long),
+            parseFloat(reviews[i].long)
           ) * 1000;
         geo_point = 10000 - diff_dist;
       } else {
@@ -162,7 +163,7 @@ const get_handler = async (req: Request, res: Response, next: NextFunction) => {
         geo_point = Math.floor(Math.random() * 4001 + 2000);
       }
       const review_datetime = DateTime.fromISO(
-        reviews[i].created_at.toISOString(),
+        reviews[i].created_at.toISOString()
       );
       const curr_datetime = DateTime.fromISO(DateTime.local().toISO());
       const diff = curr_datetime.diff(review_datetime);
@@ -194,14 +195,14 @@ const like_review = async (req: Request, res: Response, next: NextFunction) => {
     const { review_id } = req.body;
     const has_liked = await Like.user_has_liked_review(
       res.locals.user.user_id,
-      review_id,
+      review_id
     );
     console.log(review_id, has_liked);
     if (!has_liked) {
       await Like.create_like(res.locals.user.user_id, review_id);
       const victim = await pool.query(
         `select author_id from review where id = $1`,
-        [review_id],
+        [review_id]
       );
       if (victim.rows[0].author_id != res.locals.user.user_id) {
         await Notification.create_notification(
@@ -209,7 +210,7 @@ const like_review = async (req: Request, res: Response, next: NextFunction) => {
           victim.rows[0].author_id,
           NotificationObject.Review,
           review_id,
-          "like",
+          "like"
         );
       }
       return res.status(200).send({
@@ -234,7 +235,7 @@ const like_review = async (req: Request, res: Response, next: NextFunction) => {
 const bookmark_handler = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     /* Check if the user has liked the review already */
@@ -244,14 +245,14 @@ const bookmark_handler = async (
     }
     const has_bookmarked = await ReviewBookmark.user_has_bookmarked_review(
       res.locals.user.user_id,
-      review_id,
+      review_id
     );
     if (!has_bookmarked) {
       const created_at = new Date().toISOString();
       await ReviewBookmark.create_bookmark(
         res.locals.user.user_id,
         review_id,
-        created_at,
+        created_at
       );
       return res.status(200).send({
         status: "ok",
@@ -275,7 +276,7 @@ const bookmark_handler = async (
 const get_bookmarks = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const user_id = res.locals.user.user_id;
