@@ -31,7 +31,7 @@ export default function Profile() {
           `${import.meta.env.VITE_API_URL}/user/${slug}`,
           {
             mode: "cors",
-          },
+          }
         );
         const data = await res.json();
         if (data.status == "ok") {
@@ -51,7 +51,7 @@ export default function Profile() {
             headers: {
               authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
             },
-          },
+          }
         );
         const data = await res.json();
         if (data.status == "ok") {
@@ -89,7 +89,6 @@ export default function Profile() {
   return (
     <>
       <div className="grid grid-cols-3 gap-1">
-        <ReviewModal />
         <div className="col-span-2 px-4 my-4">
           <div className="w-full bg-white py-2 px-3 rounded-md flex flex-col items-center shadow-lg">
             <div className="flex flex-row justify-around w-3/4 ">

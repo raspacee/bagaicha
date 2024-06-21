@@ -28,7 +28,9 @@ export default function Feed() {
         await new Promise((resolve) => setTimeout(resolve, 300));
         let url;
 
-        url = `${import.meta.env.VITE_API_URL}/review?lat=${location.lat}&long=${location.long}&sort=${searchParams.get("sort") || "trending"}`;
+        url = `${import.meta.env.VITE_API_URL}/review?lat=${
+          location.lat
+        }&long=${location.long}&sort=${searchParams.get("sort") || "trending"}`;
         const res = await fetch(url, {
           mode: "cors",
           headers: {
@@ -49,7 +51,6 @@ export default function Feed() {
 
   return (
     <div className="grid grid-cols-3 gap-1">
-      <ReviewModal />
       <div className="col-span-2 px-4">
         <div className="bg-white w-full h-fit px-6 py-3 mt-3 border rounded-md border-slate-200 flex items-center shadow-xl">
           <Avatar alt={user.first_name} src={user.profile_picture_url} />

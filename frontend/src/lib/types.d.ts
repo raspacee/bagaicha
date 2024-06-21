@@ -39,7 +39,6 @@ export type ModalType = {
     display: boolean;
   };
   reviewModal: {
-    display: boolean;
     reviewId: string | null;
     reviewImageUrl: string;
     reviewBody: string;

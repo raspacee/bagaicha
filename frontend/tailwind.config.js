@@ -21,7 +21,7 @@ export default {
       red: colors.red,
     },
   },
-  plugins: [require("@tailwindcss/forms")],
+  plugins: [require("@tailwindcss/forms"), require("daisyui")],
   /**  safelist: [
     {
       pattern: /./,

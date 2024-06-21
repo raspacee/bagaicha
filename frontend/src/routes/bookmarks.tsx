@@ -30,7 +30,7 @@ export default function Bookmarks() {
       };
       const data = await fetchHook(
         `${import.meta.env.VITE_API_URL}/review/bookmark/`,
-        options,
+        options
       );
       setBookmarks(data.bookmarks);
     };
@@ -67,7 +67,6 @@ export default function Bookmarks() {
 
   return (
     <div className="grid grid-cols-3 gap-1 px-4">
-      <ReviewModal />
       <div className="col-span-2">
         <div className="w-full bg-white py-3 px-3 my-3 rounded-lg shadow-lg">
           <p className="font-bold text-2xl text-center mb-3">Bookmarks</p>

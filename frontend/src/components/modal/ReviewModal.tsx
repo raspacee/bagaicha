@@ -4,7 +4,7 @@ import { TfiComment } from "@react-icons/all-files/tfi/TfiComment";
 import { IoCloseOutline } from "@react-icons/all-files/io5/IoCloseOutline";
 import PlaceIcon from "@mui/icons-material/Place";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Cookies from "universal-cookie";
@@ -13,11 +13,10 @@ import Rating from "@mui/material/Rating";
 import Divider from "@mui/material/Divider";
 
 import { useAppSelector, useAppDispatch } from "../../hooks";
-import { closeReviewModal } from "../../slice/modalSlice";
 import Comment from "../review/Comment";
 import { AUTH_TOKEN } from "../../lib/cookie_names";
 
-export default function ReviewModal() {
+const ReviewModal = forwardRef<HTMLDialogElement, {}>((props, ref) => {
   const state = useAppSelector((state) => state.modal.reviewModal);
   const user = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
@@ -43,7 +42,7 @@ export default function ReviewModal() {
             headers: {
               authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
             },
-          },
+          }
         );
         const data = await res.json();
         setComments(data.comments);
@@ -51,12 +50,7 @@ export default function ReviewModal() {
         console.log(err);
       }
     };
-    if (state.display) fetchComments();
   }, [state]);
-
-  const closeModal = () => {
-    dispatch(closeReviewModal());
-  };
 
   const submitComment = async () => {
     if (commentInput.trim() == "") {
@@ -66,9 +60,13 @@ export default function ReviewModal() {
     try {
       let url: string;
       if (replyingToId) {
-        url = `${import.meta.env.VITE_API_URL}/review/${state.reviewId}/comments/${replyingToId}`;
+        url = `${import.meta.env.VITE_API_URL}/review/${
+          state.reviewId
+        }/comments/${replyingToId}`;
       } else {
-        url = `${import.meta.env.VITE_API_URL}/review/${state.reviewId}/comments`;
+        url = `${import.meta.env.VITE_API_URL}/review/${
+          state.reviewId
+        }/comments`;
       }
       const res = await fetch(url, {
         method: "post",
@@ -133,14 +131,16 @@ export default function ReviewModal() {
   const fetchReplies = async (reviewId: string, commentId: string) => {
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/review/${reviewId}/comments/${commentId}`,
+        `${
+          import.meta.env.VITE_API_URL
+        }/review/${reviewId}/comments/${commentId}`,
         {
           method: "get",
           mode: "cors",
           headers: {
             authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
           },
-        },
+        }
       );
       const data = await res.json();
       setComments((prev) => {
@@ -158,16 +158,9 @@ export default function ReviewModal() {
     }
   };
 
-  if (!state.display) {
-    return null;
-  }
   return (
-    <div className="fixed top-0 left-0 z-50 w-screen h-screen bg-black bg-opacity-80 flex justify-center items-center">
-      <motion.div
-        initial={{ scale: 0.5 }}
-        animate={{ scale: 1 }}
-        className="bg-white rounded-md w-full h-full grid grid-cols-2"
-      >
+    <dialog id="my_modal_4" className="modal" ref={ref}>
+      <div className="modal-box w-11/12 max-w-5xl grid grid-cols-2 p-0 h-[40rem] overflow-clip">
         <div className="col-span-1 h-full">
           <img
             src={state.reviewImageUrl}
@@ -186,7 +179,6 @@ export default function ReviewModal() {
               <button
                 className="ml-2 font-medium"
                 onClick={() => {
-                  dispatch(closeReviewModal());
                   navigate(`/user/${state.authorEmail}`);
                 }}
               >
@@ -195,13 +187,14 @@ export default function ReviewModal() {
             </div>
             <div className="flex items-center">
               <p className="font-regular text-gray-600">{state.createdAt}</p>
-              <IoCloseOutline
-                size={28}
-                className="ml-1 cursor-pointer"
-                onClick={closeModal}
-              />
+              <form method="dialog">
+                <button className="btn btn-ghost">
+                  <IoCloseOutline size={28} className="ml-1 cursor-pointer" />
+                </button>
+              </form>
             </div>
           </div>
+
           <div className="border-t px-2 py-1 h-[480px] overflow-y-scroll">
             <p className="">
               <PlaceIcon fontSize="large" style={{ color: "#239B56" }} />
@@ -265,7 +258,9 @@ export default function ReviewModal() {
             </div>
           </div>
         </div>
-      </motion.div>
-    </div>
+      </div>
+    </dialog>
   );
-}
+});
+
+export default ReviewModal;

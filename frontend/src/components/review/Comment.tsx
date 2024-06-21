@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 import Divider from "@mui/material/Divider";
 
 import { useAppDispatch } from "../../hooks";
-import { closeReviewModal } from "../../slice/modalSlice";
 import { AUTH_TOKEN } from "../../lib/cookie_names";
 
 export default function Comment({
@@ -33,14 +32,16 @@ export default function Comment({
 
   const likeHandler = async () => {
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/review/${comment.review_id}/comments/${comment.id}/like`,
+      `${import.meta.env.VITE_API_URL}/review/${comment.review_id}/comments/${
+        comment.id
+      }/like`,
       {
         method: "POST",
         mode: "cors",
         headers: {
           authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
         },
-      },
+      }
     );
     const message = await response.json();
     if (message.status == "ok") {
@@ -65,7 +66,6 @@ export default function Comment({
             <button
               className="ml-2 font-medium"
               onClick={() => {
-                dispatch(closeReviewModal());
                 navigate(`/user/${comment.author_email}`);
               }}
             >

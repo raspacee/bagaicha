@@ -17,7 +17,6 @@ const initialState: ModalType = {
     display: false,
   },
   reviewModal: {
-    display: false,
     reviewId: null,
     reviewImageUrl: "",
     reviewBody: "",
@@ -40,7 +39,7 @@ export const modalSlice = createSlice({
       action: PayloadAction<{
         value: boolean;
         src: string;
-      }>,
+      }>
     ) => {
       const { value, src } = action.payload;
       state.imgModal.display = value;
@@ -48,7 +47,7 @@ export const modalSlice = createSlice({
     },
     setNotificationModal: (
       state,
-      action: PayloadAction<{ value: boolean; notifications?: any[] }>,
+      action: PayloadAction<{ value: boolean; notifications?: any[] }>
     ) => {
       const { value, notifications } = action.payload;
       state.notificationModal.display = value;
@@ -76,7 +75,7 @@ export const modalSlice = createSlice({
         placeName: string;
         placeId: string;
         rating: number;
-      }>,
+      }>
     ) => {
       const {
         reviewId,
@@ -90,7 +89,6 @@ export const modalSlice = createSlice({
         placeId,
         rating,
       } = action.payload;
-      state.reviewModal.display = true;
       state.reviewModal.reviewId = reviewId;
       state.reviewModal.reviewImageUrl = reviewImageUrl;
       state.reviewModal.authorName = authorName;
@@ -101,9 +99,6 @@ export const modalSlice = createSlice({
       state.reviewModal.placeName = placeName;
       state.reviewModal.placeId = placeId;
       state.reviewModal.rating = rating;
-    },
-    closeReviewModal: (state) => {
-      state.reviewModal.display = false;
     },
   },
 });
@@ -116,7 +111,6 @@ export const {
   setPostCreateModal,
   clearPostCreateModal,
   openReviewModal,
-  closeReviewModal,
 } = modalSlice.actions;
 
 export default modalSlice.reducer;

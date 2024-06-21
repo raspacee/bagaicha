@@ -15,6 +15,8 @@ import { useAppSelector, useAppDispatch } from "../../hooks";
 import { setImgModal, openReviewModal } from "../../slice/modalSlice";
 import { useBookmark } from "../../hooks/useBookmark";
 import { useLike } from "../../hooks/useLike";
+import { useRef } from "react";
+import ReviewModal from "../modal/ReviewModal";
 
 export default function Post({ review }: { review: any }) {
   const location = useAppSelector((state) => state.location);
@@ -24,8 +26,9 @@ export default function Post({ review }: { review: any }) {
   const [hasLiked, likeHandler] = useLike(review.user_has_liked, review.id);
   const [hasBookmarked, bookmarkHandler] = useBookmark(
     review.user_has_bookmarked_review,
-    review.id,
+    review.id
   );
+  const modalRef = useRef<HTMLDialogElement>(null);
 
   const date = DateTime.fromISO(review.created_at);
 
@@ -39,7 +42,7 @@ export default function Post({ review }: { review: any }) {
     authorEmail: string,
     placeName: string,
     placeId: string,
-    rating: number,
+    rating: number
   ) => {
     dispatch(
       openReviewModal({
@@ -53,7 +56,7 @@ export default function Post({ review }: { review: any }) {
         placeName,
         placeId,
         rating,
-      }),
+      })
     );
   };
 
@@ -90,7 +93,7 @@ export default function Post({ review }: { review: any }) {
               location.lat,
               location.long,
               review.lat,
-              review.long,
+              review.long
             )} km away from you`}</span>
           </>
         )}
@@ -105,7 +108,7 @@ export default function Post({ review }: { review: any }) {
                 setImgModal({
                   value: true,
                   src: review.picture,
-                }),
+                })
               )
             }
             className="w-4/5 h-[20rem] object-cover cursor-pointer"
@@ -145,6 +148,7 @@ export default function Post({ review }: { review: any }) {
         <div className="mx-2">
           <span
             onClick={() => {
+              modalRef.current?.showModal();
               openReview(
                 review.id,
                 review.picture,
@@ -155,7 +159,7 @@ export default function Post({ review }: { review: any }) {
                 review.email,
                 review.name,
                 review.place_id,
-                parseInt(review.rating),
+                parseInt(review.rating)
               );
             }}
             className="cursor-pointer"
@@ -195,6 +199,7 @@ export default function Post({ review }: { review: any }) {
           </span>
         )}
       </div>
+      <ReviewModal ref={modalRef} />
     </div>
   );
 }
