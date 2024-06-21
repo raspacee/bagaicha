@@ -1,53 +1,33 @@
 import FavoriteIcon from "@mui/icons-material/Favorite";
 
-import { useEffect, useState } from "react";
-import Cookies from "universal-cookie";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import Avatar from "@mui/material/Avatar";
 
 import { useAppSelector, useAppDispatch } from "../hooks";
 import { setPostCreateModal } from "../slice/modalSlice";
-import { AUTH_TOKEN } from "../lib/cookie_names";
 import Post from "../components/review/Post";
 import PostLoader from "../components/loaders/PostLoader";
-import ReviewModal from "../components/modal/ReviewModal";
+import { fetchReviews } from "../api/reviewApi";
 
 export default function Feed() {
   const dispatch = useAppDispatch();
-  const location = useAppSelector((state) => state.location);
   const user = useAppSelector((state) => state.user);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "trending");
+  const location = useAppSelector((state) => state.location);
 
-  const cookies = new Cookies(null, { path: "/" });
-  const [reviews, setReviews] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        setReviews(null);
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        let url;
-
-        url = `${import.meta.env.VITE_API_URL}/review?lat=${
-          location.lat
-        }&long=${location.long}&sort=${searchParams.get("sort") || "trending"}`;
-        const res = await fetch(url, {
-          mode: "cors",
-          headers: {
-            authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
-          },
-        });
-        const data = await res.json();
-        if (data.status == "ok") {
-          setReviews(data.reviews);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchReviews();
-  }, [searchParams.get("sort")]);
+  const {
+    data: reviews,
+    isLoading,
+    isError,
+    isSuccess,
+    error,
+  } = useQuery({
+    queryKey: ["reviews", sortBy],
+    queryFn: () => fetchReviews(sortBy, location),
+  });
 
   return (
     <div className="grid grid-cols-3 gap-1">
@@ -68,16 +48,18 @@ export default function Feed() {
           </label>
           <select
             id="sort-by"
-            className="border border-gray-200 rounded-md h-9 text-sm"
+            className="select select-bordered w-[8rem] max-w-xs"
             onChange={(e) => {
               setSearchParams({ sort: e.target.value });
+              setSortBy(e.target.value);
             }}
+            value={sortBy}
           >
             <option value="trending">Trending</option>
             <option value="recent">Recent</option>
           </select>
         </div>
-        {reviews == null ? (
+        {isLoading && (
           <>
             <div className="bg-white w-full h-fit px-6 py-3 mt-3 border rounded-md border-slate-200">
               <PostLoader />
@@ -86,9 +68,13 @@ export default function Feed() {
               <PostLoader />
             </div>
           </>
-        ) : (
-          reviews.map((review: any) => <Post key={review.id} review={review} />)
         )}
+        {isSuccess &&
+          reviews &&
+          reviews.map((review: any) => (
+            <Post key={review.id} review={review} />
+          ))}
+        {isError && <div>Something went wrong, {error.message}</div>}
       </div>
       <div className="col-span-1  bg-white rounded-md mt-3 h-fit px-4 py-3 top-4 mr-2 shadow-lg">
         <p className="font-medium text-gray-700">

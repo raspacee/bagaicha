@@ -50,6 +50,7 @@ const ReviewModal = forwardRef<HTMLDialogElement, {}>((props, ref) => {
         console.log(err);
       }
     };
+    // fetchComments();
   }, [state]);
 
   const submitComment = async () => {
