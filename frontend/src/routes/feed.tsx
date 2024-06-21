@@ -74,6 +74,15 @@ export default function Feed() {
           reviews.map((review: any) => (
             <Post key={review.id} review={review} />
           ))}
+        {isSuccess && reviews == null && (
+          <div className="card lg:card-side bg-base-100 shadow-xl">
+            <div className="h-[10rem] w-full flex justify-center items-center">
+              <p className="text-xl font-bold">
+                No posts found, start creating them!
+              </p>
+            </div>
+          </div>
+        )}
         {isError && <div>Something went wrong, {error.message}</div>}
       </div>
       <div className="col-span-1  bg-white rounded-md mt-3 h-fit px-4 py-3 top-4 mr-2 shadow-lg">

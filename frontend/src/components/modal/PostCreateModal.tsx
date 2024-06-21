@@ -3,12 +3,12 @@ import { IoLocationSharp } from "@react-icons/all-files/io5/IoLocationSharp";
 import { IoImagesOutline } from "@react-icons/all-files/io5/IoImagesOutline";
 
 import Avatar from "@mui/material/Avatar";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import Cookies from "universal-cookie";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Rating from "@mui/material/Rating";
 
 import { useAppSelector, useAppDispatch } from "../../hooks.ts";
@@ -16,9 +16,9 @@ import {
   clearPostCreateModal,
   setPostCreateModal,
 } from "../../slice/modalSlice.ts";
-import { AUTH_TOKEN } from "../../lib/cookie_names.ts";
 import { ReviewSchema, ReviewSchemaType } from "../../lib/schemas";
-import StarRatingInput from "../star/StarRatingInput.tsx";
+import { createReview } from "../../api/reviewApi.ts";
+import { useSearchParams } from "react-router-dom";
 
 interface Place {
   id: string;
@@ -32,26 +32,57 @@ interface Place {
 export default function PostCreate() {
   const dispatch = useAppDispatch();
   const display = useAppSelector(
-    (state) => state.modal.postCreateModal.display,
+    (state) => state.modal.postCreateModal.display
   );
   const user = useAppSelector((state) => state.user);
-  const cookies = new Cookies(null, {
-    path: "/",
-  });
   const [suggestions, setSuggestions] = useState<Place[]>([]);
   const [query, setQuery] = useState<string>("");
   const [placeInfo, setPlaceInfo] = useState<Place | null>(null);
-  const pictureRef = useRef<HTMLInputElement>(null);
   const [image, setImage] = useState<string | null>(null);
   const [rating, setRating] = useState<number | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
   const {
     register,
     setError,
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ReviewSchemaType>({
     resolver: zodResolver(ReviewSchema),
+  });
+
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (data: any) => {
+      const formData = new FormData();
+      formData.append("picture", data.picture);
+      formData.append("comment", data.comment);
+      formData.append("place_id", placeInfo!.id);
+      formData.append("place_name", placeInfo!.name);
+      formData.append("display_name", placeInfo!.display_name);
+      formData.append("place_lat", placeInfo!.lat);
+      formData.append("place_long", placeInfo!.long);
+      formData.append("rating", rating!.toString());
+      return createReview(formData);
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(
+        ["reviews", searchParams.get("sort") || "trending"],
+        (oldData: any) => {
+          if (oldData) return [data, ...oldData];
+          return [data];
+        }
+      );
+      dispatch(setPostCreateModal({ value: false }));
+      dispatch(clearPostCreateModal());
+    },
+    onError: () => {
+      setError("root", {
+        type: "manual",
+        message: "Something went wrong, try again",
+      });
+    },
   });
 
   const closeModal = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -62,7 +93,7 @@ export default function PostCreate() {
   const fetchFromOpenmap = async () => {
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${query}&format=json&countrycodes=NP`,
+        `https://nominatim.openstreetmap.org/search?q=${query}&format=json&countrycodes=NP`
       );
       const result = await response.json();
       const sugges: Place[] = [];
@@ -88,7 +119,7 @@ export default function PostCreate() {
   const fetchFromBackend = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/place/search?q=${query}`,
+        `${import.meta.env.VITE_API_URL}/place/search?q=${query}`
       );
       const result = await response.json();
       console.log(result);
@@ -134,39 +165,10 @@ export default function PostCreate() {
     setValue("place", place);
   };
 
-  const onSubmit: SubmitHandler<ReviewSchemaType> = async (data: any) => {
-    if (placeInfo != null && rating && [1, 2, 3, 4, 5].includes(rating)) {
-      const formData = new FormData();
-      formData.append("picture", data.picture);
-      formData.append("comment", data.comment);
-      formData.append("place_id", placeInfo.id);
-      formData.append("place_name", placeInfo.name);
-      formData.append("display_name", placeInfo.display_name);
-      formData.append("place_lat", placeInfo.lat);
-      formData.append("place_long", placeInfo.long);
-      formData.append("rating", rating.toString());
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/review`, {
-          method: "POST",
-          body: formData,
-          mode: "cors",
-          headers: {
-            authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
-          },
-        });
-        const result = await response.json();
-        if (result.status == "ok") {
-          dispatch(setPostCreateModal({ value: false }));
-          dispatch(clearPostCreateModal());
-        } else {
-          throw new Error(result.message);
-        }
-      } catch (err: any) {
-        setError("root", {
-          message: err.message,
-        });
-      }
-    }
+  const onSubmit = async (data: any) => {
+    if (placeInfo == null || !rating || ![1, 2, 3, 4, 5].includes(rating))
+      return;
+    mutation.mutate(data);
   };
 
   if (!display) return null;
@@ -326,9 +328,9 @@ export default function PostCreate() {
                 }}
                 type="submit"
                 className="bg-blue-800 px-6 py-2 text-white rounded-full font-medium"
-                disabled={isSubmitting}
+                disabled={mutation.isPending}
               >
-                {isSubmitting ? "Submitting" : "Post"}
+                {mutation.isPending ? "Submitting" : "Post"}
               </motion.button>
             </div>
           </div>

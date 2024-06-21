@@ -24,4 +24,22 @@ const fetchReviews = async (sortBy: string, location: LocationType) => {
   }
 };
 
-export { fetchReviews };
+const createReview = async (data: FormData) => {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/review`, {
+    method: "POST",
+    body: data,
+    mode: "cors",
+    headers: {
+      authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+    },
+  });
+  const result = await response.json();
+  console.log("createReview:", result);
+  if (result.status == "ok") {
+    return result.review;
+  } else {
+    throw new Error(result.message);
+  }
+};
+
+export { fetchReviews, createReview };
