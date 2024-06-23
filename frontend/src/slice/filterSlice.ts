@@ -4,7 +4,6 @@ import { Distances } from "../lib/enums";
 
 const initialState: FilterType = {
   suggested: {
-    openNow: false,
     delivery: false,
     takeout: false,
     petFriendly: false,

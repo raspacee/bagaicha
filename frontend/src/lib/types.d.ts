@@ -54,7 +54,6 @@ export type ModalType = {
 
 export type FilterType = {
   suggested: {
-    openNow: boolean;
     delivery: boolean;
     takeout: boolean;
     petFriendly: boolean;

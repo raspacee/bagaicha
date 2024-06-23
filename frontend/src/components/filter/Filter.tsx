@@ -26,10 +26,6 @@ interface DistanceInterface {
 
 const suggested: SuggestedInterface[] = [
   {
-    key: "openNow",
-    label: "Places that are open",
-  },
-  {
     key: "delivery",
     label: "Places that offers delivery",
   },
@@ -120,7 +116,7 @@ export default function Filter() {
                 id={s.key}
                 onChange={(e) =>
                   dispatch(
-                    setSuggested({ key: s.key, value: e.target.checked }),
+                    setSuggested({ key: s.key, value: e.target.checked })
                   )
                 }
                 checked={suggestedFilter[s.key]}

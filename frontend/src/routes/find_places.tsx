@@ -1,3 +1,5 @@
+import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
+
 import { useState, useEffect } from "react";
 import { LatLngExpression } from "leaflet";
 import Cookies from "universal-cookie";
@@ -91,7 +93,12 @@ export default function FindPlaces() {
           </h1>
           <Filter />
           {places == null ? (
-            <h2>No place found</h2>
+            <div className="w-full bg-white my-3 px-3 py-8 shadow-md rounded-md flex flex-col justify-center items-center">
+              <SentimentVeryDissatisfiedIcon fontSize="large" />
+              <p className="font-normal text-lg mt-1">
+                No place found. Try other filters
+              </p>
+            </div>
           ) : (
             places.map((place: any, index: number) => (
               <div

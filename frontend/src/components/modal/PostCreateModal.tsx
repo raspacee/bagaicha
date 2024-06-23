@@ -282,56 +282,58 @@ export default function PostCreate() {
         </div>
         <div className="text-center w-full row-span-1">
           <div className="w-full my-2 border-t border-t-gray-400"></div>
-          <div className="px-5 flex items-center">
-            <label htmlFor="picture">
-              <IoImagesOutline
-                size={28}
-                className="text-gray-600 cursor-pointer"
+          <div className="flex justify-between">
+            <div className="px-5 flex items-center">
+              <label htmlFor="picture">
+                <IoImagesOutline
+                  size={28}
+                  className="text-gray-600 cursor-pointer"
+                />
+              </label>
+              {errors.picture && (
+                <p className="text-red-500 ml-2">
+                  {errors.picture.message as string}
+                </p>
+              )}
+              <input
+                id="picture"
+                className="ml-4"
+                type="file"
+                accept=".jpg,.jpeg,.png,.webp"
+                hidden
+                {...register("picture")}
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setImage(URL.createObjectURL(e.target.files[0]));
+                    setValue("picture", e.target.files[0]);
+                  }
+                }}
               />
-            </label>
-            {errors.picture && (
-              <p className="text-red-500 ml-2">
-                {errors.picture.message as string}
-              </p>
-            )}
-            <input
-              id="picture"
-              className="ml-4"
-              type="file"
-              accept=".jpg,.jpeg,.png,.webp"
-              hidden
-              {...register("picture")}
-              onChange={(e) => {
-                if (e.target.files && e.target.files[0]) {
-                  setImage(URL.createObjectURL(e.target.files[0]));
-                  setValue("picture", e.target.files[0]);
-                }
-              }}
-            />
-          </div>
-          <div className="flex justify-between px-4">
-            <div className="flex items-center">
-              <p className="text-red-500">
-                {errors.root && errors.root.message}
-              </p>
             </div>
-            <div className="flex">
-              <button className="bg-gray-500 px-4 py-2 text-white rounded-full mr-4 font-medium">
-                Save draft
-              </button>
-              <motion.button
-                whileHover={{
-                  scale: 1.05,
-                }}
-                whileTap={{
-                  scale: 0.9,
-                }}
-                type="submit"
-                className="bg-blue-800 px-6 py-2 text-white rounded-full font-medium"
-                disabled={mutation.isPending}
-              >
-                {mutation.isPending ? "Submitting" : "Post"}
-              </motion.button>
+            <div className="flex justify-between px-4">
+              <div className="flex items-center">
+                <p className="text-red-500">
+                  {errors.root && errors.root.message}
+                </p>
+              </div>
+              <div className="flex">
+                <button className="bg-gray-500 px-4 py-2 text-white rounded-full mr-4 font-medium">
+                  Save draft
+                </button>
+                <motion.button
+                  whileHover={{
+                    scale: 1.05,
+                  }}
+                  whileTap={{
+                    scale: 0.9,
+                  }}
+                  type="submit"
+                  className="bg-blue-800 px-6 py-2 text-white rounded-full font-medium"
+                  disabled={mutation.isPending}
+                >
+                  {mutation.isPending ? "Submitting" : "Post"}
+                </motion.button>
+              </div>
             </div>
           </div>
         </div>
