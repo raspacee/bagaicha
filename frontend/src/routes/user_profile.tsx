@@ -91,7 +91,7 @@ export default function Profile() {
       <div className="grid grid-cols-3 gap-1">
         <div className="col-span-2 px-4 my-4">
           <div className="w-full bg-white py-2 px-3 rounded-md flex flex-col items-center shadow-lg">
-            <div className="flex flex-row justify-around w-3/4 ">
+            <div className="flex flex-row justify-around w-5/6">
               <div>
                 <img
                   src={`${user.profile_picture_url}`}
@@ -105,9 +105,7 @@ export default function Profile() {
                 <span className="flex my-2 items-center">
                   <p className="font-medium text-xl mr-7 cursor-pointer">{`${user.first_name} ${user.last_name}`}</p>
                   <Link to="/user/edit-profile">
-                    <span className="bg-gray-200 py-2 px-3 rounded-md">
-                      Edit profile
-                    </span>
+                    <button className="btn btn-primary">Edit Profile</button>
                   </Link>
                 </span>
                 <h2 className="my-1">{user.email}</h2>

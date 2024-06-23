@@ -169,8 +169,8 @@ const ReviewModal = forwardRef<HTMLDialogElement, {}>((props, ref) => {
             style={{ height: "100%" }}
           />
         </div>
-        <div className="col-span-1 h-full">
-          <div className="flex h-14 items-center justify-between px-2 py-1">
+        <div className="col-span-1 grid grid-rows-12">
+          <div className="flex items-center justify-between px-2 py-1 row-span-2">
             <div className="flex items-center">
               <img
                 src={state.authorImageUrl}
@@ -196,14 +196,14 @@ const ReviewModal = forwardRef<HTMLDialogElement, {}>((props, ref) => {
             </div>
           </div>
 
-          <div className="border-t px-2 py-1 h-[480px] overflow-y-scroll">
-            <p className="">
-              <PlaceIcon fontSize="large" style={{ color: "#239B56" }} />
-              <Link to={"/place/" + state.placeId}>
-                <span className="font-bold">{state.placeName}</span>
-              </Link>
-            </p>
-            <div>
+          <div className="border-t px-2 py-1 row-span-7 overflow-y-scroll">
+            <div className="flex justify-between items-center">
+              <span>
+                <PlaceIcon fontSize="large" style={{ color: "#239B56" }} />
+                <Link to={"/place/" + state.placeId}>
+                  <span className="font-bold">{state.placeName}</span>
+                </Link>
+              </span>
               <Rating
                 name="half-rating-read"
                 value={state.rating}
@@ -229,7 +229,7 @@ const ReviewModal = forwardRef<HTMLDialogElement, {}>((props, ref) => {
               )}
             </div>
           </div>
-          <div className="border-t h-14">
+          <div className="border-t row-span-3">
             <div className="flex items-center px-2 py-1">
               <AiOutlineHeart size={32} />
               <TfiComment size={25} className="mx-2" />
