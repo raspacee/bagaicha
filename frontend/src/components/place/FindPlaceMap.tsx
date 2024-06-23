@@ -9,6 +9,7 @@ import * as L from "leaflet";
 import { LatLngExpression } from "leaflet";
 
 import { useAppSelector } from "../../hooks";
+import MyLocation from "../../assets/my-location.webp";
 
 function ChangeView({
   center,
@@ -36,8 +37,7 @@ export default function FindPlacesMap({
   });
   //@ts-ignore
   const greenIcon = new LeafIcon({
-    iconUrl:
-      "https://static.vecteezy.com/system/resources/previews/009/267/136/non_2x/location-icon-design-free-png.png",
+    iconUrl: MyLocation,
     iconSize: [25, 37],
   });
 

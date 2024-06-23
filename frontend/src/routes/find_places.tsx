@@ -47,9 +47,17 @@ export default function FindPlaces() {
       const category = filters.join(",");
 
       if (userLocation.lat != -1 && userLocation.long != -1) {
-        url = `${import.meta.env.VITE_API_URL}/place/top_places?lat=${userLocation.lat}&long=${userLocation.long}&suggested=${suggested}&category=${category}&distance=${filterState.distance.distancePicked}`;
+        url = `${import.meta.env.VITE_API_URL}/place/top_places?lat=${
+          userLocation.lat
+        }&long=${
+          userLocation.long
+        }&suggested=${suggested}&category=${category}&distance=${
+          filterState.distance.distancePicked
+        }`;
       } else {
-        url = `${import.meta.env.VITE_API_URL}/place/top_places?lat=${userLocation.lat}&long=${userLocation.long}`;
+        url = `${import.meta.env.VITE_API_URL}/place/top_places?lat=${
+          userLocation.lat
+        }&long=${userLocation.long}`;
       }
       try {
         const res = await fetch(url, {
@@ -91,7 +99,7 @@ export default function FindPlaces() {
                   handleHover(
                     parseFloat(place.lat),
                     parseFloat(place.long),
-                    place.id,
+                    place.id
                   )
                 }
                 key={place.id}
