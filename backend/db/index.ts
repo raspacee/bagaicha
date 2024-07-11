@@ -8,6 +8,9 @@ const pool = new Pool({
   user: process.env.DB_USER,
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 const query = async <I = any[]>(text: string, params: QueryConfigValues<I>) => {
