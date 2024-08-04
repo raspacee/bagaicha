@@ -1,5 +1,6 @@
 import { pool } from "../db/index";
 import { USER_LEVELS } from "../middlewares/modMiddleware";
+import { User } from "../types";
 
 const is_moderator = async (id: string) => {
   const text = `select moderation_lvl from user_ where id=$1`;
@@ -18,7 +19,7 @@ const create_user = async (
   last_name: string,
   password: string,
   created_at: string,
-  profile_picture_url: string,
+  profile_picture_url: string
 ) => {
   const text =
     "insert into user_ (id, email, first_name, last_name, password, \
@@ -56,7 +57,7 @@ const change_profile_pic_url = async (user_id: string, new_url: string) => {
   await pool.query(
     "update user_ set profile_picture_url = $1 \
     where id = $2;",
-    [new_url, user_id],
+    [new_url, user_id]
   );
 };
 
@@ -65,21 +66,32 @@ const update_profile = async (
   first_name: string,
   last_name: string,
   bio: string,
-  profile_pic: string | null,
+  profile_pic: string | null
 ) => {
   if (profile_pic == null) {
     await pool.query(
       `update user_ set first_name = $1, last_name = $2, bio = $3
     where id = $4;`,
-      [first_name, last_name, bio, user_id],
+      [first_name, last_name, bio, user_id]
     );
   } else {
     await pool.query(
       `update user_ set first_name = $1, last_name = $2, bio = $3, profile_picture_url = $4
     where id = $5;`,
-      [first_name, last_name, bio, profile_pic, user_id],
+      [first_name, last_name, bio, profile_pic, user_id]
     );
   }
+};
+
+const getDataById = async (userId: string): Promise<User | null> => {
+  const text =
+    "select id, first_name, last_name, profile_picture_url, bio, moderation_lvl, email from user_ where id=$1;";
+  const values = [userId];
+  const result = await pool.query(text, values);
+  if (result.rowCount == 0) {
+    return null;
+  }
+  return result.rows[0] as User;
 };
 
 const exporter = {
@@ -89,6 +101,7 @@ const exporter = {
   change_profile_pic_url,
   is_moderator,
   update_profile,
+  getDataById,
 };
 
 export default exporter;

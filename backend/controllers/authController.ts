@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 const signup_handler = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   const { first_name, last_name, password, email } = req.body;
 
@@ -27,7 +27,7 @@ const signup_handler = async (
       last_name,
       hashed_password,
       created_at,
-      default_profile_picture_url,
+      default_profile_picture_url
     );
 
     return res.status(200).send({
@@ -45,7 +45,7 @@ const signup_handler = async (
 const login_handler = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   const { email, password } = req.body;
 
@@ -60,14 +60,11 @@ const login_handler = async (
     if (bcrypt.compareSync(password, user.password)) {
       const token = jwt.sign(
         {
-          user_id: user.id,
+          userId: user.id,
           email: user.email,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          profile_picture_url: user.profile_picture_url,
         },
         process.env.JWT_SECRET!,
-        { expiresIn: "30d" },
+        { expiresIn: "30d" }
       );
       console.log(token);
       return res.status(200).send({ status: "ok", token });
@@ -85,21 +82,11 @@ const login_handler = async (
 const auth_handler = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
-  try {
-    const user = await User.get_info_by_id(res.locals.user.user_id);
-    return res.status(200).send({
-      status: "ok",
-      user,
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send({
-      status: "error",
-      message: err,
-    });
-  }
+  return res.json({
+    authenticated: true,
+  });
 };
 
 const mod_authenticate = async (req: Request, res: Response) => {

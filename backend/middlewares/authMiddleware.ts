@@ -1,10 +1,19 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { JwtUserData } from "../types";
+
+declare global {
+  namespace Express {
+    interface Request {
+      jwtUserData: JwtUserData;
+    }
+  }
+}
 
 export const authMiddleware = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
@@ -21,7 +30,7 @@ export const authMiddleware = (
         message: "Invalid authentication token, try logging in again",
       });
     }
-    res.locals.user = decoded;
+    req.jwtUserData = decoded as JwtUserData;
     return next();
   });
 };

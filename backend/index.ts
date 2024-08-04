@@ -13,26 +13,25 @@ import { v2 as cloudinary } from "cloudinary";
 
 const app = express();
 
-app.use(cookieParser());
 app.use(
   cors({
-    credentials: true,
     origin: process.env.FRONTEND_URL,
     optionsSuccessStatus: 200,
-  }),
+  })
 );
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(function (req, res, next) {
-  res.header("Content-Type", "application/json;charset=UTF-8");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept",
-  );
-  next();
-});
+// app.use(function (req, res, next) {
+//   res.header("Content-Type", "application/json;charset=UTF-8");
+//   res.header("Access-Control-Allow-Credentials", "true");
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept"
+//   );
+//   next();
+// });
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -53,5 +52,5 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.listen(process.env.PORT || 8080, () =>
-  console.log("Application listening on port: " + process.env.PORT || 8080),
+  console.log("Application listening on port: " + process.env.PORT || 8080)
 );

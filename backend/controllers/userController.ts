@@ -6,7 +6,7 @@ import { v2 as cloudinary } from "cloudinary";
 const get_user_info = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   const slug = req.params.slug;
   try {
@@ -28,10 +28,23 @@ const get_user_info = async (
   }
 };
 
+const getMyUserData = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = await User.getDataById(req.jwtUserData.userId);
+    return res.json(user);
+  } catch (err) {
+    return next(err);
+  }
+};
+
 const change_profile_picture = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const picture_path = req.file!.path;
@@ -39,7 +52,7 @@ const change_profile_picture = async (
 
     await User.change_profile_pic_url(
       res.locals.user.user_id,
-      picture_upload.secure_url,
+      picture_upload.secure_url
     );
 
     return res.status(200).send({
@@ -56,7 +69,7 @@ const get_user_reviews = async (req: Request, res: Response) => {
     const email = req.params.user_email;
     const reviews = await Review.get_reviews_by_email(
       res.locals.user.user_id,
-      email,
+      email
     );
     return res.status(200).send({
       status: "ok",
@@ -84,7 +97,7 @@ const update_profile = async (req: Request, res: Response) => {
     const files = req.files as ImageInterface;
     if (files.new_profile_pic) {
       const picture_upload = await cloudinary.uploader.upload(
-        files.new_profile_pic[0].path,
+        files.new_profile_pic[0].path
       );
       profile_pic = picture_upload.secure_url;
     }
@@ -93,7 +106,7 @@ const update_profile = async (req: Request, res: Response) => {
       first_name,
       last_name,
       bio,
-      profile_pic,
+      profile_pic
     );
 
     return res.status(200).send({
@@ -114,6 +127,7 @@ const exporter = {
   change_profile_picture,
   get_user_reviews,
   update_profile,
+  getMyUserData,
 };
 
 export default exporter;

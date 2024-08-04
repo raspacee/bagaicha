@@ -128,9 +128,7 @@ const get_handler = async (req: Request, res: Response, next: NextFunction) => {
     const sort = req.query.sort;
     const lat = req.query.lat as string;
     const long = req.query.long as string;
-    const reviews: any[] | null = await Review.get_feed(
-      res.locals.user.user_id
-    );
+    const reviews: any[] | null = await Review.get_feed(req.jwtUserData.userId);
     if (reviews == null) {
       return res.status(404).send({
         status: "ok",
