@@ -30,6 +30,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import NotificationItem from "./notification/NotificationItem";
 import { DateTime } from "luxon";
+import SearchBar from "./forms/SearchBar";
 
 export default function Navbar() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -59,7 +60,7 @@ export default function Navbar() {
             bagaicha
           </span>
         </Link>
-        <Input type="text" placeholder="Search restaurant" />
+        <SearchBar />
       </div>
       <div className="flex items-center gap-5">
         <DropdownMenu>
