@@ -1,5 +1,5 @@
 import { useAuthenticateUser } from "../api/AuthApi";
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
 const AuthenticatedRoute = () => {
   const { data, isLoading } = useAuthenticateUser();
@@ -8,7 +8,7 @@ const AuthenticatedRoute = () => {
     return <h1>Loading...</h1>;
   }
 
-  return data?.authenticated ? <Outlet /> : <h1>Invalid user token</h1>;
+  return data?.authenticated ? <Outlet /> : <Navigate to="login" />;
 };
 
 export default AuthenticatedRoute;

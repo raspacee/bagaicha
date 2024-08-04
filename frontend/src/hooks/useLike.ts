@@ -23,13 +23,10 @@ export function useLike(initialState: boolean, reviewID: string) {
         },
       }
     );
-    const message = await response.json();
-    if (message.status == "ok") {
-      if (message.action == "like") {
-        setHasLiked(true);
-      } else {
-        setHasLiked(false);
-      }
+    if (response.status == 201) {
+      setHasLiked(true);
+    } else {
+      setHasLiked(false);
     }
   };
 

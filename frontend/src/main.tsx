@@ -6,8 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import "./index.css";
-import Root from "./routes/root";
+import "./global.css";
 import Feed from "./routes/feed";
 import UserProfile from "./routes/user_profile";
 import Login from "./routes/login";
@@ -23,7 +22,7 @@ import EditProfile from "./routes/edit_profile";
 import NotAuthorized from "./routes/not_authorized";
 import Suggestions from "./routes/suggestions";
 import Place from "./routes/place";
-import { getUserData, notAuthenticated, isModerator } from "./lib/loaders";
+import { notAuthenticated, isModerator } from "./lib/loaders";
 import { store } from "./store";
 import { Provider } from "react-redux";
 import MainLayout from "./layouts/MainLayout";
@@ -56,11 +55,19 @@ const router = createBrowserRouter([
       },
       {
         path: "user/edit-profile",
-        element: <EditProfile />,
+        element: (
+          <MainLayout>
+            <EditProfile />
+          </MainLayout>
+        ),
       },
       {
         path: "user/:slug",
-        element: <UserProfile />,
+        element: (
+          <MainLayout>
+            <UserProfile />
+          </MainLayout>
+        ),
       },
       {
         path: "place/:place_id",
@@ -68,15 +75,27 @@ const router = createBrowserRouter([
       },
       {
         path: "place/add",
-        element: <AddPlace />,
+        element: (
+          <MainLayout>
+            <AddPlace />
+          </MainLayout>
+        ),
       },
       {
         path: "bookmarks",
-        element: <Bookmarks />,
+        element: (
+          <MainLayout>
+            <Bookmarks />
+          </MainLayout>
+        ),
       },
       {
         path: "find-places",
-        element: <FindPlaces />,
+        element: (
+          <MainLayout>
+            <FindPlaces />
+          </MainLayout>
+        ),
       },
       {
         path: "edit-place/:place_id",
@@ -85,11 +104,19 @@ const router = createBrowserRouter([
       },
       {
         path: "search/",
-        element: <Search />,
+        element: (
+          <MainLayout>
+            <Search />
+          </MainLayout>
+        ),
       },
       {
         path: "suggestions/",
-        element: <Suggestions />,
+        element: (
+          <MainLayout>
+            <Suggestions />
+          </MainLayout>
+        ),
       },
     ],
   },

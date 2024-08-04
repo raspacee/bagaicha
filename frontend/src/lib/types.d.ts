@@ -1,5 +1,5 @@
 /* User type when logged in */
-export type UserInterface = {
+type UserInterface = {
   user_id: string;
   email: string;
   first_name: string;
@@ -7,12 +7,12 @@ export type UserInterface = {
   profile_picture_url: string;
 };
 
-export type LocationType = {
+type LocationType = {
   lat: number;
   long: number;
 };
 
-export type AddPlaceType = {
+type AddPlaceType = {
   relation: null | "owner" | "customer";
   placeName: string;
   placeLat: string;
@@ -23,14 +23,10 @@ export type AddPlaceType = {
   alcoholAllowed: boolean;
 };
 
-export type ModalType = {
+type ModalType = {
   imgModal: {
     display: boolean;
     src: string;
-  };
-  notificationModal: {
-    display: boolean;
-    notifications: any[];
   };
   searchModal: {
     display: boolean;
@@ -52,7 +48,7 @@ export type ModalType = {
   };
 };
 
-export type FilterType = {
+type FilterType = {
   suggested: {
     delivery: boolean;
     takeout: boolean;
@@ -72,11 +68,30 @@ export type FilterType = {
   };
 };
 
-export type FetchOptionType = {
+type FetchOptionType = {
   method: "post" | "get" | "put";
   body?: string;
   headers?: {
     "content-type"?: string;
     authorization?: string;
   };
+};
+
+type Notification = {
+  fullname: string;
+  user_profile_picture_url: string;
+  action_type: string;
+  object_type: string;
+  object_url: string;
+  created_at: string;
+};
+
+export type {
+  UserInterface,
+  LocationType,
+  FetchOptionType,
+  Notification,
+  FilterType,
+  AddPlaceType,
+  ModalType,
 };

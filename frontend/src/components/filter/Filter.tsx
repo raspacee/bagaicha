@@ -1,5 +1,4 @@
 import { useAppDispatch, useAppSelector } from "../../hooks";
-import "../../App.css";
 import {
   setCategory,
   setSuggested,

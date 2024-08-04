@@ -30,6 +30,7 @@ export const useAuthenticateUser = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["authenticateUser"],
     queryFn: authenticateUserRequest,
+    retry: false,
   });
 
   /* TODO: If error throw a toast, clean user auths and redirect to login */

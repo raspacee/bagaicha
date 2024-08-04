@@ -6,10 +6,6 @@ const initialState: ModalType = {
     display: false,
     src: "",
   },
-  notificationModal: {
-    display: false,
-    notifications: [],
-  },
   searchModal: {
     display: false,
   },
@@ -44,14 +40,6 @@ export const modalSlice = createSlice({
       const { value, src } = action.payload;
       state.imgModal.display = value;
       state.imgModal.src = src;
-    },
-    setNotificationModal: (
-      state,
-      action: PayloadAction<{ value: boolean; notifications?: any[] }>
-    ) => {
-      const { value, notifications } = action.payload;
-      state.notificationModal.display = value;
-      if (notifications) state.notificationModal.notifications = notifications;
     },
     setSearchModal: (state, action: PayloadAction<{ value: boolean }>) => {
       const { value } = action.payload;
@@ -106,7 +94,6 @@ export const modalSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const {
   setImgModal,
-  setNotificationModal,
   setSearchModal,
   setPostCreateModal,
   clearPostCreateModal,
