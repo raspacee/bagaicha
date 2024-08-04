@@ -28,16 +28,6 @@ const create_handler = async (
       foods_ate,
       display_name,
     } = req.body;
-    console.log(
-      comment,
-      place_id,
-      rating,
-      place_name,
-      place_lat,
-      place_long,
-      null,
-      display_name
-    );
     const openmaps_place_id = place_id;
 
     /* if place is not created, create it */
@@ -69,7 +59,7 @@ const create_handler = async (
     const created_at = new Date().toISOString();
     const review = await Review.create_review(
       review_uuid,
-      res.locals.user.user_id,
+      req.jwtUserData.userId,
       comment,
       rating,
       picture_upload.secure_url,
@@ -77,14 +67,14 @@ const create_handler = async (
       [],
       created_at
     );
-    return res.status(201).send({
+    return res.status(201).json({
       status: "ok",
       message: "Your review was posted successfully",
       review: review.rows[0],
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).send({
+    return res.status(500).json({
       status: "error",
       message: "Something went wrong in the server",
     });
@@ -191,38 +181,27 @@ const like_review = async (req: Request, res: Response, next: NextFunction) => {
   try {
     /* Check if the user has liked the review already */
     const { review_id } = req.body;
-    const has_liked = await Like.user_has_liked_review(
-      res.locals.user.user_id,
-      review_id
-    );
-    console.log(review_id, has_liked);
+    const userId = req.jwtUserData.userId;
+    const has_liked = await Like.user_has_liked_review(userId, review_id);
     if (!has_liked) {
-      await Like.create_like(res.locals.user.user_id, review_id);
+      await Like.create_like(userId, review_id);
       const victim = await pool.query(
         `select author_id from review where id = $1`,
         [review_id]
       );
-      if (victim.rows[0].author_id != res.locals.user.user_id) {
+      if (victim.rows[0].author_id != userId) {
         await Notification.create_notification(
-          res.locals.user.user_id,
+          userId,
           victim.rows[0].author_id,
           NotificationObject.Review,
           review_id,
           "like"
         );
       }
-      return res.status(200).send({
-        status: "ok",
-        action: "like",
-        message: "Loved the review",
-      });
+      return res.status(201).json();
     } else {
-      await Like.delete_like(res.locals.user.user_id, review_id);
-      return res.status(200).send({
-        status: "ok",
-        action: "unlike",
-        message: "Unloved the review",
-      });
+      await Like.delete_like(userId, review_id);
+      return res.status(204).json();
     }
   } catch (err) {
     console.error(err);

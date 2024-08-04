@@ -4,16 +4,13 @@ import Notification from "../models/notificationModel";
 const get_notifications = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const notifications = await Notification.get_notifications(
-      res.locals.user.user_id,
+      req.jwtUserData.userId
     );
-    return res.status(200).send({
-      status: "ok",
-      notifications,
-    });
+    return res.status(200).json(notifications);
   } catch (err) {
     return res.status(500).send({
       status: "error",
@@ -25,13 +22,11 @@ const get_notifications = async (
 const read_notification = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
-    await Notification.read_notification(res.locals.user.user_id);
-    return res.status(200).send({
-      status: "ok",
-    });
+    await Notification.read_notification(req.jwtUserData.userId);
+    return res.json();
   } catch (err) {
     return res.status(500).send({
       status: "error",
