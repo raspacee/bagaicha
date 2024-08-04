@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { LoginSchema, type LoginSchemaType } from "../lib/schemas";
 import Cookies from "universal-cookie";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AUTH_TOKEN } from "../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../lib/config";
 
 export default function Login() {
   const {
@@ -34,7 +34,7 @@ export default function Login() {
       const result = await res.json();
 
       if (result.status == "ok") {
-        cookies.set(AUTH_TOKEN, result.token);
+        cookies.set(AUTH_TOKEN_NAME, result.token);
         setFormMsg(null);
         navigate("/feed");
       } else {

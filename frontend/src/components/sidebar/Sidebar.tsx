@@ -13,13 +13,26 @@ import AssistantIcon from "@mui/icons-material/Assistant";
 import { UserInterface } from "../../lib/types";
 import { useAppSelector } from "../../hooks";
 import SidebarItem from "./SidebarItem";
+import { useGetMyUserData } from "../../api/UserApi";
 
 export default function SidebarLeft() {
-  const user: UserInterface = useAppSelector((state) => state.user);
+  const { myUser, isLoading } = useGetMyUserData();
+
+  if (isLoading) {
+    return <h1>Loading...</h1>;
+  }
+
+  if (!myUser) {
+    return <h1>Failed to get user data, logout & login</h1>;
+  }
 
   return (
     <div className="bg-white w-full py-2 px-4 mt-3 rounded-md sticky top-4 ml-2 shadow-xl border border-slate-900">
-      <SidebarItem text="Profile" link={`/user/${user.email}`} isButton={false}>
+      <SidebarItem
+        text="Profile"
+        link={`/user/${myUser.email}`}
+        isButton={false}
+      >
         <AccountCircleIcon fontSize="large" style={{ color: "#0d47a1" }} />
       </SidebarItem>
       <SidebarItem text="Find Places" link="/find-places" isButton={false}>

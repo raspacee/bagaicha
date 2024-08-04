@@ -11,7 +11,7 @@ import Filter from "../components/filter/Filter";
 import { FetchOptionType } from "../lib/types";
 import { FetchState } from "../lib/enums";
 import type { FilterType } from "../lib/types";
-import { AUTH_TOKEN } from "../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../lib/config";
 
 export default function FindPlaces() {
   const userLocation = useAppSelector((state) => state.location);
@@ -66,7 +66,7 @@ export default function FindPlaces() {
           method: "get",
           mode: "cors",
           headers: {
-            authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+            authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
           },
         });
         const data = await res.json();

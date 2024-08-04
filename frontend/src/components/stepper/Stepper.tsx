@@ -11,7 +11,7 @@ import Snackbar from "@mui/material/Snackbar";
 import { useNavigate } from "react-router-dom";
 
 import { useAppSelector, useAppDispatch } from "../../hooks";
-import { AUTH_TOKEN } from "../../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../../lib/config";
 import { clearState } from "../../slice/addPlaceSlice";
 
 export default function HorizontalLinearStepper({ steps }: { steps: any }) {
@@ -54,7 +54,7 @@ export default function HorizontalLinearStepper({ steps }: { steps: any }) {
         body: form,
         mode: "cors",
         headers: {
-          authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
         },
       });
       const data = await res.json();
@@ -103,7 +103,7 @@ export default function HorizontalLinearStepper({ steps }: { steps: any }) {
 
   const handleClose = (
     event?: React.SyntheticEvent | Event,
-    reason?: string,
+    reason?: string
   ) => {
     if (reason === "clickaway") {
       return;

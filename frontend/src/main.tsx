@@ -26,12 +26,13 @@ import Place from "./routes/place";
 import { getUserData, notAuthenticated, isModerator } from "./lib/loaders";
 import { store } from "./store";
 import { Provider } from "react-redux";
+import MainLayout from "./layouts/MainLayout";
+import AuthenticatedRoute from "./auth/AuthenticatedRoute";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Root />,
-    loader: getUserData,
+    element: <AuthenticatedRoute />,
     children: [
       {
         path: "/",
@@ -43,7 +44,11 @@ const router = createBrowserRouter([
       },
       {
         path: "feed",
-        element: <Feed />,
+        element: (
+          <MainLayout>
+            <Feed />
+          </MainLayout>
+        ),
       },
       {
         path: "feed/create",

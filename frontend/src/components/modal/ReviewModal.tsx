@@ -14,7 +14,7 @@ import Divider from "@mui/material/Divider";
 
 import { useAppSelector, useAppDispatch } from "../../hooks";
 import Comment from "../review/Comment";
-import { AUTH_TOKEN } from "../../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../../lib/config";
 
 const ReviewModal = forwardRef<HTMLDialogElement, {}>((props, ref) => {
   const state = useAppSelector((state) => state.modal.reviewModal);
@@ -40,7 +40,7 @@ const ReviewModal = forwardRef<HTMLDialogElement, {}>((props, ref) => {
             method: "get",
             mode: "cors",
             headers: {
-              authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+              authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
             },
           }
         );
@@ -73,7 +73,7 @@ const ReviewModal = forwardRef<HTMLDialogElement, {}>((props, ref) => {
         method: "post",
         mode: "cors",
         headers: {
-          authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -139,7 +139,7 @@ const ReviewModal = forwardRef<HTMLDialogElement, {}>((props, ref) => {
           method: "get",
           mode: "cors",
           headers: {
-            authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+            authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
           },
         }
       );

@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import Divider from "@mui/material/Divider";
 
 import { useAppDispatch } from "../../hooks";
-import { AUTH_TOKEN } from "../../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../../lib/config";
 
 export default function Comment({
   comment,
@@ -39,7 +39,7 @@ export default function Comment({
         method: "POST",
         mode: "cors",
         headers: {
-          authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
         },
       }
     );

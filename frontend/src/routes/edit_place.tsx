@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import Cookies from "universal-cookie";
-import { AUTH_TOKEN } from "../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../lib/config";
 
 const checkboxes = [
   { label: "Sunday", value: "sunday" },
@@ -41,10 +41,9 @@ export default function EditPlace() {
       };
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/place/${place_id}`,
-        options,
+        options
       );
       const data = await res.json();
-      console.log(data.place.place);
       setPlace(data.place.place);
       setPlaceFeatures(data.place.place.place_features || []);
       setOpenDays(data.place.place.open_days || []);
@@ -67,11 +66,11 @@ export default function EditPlace() {
     formData.append("open_days", JSON.stringify(openDays));
     formData.append(
       "opening_time",
-      JSON.stringify(openingTimeRef.current?.value),
+      JSON.stringify(openingTimeRef.current?.value)
     );
     formData.append(
       "closing_time",
-      JSON.stringify(closingTimeRef.current?.value),
+      JSON.stringify(closingTimeRef.current?.value)
     );
     formData.append("place_features", JSON.stringify(placeFeatures));
 
@@ -95,9 +94,9 @@ export default function EditPlace() {
           method: "put",
           body: formData,
           headers: {
-            authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+            authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
           },
-        },
+        }
       );
       const data = await res.json();
       if (data.status == "ok") {

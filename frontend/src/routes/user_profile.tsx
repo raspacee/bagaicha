@@ -13,7 +13,7 @@ import Cookies from "universal-cookie";
 import Divider from "@mui/material/Divider";
 
 import Post from "../components/review/Post";
-import { AUTH_TOKEN } from "../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../lib/config";
 import ReviewModal from "../components/modal/ReviewModal";
 
 export default function Profile() {
@@ -49,7 +49,7 @@ export default function Profile() {
           {
             mode: "cors",
             headers: {
-              authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+              authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
             },
           }
         );

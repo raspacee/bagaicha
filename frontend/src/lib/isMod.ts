@@ -1,5 +1,5 @@
 import Cookies from "universal-cookie";
-import { AUTH_TOKEN } from "../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "./config";
 
 export const isMod = async () => {
   const cookies = new Cookies(null, {
@@ -10,7 +10,7 @@ export const isMod = async () => {
       method: "post",
       mode: "cors",
       headers: {
-        authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
       },
     });
     const data = await res.json();

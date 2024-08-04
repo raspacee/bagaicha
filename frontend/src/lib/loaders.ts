@@ -1,13 +1,13 @@
 import { redirect } from "react-router-dom";
 import { UserInterface } from "./types";
 import Cookies from "universal-cookie";
-import { AUTH_TOKEN } from "./cookie_names";
+import { AUTH_TOKEN_NAME } from "./config";
 
 /* Reads user token and decodes it */
 export async function getUserData(): Promise<UserInterface | null> {
   const cookies = new Cookies(null, { path: "/" });
   try {
-    const token = cookies.get(AUTH_TOKEN);
+    const token = cookies.get(AUTH_TOKEN_NAME);
     const res = await fetch(
       `${import.meta.env.VITE_API_URL}/auth/authenticate`,
       {
@@ -16,7 +16,7 @@ export async function getUserData(): Promise<UserInterface | null> {
         headers: {
           authorization: `Bearer ${token}`,
         },
-      },
+      }
     );
     const data = await res.json();
     if (data.status == "ok") return data.user;
@@ -29,7 +29,7 @@ export async function getUserData(): Promise<UserInterface | null> {
 
 export function notAuthenticated() {
   const cookies = new Cookies(null, { path: "/" });
-  const token = cookies.get(AUTH_TOKEN);
+  const token = cookies.get(AUTH_TOKEN_NAME);
   if (token) {
     return redirect("/feed");
   }
@@ -39,7 +39,7 @@ export function notAuthenticated() {
 export async function isModerator() {
   const cookies = new Cookies(null, { path: "/" });
   try {
-    const token = cookies.get(AUTH_TOKEN);
+    const token = cookies.get(AUTH_TOKEN_NAME);
     const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/moderator`, {
       method: "POST",
       mode: "cors",

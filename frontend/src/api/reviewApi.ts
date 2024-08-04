@@ -1,6 +1,6 @@
 import Cookies from "universal-cookie";
 
-import { AUTH_TOKEN } from "../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../lib/config";
 import { LocationType } from "../lib/types";
 
 const cookies = new Cookies(null, { path: "/" });
@@ -13,7 +13,7 @@ const fetchReviews = async (sortBy: string, location: LocationType) => {
   const res = await fetch(url, {
     mode: "cors",
     headers: {
-      authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+      authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
     },
   });
   const data = await res.json();
@@ -30,7 +30,7 @@ const createReview = async (data: FormData) => {
     body: data,
     mode: "cors",
     headers: {
-      authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+      authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
     },
   });
   const result = await response.json();

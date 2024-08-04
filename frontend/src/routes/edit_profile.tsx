@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "@mui/material/Button";
 
-import { AUTH_TOKEN } from "../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../lib/config";
 import { UserSettingSchema, UserSettingType } from "../lib/schemas";
 
 export default function EditProfile() {
@@ -31,7 +31,7 @@ export default function EditProfile() {
 
   const handleClose = (
     event?: React.SyntheticEvent | Event,
-    reason?: string,
+    reason?: string
   ) => {
     if (reason === "clickaway") {
       return;
@@ -47,7 +47,7 @@ export default function EditProfile() {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/user/`, {
           mode: "cors",
           headers: {
-            authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+            authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
           },
         });
         const data = await res.json();
@@ -76,7 +76,7 @@ export default function EditProfile() {
         method: "PUT",
         mode: "cors",
         headers: {
-          authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
         },
         body: form,
       });

@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
-import { AUTH_TOKEN } from "../../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../../lib/config";
 
 export default function Item({
   isButton,
@@ -18,7 +18,7 @@ export default function Item({
     path: "/",
   });
   const logout = () => {
-    cookies.remove(AUTH_TOKEN);
+    cookies.remove(AUTH_TOKEN_NAME);
     navigate("/login");
   };
   return (

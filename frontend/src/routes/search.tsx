@@ -18,7 +18,7 @@ import { place_features } from "./edit_place";
 import { useBookmark } from "../hooks/useBookmark";
 import { useLike } from "../hooks/useLike";
 import { setImgModal } from "../slice/modalSlice";
-import { AUTH_TOKEN } from "../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../lib/config";
 
 const ReviewSearchResult = ({ review }: { review: any }) => {
   const dispatch = useAppDispatch();
@@ -62,7 +62,7 @@ const ReviewSearchResult = ({ review }: { review: any }) => {
               setImgModal({
                 value: true,
                 src: review.picture,
-              }),
+              })
             )
           }
         />
@@ -197,7 +197,7 @@ export default function Search() {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/search?q=${q}`, {
         mode: "cors",
         headers: {
-          authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
         },
       });
       const data = await res.json();

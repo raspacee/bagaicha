@@ -37,7 +37,7 @@ import Cookies from "universal-cookie";
 import Map from "../components/place/Map";
 import { isMod } from "../lib/isMod";
 import { place_features } from "./edit_place";
-import { AUTH_TOKEN } from "../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../lib/config";
 import { useAppSelector } from "../hooks";
 import { haversine } from "../lib/helpers";
 
@@ -72,7 +72,7 @@ export default function Place() {
   const [value, setValue] = useState(
     searchParams.get("rating")
       ? (5 - parseInt(searchParams.get("rating")!)).toString()
-      : "0",
+      : "0"
   );
   const location = useAppSelector((state) => state.location);
   const { place_id } = useParams();
@@ -88,7 +88,7 @@ export default function Place() {
           {
             method: "GET",
             mode: "cors",
-          },
+          }
         );
         const data = await response.json();
         if (data.status == "ok" && data.place != null) {
@@ -123,14 +123,16 @@ export default function Place() {
     const fetch_reviews = async (rating: string) => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/place/review?rating=${rating}&place_id=${place_id}`,
+          `${
+            import.meta.env.VITE_API_URL
+          }/place/review?rating=${rating}&place_id=${place_id}`,
           {
             method: "get",
             headers: {
-              authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+              authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
               "content-type": "application/json",
             },
-          },
+          }
         );
         const data = await res.json();
         if (data.reviews != null) setPlaceReviews(data.reviews);
@@ -157,10 +159,10 @@ export default function Place() {
               textbody: body,
             }),
             headers: {
-              authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+              authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
               "content-type": "application/json",
             },
-          },
+          }
         );
         if (res.ok) {
           setRating(0);
@@ -183,7 +185,7 @@ export default function Place() {
 
   const handleClose = (
     event?: React.SyntheticEvent | Event,
-    reason?: string,
+    reason?: string
   ) => {
     if (reason === "clickaway") {
       return;
@@ -305,7 +307,7 @@ export default function Place() {
               place.place_features.length > 0 ? (
                 place.place_features.map((f: number) => {
                   const feature = place_features.find(
-                    (data) => data.value == f,
+                    (data) => data.value == f
                   );
                   return (
                     <Grid xs={4}>
@@ -340,7 +342,11 @@ export default function Place() {
                     return (
                       <OpenDayItem
                         day={day}
-                        open={place.open_days ? place.open_days.includes(day.toLowerCase()) : false}
+                        open={
+                          place.open_days
+                            ? place.open_days.includes(day.toLowerCase())
+                            : false
+                        }
                       />
                     );
                   })}

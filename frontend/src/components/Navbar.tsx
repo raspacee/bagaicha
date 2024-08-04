@@ -8,7 +8,7 @@ import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 
-import { AUTH_TOKEN } from "../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../lib/config";
 import NotificationModel from "./modal/NotificationModal";
 import { useAppSelector, useAppDispatch } from "../hooks";
 import { setNotificationModal, setSearchModal } from "../slice/modalSlice";
@@ -20,11 +20,11 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const isLoggedIn = true;
   const notifications = useAppSelector(
-    (state) => state.modal.notificationModal.notifications,
+    (state) => state.modal.notificationModal.notifications
   );
 
   const notificationDisplay = useAppSelector(
-    (state) => state.modal.notificationModal.display,
+    (state) => state.modal.notificationModal.display
   );
   const cookies = new Cookies(null, {
     path: "/",
@@ -37,14 +37,14 @@ export default function Navbar() {
         method: "get",
         mode: "cors",
         headers: {
-          authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
         },
       });
       dispatch(
         setNotificationModal({
           value: !notificationDisplay,
           notifications: [],
-        }),
+        })
       );
     } else {
       dispatch(setNotificationModal({ value: !notificationDisplay }));
@@ -60,9 +60,9 @@ export default function Navbar() {
             method: "get",
             mode: "cors",
             headers: {
-              authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+              authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
             },
-          },
+          }
         );
         const data = await res.json();
         if (data.status == "ok") {
@@ -70,7 +70,7 @@ export default function Navbar() {
             setNotificationModal({
               value: false,
               notifications: data.notifications || [],
-            }),
+            })
           );
         }
       } catch (err) {
@@ -81,7 +81,7 @@ export default function Navbar() {
   }, []);
 
   const logout = () => {
-    cookies.remove(AUTH_TOKEN);
+    cookies.remove(AUTH_TOKEN_NAME);
     navigate("/login");
   };
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Cookies from "universal-cookie";
 
-import { AUTH_TOKEN } from "../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../lib/config";
 
 export function useLike(initialState: boolean, reviewID: string) {
   const [hasLiked, setHasLiked] = useState(initialState);
@@ -18,10 +18,10 @@ export function useLike(initialState: boolean, reviewID: string) {
         body: JSON.stringify(data),
         mode: "cors",
         headers: {
-          authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
           "content-type": "application/json",
         },
-      },
+      }
     );
     const message = await response.json();
     if (message.status == "ok") {

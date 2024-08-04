@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Cookies from "universal-cookie";
 import Typography from "@mui/material/Typography";
 
-import { AUTH_TOKEN } from "../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../lib/config";
 import ReviewModal from "../components/modal/ReviewModal";
 import Post from "../components/review/Post";
 import useFetch from "../hooks/useFetch";
@@ -25,7 +25,7 @@ export default function Bookmarks() {
       const options: FetchOptionType = {
         method: "get",
         headers: {
-          authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
         },
       };
       const data = await fetchHook(

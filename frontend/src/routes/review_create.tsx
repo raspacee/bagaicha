@@ -5,7 +5,7 @@ import { IoIosRemoveCircleOutline } from "@react-icons/all-files/io/IoIosRemoveC
 import { ReviewSchema, ReviewSchemaType } from "../lib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Cookies from "universal-cookie";
-import { AUTH_TOKEN } from "../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../lib/config";
 import { useNavigate } from "react-router-dom";
 
 interface Place {
@@ -56,7 +56,7 @@ export default function CreateReview() {
   const onSubmit = async (data: any) => {
     if (placeInfo == null) {
       setPlaceError(
-        "You can only choose places that show in the suggestion box. Please choose from that only.",
+        "You can only choose places that show in the suggestion box. Please choose from that only."
       );
     } else {
       setPlaceError(null);
@@ -92,7 +92,7 @@ export default function CreateReview() {
           body: formData,
           mode: "cors",
           headers: {
-            authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+            authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
           },
         });
         const result = await response.json();
@@ -109,7 +109,7 @@ export default function CreateReview() {
 
   const getSuggestions = async (query: string) => {
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${query}&format=json&countrycodes=NP`,
+      `https://nominatim.openstreetmap.org/search?q=${query}&format=json&countrycodes=NP`
     );
     const result = await response.json();
     const sugges: Place[] = [];

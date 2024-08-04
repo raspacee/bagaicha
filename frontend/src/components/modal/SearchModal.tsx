@@ -5,7 +5,7 @@ import Divider from "@mui/material/Divider";
 
 import { useAppSelector, useAppDispatch } from "../../hooks";
 import { setSearchModal } from "../../slice/modalSlice";
-import { AUTH_TOKEN } from "../../lib/cookie_names";
+import { AUTH_TOKEN_NAME } from "../../lib/config";
 
 export default function SearchModal() {
   const display = useAppSelector((state) => state.modal.searchModal.display);
@@ -22,9 +22,9 @@ export default function SearchModal() {
           `${import.meta.env.VITE_API_URL}/search/history`,
           {
             headers: {
-              authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+              authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
             },
-          },
+          }
         );
         if (!res.ok) {
           throw new Error();
@@ -51,9 +51,9 @@ export default function SearchModal() {
           {
             method: "delete",
             headers: {
-              authorization: `Bearer ${cookies.get(AUTH_TOKEN)}`,
+              authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
             },
-          },
+          }
         );
         if (!res.ok) {
           throw new Error();
