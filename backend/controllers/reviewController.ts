@@ -119,25 +119,13 @@ const get_handler = async (req: Request, res: Response, next: NextFunction) => {
     const sort = req.query.sort;
     const lat = req.query.lat as string;
     const long = req.query.long as string;
-    const reviews: any[] | null = await Review.get_feed(
-      req.jwtUserData!.userId
-    );
-    if (reviews == null) {
-      return res.status(404).send({
-        status: "ok",
-        reviews,
-      });
-    }
-
-    if (sort == "recent") {
-      return res.status(200).send({
-        status: "ok",
-        reviews,
-      });
+    const posts = await Review.get_feed(req.jwtUserData!.userId);
+    if (posts.length == 0 || sort == "recent") {
+      return res.json(posts);
     }
 
     /* Feed algorithm */
-    for (let i = 0; i < reviews.length; i++) {
+    for (let i = 0; i < posts.length; i++) {
       let geo_point: number;
       if (req.query.lat && req.query.long) {
         /* Calculating distance between the points and converting it to meters */
@@ -145,31 +133,26 @@ const get_handler = async (req: Request, res: Response, next: NextFunction) => {
           haversine(
             parseFloat(lat),
             parseFloat(long),
-            parseFloat(reviews[i].lat),
-            parseFloat(reviews[i].long)
+            posts[i].place_lat,
+            posts[i].place_long
           ) * 1000;
         geo_point = 10000 - diff_dist;
       } else {
         /* If user does not provide location, random geo point is calculated */
         geo_point = Math.floor(Math.random() * 4001 + 2000);
       }
-      const review_datetime = DateTime.fromISO(
-        reviews[i].created_at.toISOString()
-      );
+      const review_datetime = DateTime.fromISO(posts[i].created_at);
       const curr_datetime = DateTime.fromISO(DateTime.local().toISO());
       const diff = curr_datetime.diff(review_datetime);
       const time_passed_mins = diff.toObject().milliseconds! / 1000 / 60;
-      const score = (reviews[i].like_count * geo_point) / time_passed_mins;
-      reviews[i].score = score;
+      const score = (posts[i].like_count * geo_point) / time_passed_mins;
+      posts[i].score = score;
     }
-    reviews.sort((a, b) => {
+    posts.sort((a, b) => {
       if (a.score > b.score) return -1;
       else return 1;
     });
-    return res.status(200).send({
-      status: "ok",
-      reviews,
-    });
+    return res.json(posts);
   } catch (err: any) {
     console.log(err);
     return res.status(500).send({
