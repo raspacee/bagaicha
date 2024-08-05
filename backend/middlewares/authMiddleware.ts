@@ -5,7 +5,7 @@ import { JwtUserData } from "../types";
 declare global {
   namespace Express {
     interface Request {
-      jwtUserData: JwtUserData;
+      jwtUserData?: JwtUserData;
     }
   }
 }

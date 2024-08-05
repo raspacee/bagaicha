@@ -8,13 +8,13 @@ import Notification, { NotificationObject } from "../models/notificationModel";
 const get_review_comments = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   console.log("Hitting get_review_comments");
   try {
     const comments = await Comment.get_comments(
       req.params.review_id as string,
-      res.locals.user.user_id,
+      res.locals.user.user_id
     );
     return res.status(200).send({
       status: "ok",
@@ -32,25 +32,26 @@ const get_review_comments = async (
 const create_comment = async (req: Request, res: Response) => {
   try {
     const review_id = req.params.review_id;
-    const { comment_body } = req.body;
+    const { commentBody } = req.body;
+    const userId = req.jwtUserData!.userId;
 
     const comment = await Comment.create_comment(
       review_id,
-      res.locals.user.user_id,
-      comment_body,
-      null,
+      userId,
+      commentBody,
+      null
     );
     const victim = await pool.query(
       `select author_id from review where id = $1`,
-      [review_id],
+      [review_id]
     );
-    if (victim.rows[0].author_id != res.locals.user.user_id) {
+    if (victim.rows[0].author_id != userId) {
       await Notification.create_notification(
         res.locals.user.user_id,
         victim.rows[0].author_id,
         NotificationObject.Review,
         review_id,
-        "comment",
+        "comment"
       );
     }
     return res.status(201).send({
@@ -69,7 +70,7 @@ const create_comment = async (req: Request, res: Response) => {
 const reply_comment = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const comment_id = req.params.comment_id;
@@ -80,7 +81,7 @@ const reply_comment = async (
       review_id,
       res.locals.user.user_id,
       comment_body,
-      parseInt(comment_id),
+      parseInt(comment_id)
     );
     return res.status(201).send({
       status: "ok",
@@ -101,7 +102,7 @@ const get_replies = async (req: Request, res: Response, next: NextFunction) => {
 
     const replies = await Comment.get_replies(
       parseInt(comment_id),
-      res.locals.user.user_id,
+      res.locals.user.user_id
     );
 
     return res.status(200).send({
@@ -119,7 +120,7 @@ const get_replies = async (req: Request, res: Response, next: NextFunction) => {
 const like_comment = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     /* Check if the user has liked the review already */
@@ -127,13 +128,13 @@ const like_comment = async (
     console.log(review_id, comment_id);
     const has_liked = await Comment.user_has_liked_comment(
       res.locals.user.user_id,
-      parseInt(comment_id),
+      parseInt(comment_id)
     );
     if (!has_liked) {
       await CommentLike.create_like(res.locals.user.user_id, comment_id);
       const victim = await pool.query(
         `select author_id from review_comment where id = $1`,
-        [comment_id],
+        [comment_id]
       );
       if (victim.rows[0].author_id != res.locals.user.user_id) {
         await Notification.create_notification(
@@ -141,7 +142,7 @@ const like_comment = async (
           victim.rows[0].author_id,
           NotificationObject.Comment,
           comment_id,
-          "like",
+          "like"
         );
       }
       return res.status(200).send({

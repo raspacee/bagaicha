@@ -8,7 +8,7 @@ const get_notifications = async (
 ) => {
   try {
     const notifications = await Notification.get_notifications(
-      req.jwtUserData.userId
+      req.jwtUserData!.userId
     );
     return res.status(200).json(notifications);
   } catch (err) {
@@ -25,7 +25,7 @@ const read_notification = async (
   next: NextFunction
 ) => {
   try {
-    await Notification.read_notification(req.jwtUserData.userId);
+    await Notification.read_notification(req.jwtUserData!.userId);
     return res.json();
   } catch (err) {
     return res.status(500).send({

@@ -8,6 +8,7 @@ import Place from "../models/placeModel";
 import Review from "../models/reviewModel";
 import Like from "../models/likeModel";
 import ReviewBookmark from "../models/reviewBookmarkModel";
+import Comment from "../models/commentModel";
 import Notification, { NotificationObject } from "../models/notificationModel";
 import { pool } from "../db";
 
@@ -59,7 +60,7 @@ const create_handler = async (
     const created_at = new Date().toISOString();
     const review = await Review.create_review(
       review_uuid,
-      req.jwtUserData.userId,
+      req.jwtUserData!.userId,
       comment,
       rating,
       picture_upload.secure_url,
@@ -118,7 +119,9 @@ const get_handler = async (req: Request, res: Response, next: NextFunction) => {
     const sort = req.query.sort;
     const lat = req.query.lat as string;
     const long = req.query.long as string;
-    const reviews: any[] | null = await Review.get_feed(req.jwtUserData.userId);
+    const reviews: any[] | null = await Review.get_feed(
+      req.jwtUserData!.userId
+    );
     if (reviews == null) {
       return res.status(404).send({
         status: "ok",
@@ -181,7 +184,7 @@ const like_review = async (req: Request, res: Response, next: NextFunction) => {
   try {
     /* Check if the user has liked the review already */
     const { review_id } = req.body;
-    const userId = req.jwtUserData.userId;
+    const userId = req.jwtUserData!.userId;
     const has_liked = await Like.user_has_liked_review(userId, review_id);
     if (!has_liked) {
       await Like.create_like(userId, review_id);
@@ -272,12 +275,37 @@ const get_bookmarks = async (
   }
 };
 
+const getSinglePost = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const postId = req.params.postId;
+    const post = await Review.getPostById(
+      postId,
+      req.jwtUserData?.userId || null
+    );
+    if (post == null) res.status(404).send();
+    const comments = await Comment.getCommentsOfPost(
+      postId,
+      req.jwtUserData?.userId || null
+    );
+    post!.comments = comments;
+    return res.json(post);
+  } catch (err) {
+    console.error(err);
+    return next("Error while fetching post by id");
+  }
+};
+
 const exporter = {
   create_handler,
   get_handler,
   like_review,
   bookmark_handler,
   get_bookmarks,
+  getSinglePost,
 };
 
 export default exporter;

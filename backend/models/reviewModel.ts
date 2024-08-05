@@ -1,5 +1,6 @@
 import { pool } from "../db/index";
 import { Distances } from "../lib/enums";
+import { PostWithComments } from "../types";
 
 const create_review = async (
   id: string,
@@ -77,11 +78,57 @@ where u.email = $2
   return result.rows;
 };
 
+const getPostById = async (
+  postId: string,
+  userId: string | null
+): Promise<PostWithComments | null> => {
+  const text = `
+SELECT 
+  r.*, 
+  u.first_name || ' ' || u.last_name AS author_name, 
+  u.profile_picture_url AS author_profile_picture_url, 
+  u.email AS author_email, 
+  pl.lat AS place_lat, 
+  pl.long AS place_long, 
+  pl.name AS place_name, 
+  pl.openmaps_place_id AS place_openmaps_place_id,
+  (
+    SELECT EXISTS (
+      SELECT 1 
+      FROM review_like AS l 
+      WHERE l.liker_id = $1 
+        AND l.review_id = r.id 
+      LIMIT 1
+    )
+  ) AS user_has_liked,
+  (
+    SELECT EXISTS (
+      SELECT 1 
+      FROM review_bookmark AS b 
+      WHERE b.user_id = $1 
+        AND b.review_id = r.id 
+      LIMIT 1
+    )
+  ) AS user_has_bookmarked
+FROM 
+  review AS r 
+  INNER JOIN user_ AS u ON r.author_id = u.id
+  INNER JOIN place AS pl ON r.place_id = pl.id 
+WHERE 
+  r.id = $2;
+  `;
+  const values = [userId, postId];
+  const result = await pool.query(text, values);
+  if (result.rowCount == 0) return null;
+  return result.rows[0];
+};
+
 const exporter = {
   create_review,
   get_feed,
   search_reviews,
   get_reviews_by_email,
+  getPostById,
 };
 
 export default exporter;

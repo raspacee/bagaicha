@@ -1,4 +1,5 @@
 import { pool } from "../db";
+import { Comment } from "../types";
 
 const get_comments = async (review_id: string, user_id: string) => {
   const text = `
@@ -23,7 +24,7 @@ const create_comment = async (
   review_id: string,
   author_id: string,
   comment_body: string,
-  reply_to: number | null,
+  reply_to: number | null
 ) => {
   const text = `
 with inserted as (
@@ -70,11 +71,50 @@ const user_has_liked_comment = async (user_id: string, comment_id: number) => {
   return true;
 };
 
+const getCommentsOfPost = async (
+  postId: string,
+  userId: string | null
+): Promise<Comment[]> => {
+  const text = `
+SELECT 
+  rc.body, 
+  rc.author_id, 
+  rc.review_id,
+  rc.id, 
+  rc.like_count, 
+  u.first_name || ' ' || u.last_name AS author_name, 
+  u.email AS author_email, 
+  u.profile_picture_url AS author_picture_url,
+  (
+    SELECT EXISTS (
+      SELECT 1 
+      FROM comment_like 
+      WHERE liker_id = $2 
+        AND comment_id = rc.id
+    )
+  ) AS has_liked_comment
+FROM 
+  review_comment AS rc
+  INNER JOIN user_ AS u ON rc.author_id = u.id
+  INNER JOIN review AS r ON rc.review_id = r.id
+WHERE 
+  rc.reply_to IS NULL 
+  AND rc.review_id = $1
+ORDER BY 
+  rc.created_at DESC;
+`;
+  const values = [postId, userId];
+  const result = await pool.query(text, values);
+  if (result.rowCount == 0) return [];
+  return result.rows;
+};
+
 const exporter = {
   get_comments,
   create_comment,
   get_replies,
   user_has_liked_comment,
+  getCommentsOfPost,
 };
 
 export default exporter;

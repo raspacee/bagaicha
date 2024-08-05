@@ -34,7 +34,7 @@ const getMyUserData = async (
   next: NextFunction
 ) => {
   try {
-    const user = await User.getDataById(req.jwtUserData.userId);
+    const user = await User.getDataById(req.jwtUserData!.userId);
     return res.json(user);
   } catch (err) {
     return next(err);
