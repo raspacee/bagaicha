@@ -100,28 +100,31 @@ type Comment = {
 };
 
 type PostWithComments = Post & {
-  author_name: string;
-  author_profile_picture_url: string;
-  author_email: string;
-  place_lat: number;
-  place_long: number;
-  place_name: string;
-  place_openmaps_place_id: string;
-  user_has_liked: boolean;
-  user_has_bookmarked: boolean;
-
   comments: Comment[];
 };
 
 type Post = {
   id: string;
   author_id: string;
+  author_name: string;
+  author_profile_picture_url: string;
+  author_email: string;
   body: string;
   picture: string;
   like_count: number;
   place_id: string;
   created_at: string;
+  place_lat: number;
+  place_long: number;
+  place_name: string;
+  place_openmaps_place_id: string;
+  user_has_liked: boolean;
+  user_has_bookmarked: boolean;
   rating: number;
+};
+
+type FeedPost = Post & {
+  score: number;
 };
 
 export type {
@@ -132,6 +135,7 @@ export type {
   FilterType,
   AddPlaceType,
   ModalType,
+  FeedPost,
   Post,
   PostWithComments,
   Comment,

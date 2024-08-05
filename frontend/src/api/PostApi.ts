@@ -1,19 +1,25 @@
 import { CommentForm } from "@/components/review/PostComments";
 import { AUTH_TOKEN_NAME } from "@/lib/config";
-import type { LocationType, Post, PostWithComments } from "@/lib/types";
+import type {
+  FeedPost,
+  LocationType,
+  Post,
+  PostWithComments,
+} from "@/lib/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { toast } from "sonner";
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies(null, { path: "/" });
 
 const BASE_API_URL = import.meta.env.VITE_API_URL;
 
-const useFetchMyFeed = () => {
+const useFetchMyFeed = (sortBy: string, location: LocationType) => {
   const fetchFeedRequest = async (
     sortBy: string,
     location: LocationType
-  ): Promise<Post[]> => {
+  ): Promise<FeedPost[]> => {
     const url = `${BASE_API_URL}/review?lat=${location.lat}&long=${location.long}&sort=${sortBy}`;
     const response = await fetch(url, {
       mode: "cors",
@@ -26,6 +32,21 @@ const useFetchMyFeed = () => {
     }
     return response.json();
   };
+
+  const {
+    data: posts,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["reviews", sortBy],
+    queryFn: () => fetchFeedRequest(sortBy, location),
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { posts, isLoading };
 };
 
 const useFetchPostById = (postId: string) => {
@@ -53,6 +74,10 @@ const useFetchPostById = (postId: string) => {
     enabled: enabled,
   });
 
+  if (error) {
+    toast.error(error.message);
+  }
+
   return { post, isLoading, enabled, setEnabled };
 };
 
@@ -72,7 +97,7 @@ const useCreateComment = () => {
       }
     );
     if (!response.ok) {
-      throw new Error("Error creating a comment");
+      throw new Error("Error while creating comment");
     }
   };
 
@@ -83,7 +108,12 @@ const useCreateComment = () => {
     isSuccess,
   } = useMutation({
     mutationFn: createCommentRequest,
+    retry: 2,
   });
+
+  if (error) {
+    toast.error(error.message);
+  }
 
   return {
     createComment,

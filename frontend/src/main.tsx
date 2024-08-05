@@ -27,6 +27,7 @@ import { store } from "./store";
 import { Provider } from "react-redux";
 import MainLayout from "./layouts/MainLayout";
 import AuthenticatedRoute from "./auth/AuthenticatedRoute";
+import { Toaster } from "./components/ui/sonner";
 
 const router = createBrowserRouter([
   {
@@ -139,6 +140,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
         <RouterProvider router={router} />
+        <Toaster richColors />
       </Provider>
     </QueryClientProvider>
   </React.StrictMode>

@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useFetchMyFeed } from "@/api/PostApi";
 
 export default function FeedPage() {
   const dispatch = useAppDispatch();
@@ -24,15 +25,11 @@ export default function FeedPage() {
   const location = useAppSelector((state) => state.location);
   const sortBy = searchParams.get("sort") || "trending";
 
-  const {
-    data: reviews,
-    isLoading,
-    isError,
-    isSuccess,
-  } = useQuery({
-    queryKey: ["reviews", sortBy],
-    queryFn: () => fetchReviews(sortBy, location),
-  });
+  const { posts, isLoading } = useFetchMyFeed(sortBy, location);
+
+  if (isLoading) {
+    return <h1>Loading...</h1>;
+  }
 
   return (
     <div className="flex flex-col md:flex-row">
@@ -71,11 +68,8 @@ export default function FeedPage() {
             </div>
           </>
         )}
-        {reviews &&
-          reviews.map((review: any) => (
-            <Post key={review.id} review={review} />
-          ))}
-        {isSuccess && reviews == null && (
+        {posts && posts.map((post) => <Post key={post.id} post={post} />)}
+        {posts && posts.length == 0 && (
           <div className="card lg:card-side bg-base-100 shadow-xl">
             <div className="h-[10rem] w-full flex justify-center items-center">
               <p className="text-xl font-bold">
@@ -84,7 +78,6 @@ export default function FeedPage() {
             </div>
           </div>
         )}
-        {isError && <div>Error while fetching posts</div>}
       </div>
       <div className="bg-white rounded-md mt-3 h-fit px-4 py-3 top-4 mr-2 shadow-lg">
         <p className="font-medium text-gray-700">
