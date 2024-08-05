@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./global.css";
-import Feed from "./routes/feed";
+import FeedPage from "./routes/FeedPage";
 import UserProfile from "./routes/user_profile";
 import Login from "./routes/login";
 import Signup from "./routes/signup";
@@ -45,7 +45,7 @@ const router = createBrowserRouter([
         path: "feed",
         element: (
           <MainLayout>
-            <Feed />
+            <FeedPage />
           </MainLayout>
         ),
       },

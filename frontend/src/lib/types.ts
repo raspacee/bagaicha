@@ -64,7 +64,7 @@ type FilterType = {
     coffee: boolean;
   };
   distance: {
-    distancePicked: Distances;
+    distancePicked: any;
   };
 };
 
@@ -86,6 +86,44 @@ type Notification = {
   created_at: string;
 };
 
+type Comment = {
+  id: number;
+  review_id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+  like_count: string;
+  author_name: string;
+  author_email: string;
+  author_picture_url: string;
+  has_liked_comment: boolean;
+};
+
+type PostWithComments = Post & {
+  author_name: string;
+  author_profile_picture_url: string;
+  author_email: string;
+  place_lat: number;
+  place_long: number;
+  place_name: string;
+  place_openmaps_place_id: string;
+  user_has_liked: boolean;
+  user_has_bookmarked: boolean;
+
+  comments: Comment[];
+};
+
+type Post = {
+  id: string;
+  author_id: string;
+  body: string;
+  picture: string;
+  like_count: number;
+  place_id: string;
+  created_at: string;
+  rating: number;
+};
+
 export type {
   UserInterface,
   LocationType,
@@ -94,4 +132,7 @@ export type {
   FilterType,
   AddPlaceType,
   ModalType,
+  Post,
+  PostWithComments,
+  Comment,
 };

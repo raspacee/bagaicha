@@ -1,6 +1,5 @@
 import FavoriteIcon from "@mui/icons-material/Favorite";
 
-import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Avatar from "@mui/material/Avatar";
@@ -10,54 +9,57 @@ import { setPostCreateModal } from "../slice/modalSlice";
 import Post from "../components/review/Post";
 import PostLoader from "../components/loaders/PostLoader";
 import { fetchReviews } from "../api/reviewApi";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-export default function Feed() {
+export default function FeedPage() {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "trending");
   const location = useAppSelector((state) => state.location);
+  const sortBy = searchParams.get("sort") || "trending";
 
   const {
     data: reviews,
     isLoading,
     isError,
     isSuccess,
-    error,
   } = useQuery({
     queryKey: ["reviews", sortBy],
     queryFn: () => fetchReviews(sortBy, location),
   });
 
   return (
-    <div className="grid grid-cols-3 gap-1">
-      <div className="col-span-2 px-4">
-        <div className="bg-white w-full h-fit px-6 py-3 mt-3 border rounded-md border-slate-200 flex items-center shadow-xl">
+    <div className="flex flex-col md:flex-row">
+      <div className="px-1 md:px-4">
+        <div className="bg-white h-fit px-6 py-3 mt-3 border rounded-md border-slate-200 flex items-center shadow-xl">
           <Avatar alt={user.first_name} src={user.profile_picture_url} />
           <div className="w-full ml-3">
             <input
-              className="w-full border bg-gray-200 border-gray-200 rounded-full cursor-pointer"
+              className="w-full border bg-gray-200 border-gray-200 rounded-full cursor-pointer px-3 py-2"
               placeholder="Post a review"
               onClick={() => dispatch(setPostCreateModal({ value: true }))}
             />
           </div>
         </div>
         <div className="w-full flex justify-end my-1 items-center">
-          <label htmlFor="sort-by" className="mr-2 text-sm">
-            Sort by
-          </label>
-          <select
-            id="sort-by"
-            className="select select-bordered w-[8rem] max-w-xs"
-            onChange={(e) => {
-              setSearchParams({ sort: e.target.value });
-              setSortBy(e.target.value);
-            }}
-            value={sortBy}
+          <Select
+            onValueChange={(value) => setSearchParams({ sort: value })}
+            value={searchParams.get("sort") || "trending"}
           >
-            <option value="trending">Trending</option>
-            <option value="recent">Recent</option>
-          </select>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort Posts" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="trending">Trending</SelectItem>
+              <SelectItem value="recent">Recent</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         {isLoading && (
           <>
@@ -69,8 +71,7 @@ export default function Feed() {
             </div>
           </>
         )}
-        {isSuccess &&
-          reviews &&
+        {reviews &&
           reviews.map((review: any) => (
             <Post key={review.id} review={review} />
           ))}
@@ -83,9 +84,9 @@ export default function Feed() {
             </div>
           </div>
         )}
-        {isError && <div>Something went wrong, {error.message}</div>}
+        {isError && <div>Error while fetching posts</div>}
       </div>
-      <div className="col-span-1  bg-white rounded-md mt-3 h-fit px-4 py-3 top-4 mr-2 shadow-lg">
+      <div className="bg-white rounded-md mt-3 h-fit px-4 py-3 top-4 mr-2 shadow-lg">
         <p className="font-medium text-gray-700">
           Made by <a href="https://github.com/raspacee">raspace</a> with{" "}
           <FavoriteIcon style={{ color: "red" }} />

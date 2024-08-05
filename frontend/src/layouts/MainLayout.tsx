@@ -12,11 +12,11 @@ const MainLayout = ({ children }: Props) => {
   return (
     <div className="h-fit min-h-screen bg-gray-200">
       <Navbar />
-      <main className="grid grid-cols-4 gap-1">
-        <aside className="col-span-1">
+      <main className="flex gap-3">
+        <aside className="hidden md:block">
           <SidebarLeft />
         </aside>
-        <div className="col-span-3">{children}</div>
+        <div className="flex-1">{children}</div>
       </main>
       <ImgModal />
       <PostCreateModal />

@@ -10,8 +10,6 @@ import PlaceIcon from "@mui/icons-material/Place";
 import BookmarksIcon from "@mui/icons-material/Bookmarks";
 import AssistantIcon from "@mui/icons-material/Assistant";
 
-import { UserInterface } from "../../lib/types";
-import { useAppSelector } from "../../hooks";
 import SidebarItem from "./SidebarItem";
 import { useGetMyUserData } from "../../api/UserApi";
 
@@ -27,7 +25,7 @@ export default function SidebarLeft() {
   }
 
   return (
-    <div className="bg-white w-full py-2 px-4 mt-3 rounded-md sticky top-4 ml-2 shadow-xl border border-slate-900">
+    <div className="bg-white w-full py-2 px-4 mt-3 rounded-md sticky top-4 ml-2 shadow-xl border md:w-[20rem]">
       <SidebarItem
         text="Profile"
         link={`/user/${myUser.email}`}

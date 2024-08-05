@@ -3,20 +3,18 @@ import { AiFillHeart } from "@react-icons/all-files/ai/AiFillHeart";
 import { BsDot } from "@react-icons/all-files/bs/BsDot";
 import { BsBookmarkDash } from "@react-icons/all-files/bs/BsBookmarkDash";
 import { BsBookmarkDashFill } from "@react-icons/all-files/bs/BsBookmarkDashFill";
-import ForumIcon from "@mui/icons-material/Forum";
 
 import { Link } from "react-router-dom";
 import { DateTime } from "luxon";
 import { motion } from "framer-motion";
-import Tooltip from "@mui/material/Tooltip";
 
 import { haversine } from "../../lib/helpers";
 import { useAppSelector, useAppDispatch } from "../../hooks";
-import { setImgModal, openReviewModal } from "../../slice/modalSlice";
+import { setImgModal } from "../../slice/modalSlice";
 import { useBookmark } from "../../hooks/useBookmark";
 import { useLike } from "../../hooks/useLike";
-import { useRef } from "react";
-import ReviewModal from "../modal/ReviewModal";
+import { MapPinHouse } from "lucide-react";
+import PostComments from "./PostComments";
 
 export default function Post({ review }: { review: any }) {
   const location = useAppSelector((state) => state.location);
@@ -28,99 +26,74 @@ export default function Post({ review }: { review: any }) {
     review.user_has_bookmarked_review,
     review.id
   );
-  const modalRef = useRef<HTMLDialogElement>(null);
 
   const date = DateTime.fromISO(review.created_at);
 
-  const openReview = (
-    reviewId: string,
-    reviewImageUrl: string,
-    authorName: string,
-    authorImageUrl: string,
-    createdAt: string,
-    reviewBody: string,
-    authorEmail: string,
-    placeName: string,
-    placeId: string,
-    rating: number
-  ) => {
-    dispatch(
-      openReviewModal({
-        reviewId,
-        reviewImageUrl,
-        authorName,
-        authorImageUrl,
-        createdAt,
-        reviewBody,
-        authorEmail,
-        placeName,
-        placeId,
-        rating,
-      })
-    );
-  };
-
   return (
-    <div className="bg-white w-full h-fit px-6 py-3 mb-3 border rounded-md border-slate-200">
-      <div className="flex items-center">
-        <img
-          src={review.profile_picture_url}
-          alt="User profile picture"
-          className="rounded-full h-11 w-11 object-cover"
-          width="100"
-          height="100"
-        />
-        <Link to={`/user/${review.email}`}>
-          <p className="ml-2">{`${review.first_name} ${review.last_name}`}</p>
-        </Link>
-        <BsDot className="ml-0.5" size={20} />
-        <span className="ml-0.5 font-normal text-sm text-gray-500">
-          {" "}
-          {date.toRelative()}
-        </span>
-        <BsDot className="ml-0.5" size={20} />
-        <span className="ml-0.5 text-sm font-normal text-gray-500">{`${review.first_name} rated the food ${review.rating} star`}</span>
-      </div>{" "}
-      <div className="border-t mt-2 pt-1 flex items-center">
-        at{" "}
+    <div className="bg-white w-full h-fit px-1 md:px-6 py-3 mb-3 border rounded-md border-slate-200">
+      <div className="flex flex-col md:flex-row justify-between md:items-center">
+        <div className="flex items-center">
+          <img
+            src={review.profile_picture_url}
+            alt="User profile picture"
+            className="rounded-full h-11 w-11 object-cover"
+            width="100"
+            height="100"
+          />
+          <Link to={`/user/${review.email}`}>
+            <p className="ml-2">{`${review.first_name} ${review.last_name}`}</p>
+          </Link>
+        </div>
+        <div className="flex">
+          <div className="flex">
+            <span className="ml-0.5 font-normal text-sm text-gray-500">
+              {date.toRelative()}
+            </span>
+          </div>
+          <div className="flex">
+            <BsDot className="ml-0.5" size={20} />
+            <span className="ml-0.5 text-sm font-normal text-gray-500">{`${review.first_name} rated the food ${review.rating} star`}</span>
+          </div>
+        </div>
+      </div>
+      <div className="border-t mt-2 pt-1 flex md:items-center flex-col md:flex-row gap-3">
         <Link to={`/place/${review.place_id}`}>
-          <span className="font-semibold ml-1">{review.name}</span>
+          at <span className="font-semibold">{review.name}</span>
         </Link>
         {isLocationGranted && (
-          <>
-            <BsDot className="ml-0.5" size={20} />
+          <div className="flex">
+            <BsDot className="hidden md:block" size={20} />
+            <MapPinHouse className="block md:hidden" />
             <span className="ml-0.5 text-sm font-normal text-gray-500">{`${haversine(
               location.lat,
               location.long,
               review.lat,
               review.long
             )} km away from you`}</span>
-          </>
+          </div>
         )}
       </div>
-      <div className="mt-2">
-        <Tooltip title="Open image">
-          <img
-            src={`${review.picture}`}
-            alt="Food picture"
-            onClick={() =>
-              dispatch(
-                setImgModal({
-                  value: true,
-                  src: review.picture,
-                })
-              )
-            }
-            className="w-4/5 h-[20rem] object-cover cursor-pointer"
-          />
-        </Tooltip>
+      <div className="mt-2 flex">
+        <img
+          src={`${review.picture}`}
+          alt="Food picture"
+          onClick={() =>
+            dispatch(
+              setImgModal({
+                value: true,
+                src: review.picture,
+              })
+            )
+          }
+          className="flex-1 h-[22rem] object-cover cursor-pointer"
+        />
       </div>
       <div className="my-3">
         <p>{review.body}</p>
       </div>
       <div className="border-t-2 my-2"></div>
-      <div className="h-fit flex items-center">
-        <div className="mx-2">
+      <div className="flex items-center gap-3">
+        <div className="">
           {hasLiked ? (
             <motion.div
               initial={{ scale: 0 }}
@@ -145,29 +118,10 @@ export default function Post({ review }: { review: any }) {
             />
           )}
         </div>
-        <div className="mx-2">
-          <span
-            onClick={() => {
-              modalRef.current?.showModal();
-              openReview(
-                review.id,
-                review.picture,
-                review.first_name + " " + review.last_name,
-                review.profile_picture_url,
-                date.toRelative()!,
-                review.body,
-                review.email,
-                review.name,
-                review.place_id,
-                parseInt(review.rating)
-              );
-            }}
-            className="cursor-pointer"
-          >
-            <ForumIcon style={{ fontSize: 25 }} />
-          </span>
+        <div className="">
+          <PostComments postId={review.id as string} />
         </div>
-        <div className="mx-2">
+        <div className="">
           {hasBookmarked ? (
             <motion.div
               initial={{ scale: 0 }}
@@ -195,11 +149,10 @@ export default function Post({ review }: { review: any }) {
       <div>
         {review.like_count != 0 && (
           <span className="text-sm font-medium ml-2 text-gray-800 select-none">
-            {`${review.like_count} people love this review`}
+            {`${review.like_count} people love this post`}
           </span>
         )}
       </div>
-      <ReviewModal ref={modalRef} />
     </div>
   );
 }
