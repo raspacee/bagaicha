@@ -1,83 +1,49 @@
 import path from "path";
 import { DateTime } from "luxon";
 import { NextFunction, Request, Response } from "express";
-import { v4 as uuidv4 } from "uuid";
 import { v2 as cloudinary } from "cloudinary";
 
-import Place from "../models/placeModel";
-import Review from "../models/reviewModel";
+import Place from "../models/place.model";
+import PostModel from "../models/post.model";
 import Like from "../models/likeModel";
 import ReviewBookmark from "../models/reviewBookmarkModel";
 import Comment from "../models/commentModel";
 import Notification, { NotificationObject } from "../models/notificationModel";
 import { pool } from "../db";
+import { CreatePostForm, Post } from "../types";
 
-/* create a review */
-const create_handler = async (
+/* create a post */
+const createMyPost = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const {
-      comment,
-      place_id,
-      rating,
-      place_name,
-      place_lat,
-      place_long,
-      foods_ate,
-      display_name,
-    } = req.body;
-    const openmaps_place_id = place_id;
+    const { placeName, placeId, body, rating }: CreatePostForm = req.body;
 
-    /* if place is not created, create it */
-    const place = await Place.get_place_by_id(openmaps_place_id);
-    let place_uuid;
+    const place = await Place.getPlacebyId(placeId);
     if (!place) {
-      place_uuid = uuidv4();
-      await Place.create_place(
-        place_uuid,
-        openmaps_place_id,
-        place_name,
-        place_lat,
-        place_long,
-        display_name
-      );
-    } else {
-      place_uuid = place.id;
+      return res.status(400).json({
+        message: "Bad placeId",
+      });
     }
 
-    /* upload the image */
-    if (!req.file?.path) {
-      throw new Error("Picture pathname is missing");
-    }
-    const picture_path = path.join(req.file!.path);
-    const picture_upload = await cloudinary.uploader.upload(picture_path);
+    /* Upload the image */
+    const imageUrl = await uploadImage(req.file as Express.Multer.File);
 
-    /* create the review */
-    const review_uuid = uuidv4();
-    const created_at = new Date().toISOString();
-    const review = await Review.create_review(
-      review_uuid,
+    /* create the post */
+    const createdPost = await PostModel.createPost(
       req.jwtUserData!.userId,
-      comment,
+      body,
       rating,
-      picture_upload.secure_url,
-      place_uuid,
-      [],
-      created_at
+      imageUrl,
+      placeId
     );
-    return res.status(201).json({
-      status: "ok",
-      message: "Your review was posted successfully",
-      review: review.rows[0],
-    });
+    return res.status(201).json(createdPost);
   } catch (err) {
     console.error(err);
     return res.status(500).json({
-      status: "error",
-      message: "Something went wrong in the server",
+      message: "Error while creating a post",
     });
   }
 };
@@ -114,12 +80,12 @@ export const place_features = [
   { key: "affordable", value: 4 },
 ];
 
-const get_handler = async (req: Request, res: Response, next: NextFunction) => {
+const getFeed = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const sort = req.query.sort;
     const lat = req.query.lat as string;
     const long = req.query.long as string;
-    const posts = await Review.get_feed(req.jwtUserData!.userId);
+    const posts = await PostModel.getFeedPosts(req.jwtUserData!.userId);
     if (posts.length == 0 || sort == "recent") {
       return res.json(posts);
     }
@@ -133,19 +99,19 @@ const get_handler = async (req: Request, res: Response, next: NextFunction) => {
           haversine(
             parseFloat(lat),
             parseFloat(long),
-            posts[i].place_lat,
-            posts[i].place_long
+            posts[i].lat,
+            posts[i].lon
           ) * 1000;
         geo_point = 10000 - diff_dist;
       } else {
         /* If user does not provide location, random geo point is calculated */
         geo_point = Math.floor(Math.random() * 4001 + 2000);
       }
-      const review_datetime = DateTime.fromISO(posts[i].created_at);
+      const review_datetime = DateTime.fromISO(posts[i].createdAt);
       const curr_datetime = DateTime.fromISO(DateTime.local().toISO());
       const diff = curr_datetime.diff(review_datetime);
       const time_passed_mins = diff.toObject().milliseconds! / 1000 / 60;
-      const score = (posts[i].like_count * geo_point) / time_passed_mins;
+      const score = (posts[i].likeCount * geo_point) / time_passed_mins;
       posts[i].score = score;
     }
     posts.sort((a, b) => {
@@ -265,7 +231,7 @@ const getSinglePost = async (
 ) => {
   try {
     const postId = req.params.postId;
-    const post = await Review.getPostById(
+    const post = await PostModel.getPostById(
       postId,
       req.jwtUserData?.userId || null
     );
@@ -282,9 +248,16 @@ const getSinglePost = async (
   }
 };
 
+const uploadImage = async (image: Express.Multer.File) => {
+  const base64Image = Buffer.from(image.buffer).toString("base64");
+  const dataURI = `data:${image.mimetype};base64,${base64Image}`;
+  const uploadResponse = await cloudinary.uploader.upload(dataURI);
+  return uploadResponse.secure_url;
+};
+
 const exporter = {
-  create_handler,
-  get_handler,
+  createMyPost,
+  getFeed,
   like_review,
   bookmark_handler,
   get_bookmarks,

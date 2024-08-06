@@ -29,14 +29,22 @@ const get_notifications = async (
   victim: string
 ): Promise<Notification[] | null> => {
   const notifications = await pool.query(
-    ` select u.first_name || ' ' || u.last_name as fullname, u.profile_picture_url as user_profile_picture_url, 
-n.action_type, no_.object_type, no_.object_url, n.created_at from notification as n 
-	inner join notification_object as no_ on n.notification_object_id = no_.id
-	inner join user_ as u on u.id = n.actor
-	where victim=$1 and unread=true
-`,
+    `
+    SELECT
+      u."firstName" || ' ' || u."lastName" AS "fullName",
+      u."profilePictureUrl" AS "userProfilePictureUrl",
+      n."actionType",
+      no_."objectType",
+      no_."objectUrl",
+      n."createdAt"
+    FROM "notification" AS n
+    INNER JOIN "notificationObject" AS no_ ON n."notificationObjectId" = no_."id"
+    INNER JOIN "user_" AS u ON u."id" = n."actor"
+    WHERE n."victim" = $1 AND n."unread" = true
+  `,
     [victim]
   );
+
   if (notifications.rowCount == 0) return null;
   return notifications.rows;
 };

@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 type JwtUserData = {
   userId: string;
   email: string;
@@ -38,28 +40,38 @@ type PostWithComments = Post & {
   comments: Comment[];
 };
 
-type Post = {
-  id: string;
-  author_id: string;
-  author_name: string;
-  author_profile_picture_url: string;
-  author_email: string;
-  body: string;
-  picture: string;
-  like_count: number;
-  place_id: string;
-  created_at: string;
-  place_lat: number;
-  place_long: number;
-  place_name: string;
-  place_openmaps_place_id: string;
-  user_has_liked: boolean;
-  user_has_bookmarked: boolean;
-  rating: number;
-};
+export const postSchema = z.object({
+  id: z.string().uuid(),
+  authorId: z.string().uuid(),
+  body: z.string().min(1).max(500),
+  imageUrl: z.string().url(),
+  likeCount: z.number().default(0),
+  placeId: z.string().uuid(),
+  rating: z.number().min(1).max(5),
+  createdAt: z.string().datetime(),
+});
+
+type Post = z.infer<typeof postSchema>;
 
 type FeedPost = Post & {
   score: number;
+  authorFirstName: string;
+  authorLastName: string;
+  authorEmail: string;
+  authorPictureUrl: string;
+  hasLiked: boolean;
+  hasBookmarked: boolean;
+  placeName: string;
+  lat: number;
+  lon: number;
+};
+
+type CreatePostForm = {
+  placeName: string;
+  placeId: string;
+  rating: number;
+  body: string;
+  image: File;
 };
 
 export type {
@@ -70,4 +82,5 @@ export type {
   Comment,
   PostWithComments,
   FeedPost,
+  CreatePostForm,
 };

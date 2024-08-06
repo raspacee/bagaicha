@@ -4,9 +4,9 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import indexRouter from "./routes/indexRouter";
 import authRouter from "./routes/authRouter";
-import reviewRouter from "./routes/reviewRouter";
+import postRouter from "./routes/post.router";
 import userRouter from "./routes/userRouter";
-import placeRouter from "./routes/placeRouter";
+import placeRouter from "./routes/place.router";
 import notificationRouter from "./routes/notificationRouter";
 import cookieParser from "cookie-parser";
 import { v2 as cloudinary } from "cloudinary";
@@ -41,7 +41,7 @@ cloudinary.config({
 
 app.use("/api", indexRouter);
 app.use("/api/auth", authRouter);
-app.use("/api/review", reviewRouter);
+app.use("/api/review", postRouter);
 app.use("/api/user", userRouter);
 app.use("/api/place", placeRouter);
 app.use("/api/notification", notificationRouter);

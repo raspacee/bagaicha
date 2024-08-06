@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import User from "../models/userModel";
-import Review from "../models/reviewModel";
+import Review from "../models/post.model";
 import { v2 as cloudinary } from "cloudinary";
 
 const get_user_info = async (

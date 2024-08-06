@@ -11,7 +11,7 @@ router.post(
   "/",
   authMiddleware,
   upload.fields([{ name: "displayPic", maxCount: 1 }]),
-  placeController.create_place,
+  placeController.create_place
 );
 
 /* Search place names by query */
@@ -34,9 +34,15 @@ router.put(
     { name: "thumbnail_img", maxCount: 1 },
     { name: "cover_img", maxCount: 1 },
   ]),
-  placeController.update_place_info,
+  placeController.update_place_info
 );
+
 router.get("/:place_id/rating/:rating", placeController.get_review);
+
 /* Get place data */
 router.get("/:place_id", placeController.get_place_info);
+
+/* Endpoint to get place names suggestions */
+router.get("/suggestion/:query", placeController.getPlaceSuggestions);
+
 export default router;

@@ -1,15 +1,58 @@
+import { foodItems } from "../config/foods";
 import { pool } from "../db/index";
 import { Distances } from "../lib/enums";
+import { z } from "zod";
 
-const get_place_by_id = async (id: string) => {
-  const result = await pool.query(
-    "select * from place where openmaps_place_id=$1 limit 1",
-    [id],
-  );
-  if (result.rowCount == 1) {
-    return result.rows[0];
-  }
-  return undefined;
+const daySchema = z.enum([
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+]);
+
+export type Day = z.infer<typeof daySchema>;
+
+const placeFeatureSchema = z.enum([
+  "Offers Delivery",
+  "Offers Takeout",
+  "Pet Friendly",
+  "Very Clean",
+  "Affordable",
+]);
+
+export type PlaceFeature = z.infer<typeof placeFeatureSchema>;
+
+const foodsOfferedSchema = z.enum(foodItems);
+
+export type FoodsOffered = z.infer<typeof foodsOfferedSchema>;
+
+const placeSchema = z.object({
+  id: z.string().uuid(),
+  osmId: z.string().max(20),
+  name: z.string().min(2).max(250),
+  lat: z.number(),
+  lon: z.number(),
+  openDays: z.array(daySchema).optional(),
+  openingTime: z.string().time().optional(),
+  closingTime: z.string().time().optional(),
+  placeFeatures: z.array(placeFeatureSchema).optional(),
+  coverImgUrl: z.string().url().optional(),
+  foodsOffered: z.array(foodsOfferedSchema).optional(),
+  ownedBy: z.string().uuid().optional(),
+  createdAt: z.string().datetime(),
+});
+
+export type Place = z.infer<typeof placeSchema>;
+
+const getPlacebyId = async (placeId: string): Promise<Place | null> => {
+  const result = await pool.query("select * from place where id=$1 limit 1", [
+    placeId,
+  ]);
+  if (result.rowCount == 0) return null;
+  return result.rows[0];
 };
 
 enum Rating {
@@ -29,7 +72,7 @@ const get_place_by_uuid = async (uuid: string) => {
       const total_count = await pool.query(
         "select count(*) as total_count from \
       place_review where place_id=$1",
-        [uuid],
+        [uuid]
       );
       const text = `
 with counts as (select count(*) as reviews_count, rating as rating_star from place_review 
@@ -65,7 +108,7 @@ const update_place = async (
   closing_time: string,
   place_features: number[],
   thumbnail_img: string,
-  cover_img: string,
+  cover_img: string
 ) => {
   const text = `update place set open_days=$2,
   opening_time=$3, closing_time=$4, place_features=$5,
@@ -98,7 +141,7 @@ const create_place = async (
   name: string,
   lat: string,
   long: string,
-  display_name: string,
+  display_name: string
 ) => {
   let text =
     "insert into place (id, openmaps_place_id, name, lat, long, display_name) \
@@ -118,7 +161,7 @@ const add_place = async (
   display_pic_url: string,
   owned_by: string | null,
   alcohol_allowed: boolean,
-  openmaps_place_id: string,
+  openmaps_place_id: string
 ) => {
   let text =
     "insert into place (id, name, lat, long, display_name, cover_img_url, foods_offered, owned_by, alcohol_allowed, openmaps_place_id) \
@@ -143,7 +186,7 @@ const get_top_places = async (
   user_long: number,
   categories: string[] | null,
   suggestions: number[] | null,
-  distance: Distances | null,
+  distance: Distances | null
 ) => {
   const text = `
 select *, haversine(place.lat::decimal, place.long::decimal, $1, $2) as distance,
@@ -171,8 +214,21 @@ const search_place = async (name: string) => {
   return data.rows;
 };
 
+const getPlaceSuggestionsByQuery = async (query: string): Promise<Place[]> => {
+  const text = `
+  SELECT id, name, lat, lon
+  FROM place
+  WHERE name ILIKE $1
+  LIMIT 5;
+  `;
+  const values = [`%${query}%`];
+  const result = await pool.query(text, values);
+  if (result.rowCount == 0) return [];
+  return result.rows;
+};
+
 const exporter = {
-  get_place_by_id,
+  getPlacebyId,
   get_place_by_uuid,
   create_place,
   get_review_by_rating,
@@ -180,6 +236,7 @@ const exporter = {
   update_place,
   add_place,
   search_place,
+  getPlaceSuggestionsByQuery,
 };
 
 export default exporter;

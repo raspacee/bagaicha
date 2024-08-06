@@ -1,15 +1,11 @@
-create table if not exists place_review (
-    id serial primary key,
-    place_id uuid not null,
-    author_id uuid not null,
-    rating smallint not null,
-    body varchar(500),
-    created_at timestamp with time zone not null,
-
-    constraint fk_author
-      foreign key (author_id)
-      references user_(id),
-    constraint fk_place
-      foreign key (place_id)
-      references place(id)
-)
+CREATE TABLE
+  IF NOT EXISTS "placeReview" (
+    "id" UUID PRIMARY KEY,
+    "placeId" UUID NOT NULL,
+    "authorId" UUID NOT NULL,
+    "rating" SMALLINT NOT NULL,
+    "body" VARCHAR(500),
+    "createdAt" TIMESTAMPTZ NOT NULL,
+    CONSTRAINT "fkAuthor" FOREIGN KEY ("authorId") REFERENCES "user_" ("id"),
+    CONSTRAINT "fkPlace" FOREIGN KEY ("placeId") REFERENCES "place" ("id")
+  );

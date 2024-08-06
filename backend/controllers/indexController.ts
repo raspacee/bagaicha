@@ -1,13 +1,13 @@
 import express, { Request, Response, NextFunction } from "express";
-import Place from "../models/placeModel";
-import Review from "../models/reviewModel";
+import Place from "../models/place.model";
+import Review from "../models/post.model";
 import Search from "../models/searchModel";
 // import { query, pool } from "../db/index.ts";
 
 const search_results = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const q = req.query.q as string;

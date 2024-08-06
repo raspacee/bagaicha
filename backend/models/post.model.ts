@@ -1,74 +1,98 @@
+import { z } from "zod";
 import { pool } from "../db/index";
 import { Distances } from "../lib/enums";
 import { FeedPost, PostWithComments } from "../types";
+import { v4 as uuidv4 } from "uuid";
 
-const create_review = async (
-  id: string,
-  author_id: string,
-  comment: string,
+const createPost = async (
+  authorId: string,
+  body: string,
   rating: number,
-  picture_url: string,
-  place_id: string,
-  foods_ate: string[],
-  created_at: string
-) => {
-  let text =
-    "with inserted_review as (insert into review (id, author_id, body, rating, picture, place_id, \
-        foods_ate, created_at) values ($1, $2, $3, $4, $5, $6, $7, $8) returning *) \
-      select inserted_review.*, u.first_name, u.last_name, u.profile_picture_url, u.email, \
-      false as user_has_liked, false as user_has_bookmarked_review, pl.* \
-      from inserted_review \
-      inner join user_ as u on inserted_review.author_id = u.id \
-      inner join place as pl on inserted_review.place_id = pl.id";
+  imageUrl: string,
+  placeId: string
+): Promise<FeedPost> => {
+  const text = `
+  WITH insertedPost AS (
+    INSERT INTO "post" (
+      "id",
+      "authorId",
+      "body",
+      "rating",
+      "imageUrl",
+      "placeId",
+      "createdAt"
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    RETURNING *
+  )
+  SELECT
+    insertedPost.*,
+    u."firstName" as "authorFirstname",
+    u."lastName" as "authorLastname",
+    u."profilePictureUrl" as "authorPictureUrl",
+    u."email" as "authorEmail",
+    false AS "hasLiked",
+    false AS "hasBookmarked",
+    pl.name as "placeName",
+    pl.lat,
+    pl.lon
+  FROM insertedPost
+  INNER JOIN "user_" AS u ON insertedPost."authorId" = u."id"
+  INNER JOIN "place" AS pl ON insertedPost."placeId" = pl."id";
+`;
+  const newPostId = uuidv4();
+  const createdAt = new Date().toISOString();
   let values = [
-    id,
-    author_id,
-    comment,
+    newPostId,
+    authorId,
+    body,
     rating.toString(),
-    picture_url,
-    place_id,
-    foods_ate,
-    created_at,
+    imageUrl,
+    placeId,
+    createdAt,
   ];
-  return pool.query(text, values);
+  const result = await pool.query(text, values);
+  return result.rows[0];
 };
 
-const get_feed = async (user_id: string): Promise<FeedPost[]> => {
-  let text = `
-SELECT 
-  r.*, 
-  u.first_name || ' ' || u.last_name AS author_name, 
-  u.profile_picture_url AS author_profile_picture_url, 
-  u.email AS author_email, 
-  pl.lat AS place_lat, 
-  pl.long AS place_long, 
-  pl.name AS place_name, 
-  pl.openmaps_place_id AS place_openmaps_place_id,
-  (
-    SELECT EXISTS (
-      SELECT 1 
-      FROM review_like AS l 
-      WHERE l.liker_id = $1 
-        AND l.review_id = r.id 
-      LIMIT 1
-    )
-  ) AS user_has_liked,
-  (
-    SELECT EXISTS (
-      SELECT 1 
-      FROM review_bookmark AS b 
-      WHERE b.user_id = $1 
-        AND b.review_id = r.id 
-      LIMIT 1
-    )
-  ) AS user_has_bookmarked
-FROM 
-  review AS r 
-  INNER JOIN user_ AS u ON r.author_id = u.id
-  INNER JOIN place AS pl ON r.place_id = pl.id 
-  ORDER BY r.created_at desc limit 20;
+const getFeedPosts = async (userId: string): Promise<FeedPost[]> => {
+  const text = `
+  SELECT 
+    p.*, 
+    u."firstName" AS "authorFirstName",
+    u."lastName" AS "authorLastName", 
+    u."profilePictureUrl" AS "authorPictureUrl", 
+    u."email" AS "authorEmail", 
+    pl."lat", 
+    pl."lon", 
+    pl."name", 
+    (
+      SELECT EXISTS (
+        SELECT 1 
+        FROM "postLike" AS l 
+        WHERE l."likerId" = $1 
+          AND l."postId" = p."id" 
+        LIMIT 1
+      )
+    ) AS "hasLiked",
+    (
+      SELECT EXISTS (
+        SELECT 1 
+        FROM "postBookmark" AS b 
+        WHERE b."userId" = $1 
+          AND b."postId" = p."id" 
+        LIMIT 1
+      )
+    ) AS "hasBookmarked"
+  FROM 
+    "post" AS p
+    INNER JOIN "user_" AS u ON p."authorId" = u."id"
+    INNER JOIN "place" AS pl ON p."placeId" = pl."id" 
+  ORDER BY p."createdAt" DESC 
+  LIMIT 20;
 `;
-  const values = [user_id];
+
+  const values = [userId];
   const result = await pool.query(text, values);
   if (result.rowCount == 0) return [];
   return result.rows;
@@ -150,8 +174,8 @@ WHERE
 };
 
 const exporter = {
-  create_review,
-  get_feed,
+  createPost,
+  getFeedPosts,
   search_reviews,
   get_reviews_by_email,
   getPostById,

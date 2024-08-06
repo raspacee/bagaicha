@@ -84,8 +84,18 @@ const update_profile = async (
 };
 
 const getDataById = async (userId: string): Promise<User | null> => {
-  const text =
-    "select id, first_name, last_name, profile_picture_url, bio, moderation_lvl, email from user_ where id=$1;";
+  const text = `
+  SELECT 
+    "id",
+    "firstName",
+    "lastName",
+    "profilePictureUrl",
+    "bio",
+    "moderationLvl",
+    "email"
+  FROM "user_"
+  WHERE "id" = $1;
+`;
   const values = [userId];
   const result = await pool.query(text, values);
   if (result.rowCount == 0) {

@@ -2,26 +2,26 @@ import express from "express";
 const router = express.Router();
 import upload from "../multer";
 
-import reviewController from "../controllers/reviewController";
+import postController from "../controllers/post.controller";
 import commentController from "../controllers/commentController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
 router.post(
   "/",
   authMiddleware,
-  upload.single("picture"),
-  reviewController.create_handler
+  upload.single("image"),
+  postController.createMyPost
 );
 
-router.post("/like", authMiddleware, reviewController.like_review);
+router.post("/like", authMiddleware, postController.like_review);
 
-router.get("/", authMiddleware, reviewController.get_handler);
+router.get("/", authMiddleware, postController.getFeed);
 
 /* Bookmark a review */
-router.post("/bookmark", authMiddleware, reviewController.bookmark_handler);
+router.post("/bookmark", authMiddleware, postController.bookmark_handler);
 
 /* Get all bookmarked reviews by a user */
-router.get("/bookmark", authMiddleware, reviewController.get_bookmarks);
+router.get("/bookmark", authMiddleware, postController.get_bookmarks);
 
 router.get(
   "/:review_id/comments",
@@ -56,6 +56,6 @@ router.post(
   commentController.like_comment
 );
 
-router.get("/:postId", reviewController.getSinglePost);
+router.get("/:postId", postController.getSinglePost);
 
 export default router;
