@@ -12,7 +12,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import Cookies from "universal-cookie";
 import Divider from "@mui/material/Divider";
 
-import Post from "../components/review/Post";
+import Post from "../components/post/Post";
 import { AUTH_TOKEN_NAME } from "../lib/config";
 import ReviewModal from "../components/modal/ReviewModal";
 

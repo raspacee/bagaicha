@@ -1,5 +1,3 @@
-import { AiOutlineHeart } from "@react-icons/all-files/ai/AiOutlineHeart";
-import { AiFillHeart } from "@react-icons/all-files/ai/AiFillHeart";
 import { BsDot } from "@react-icons/all-files/bs/BsDot";
 import { BsBookmarkDash } from "@react-icons/all-files/bs/BsBookmarkDash";
 import { BsBookmarkDashFill } from "@react-icons/all-files/bs/BsBookmarkDashFill";
@@ -12,10 +10,10 @@ import { haversine } from "../../lib/helpers";
 import { useAppSelector, useAppDispatch } from "../../hooks";
 import { setImgModal } from "../../slice/modalSlice";
 import { useBookmark } from "../../hooks/useBookmark";
-import { useLike } from "../../hooks/useLike";
-import { MapPinHouse } from "lucide-react";
+import { Heart, MapPinHouse } from "lucide-react";
 import PostOpened from "./PostOpened";
 import { FeedPost } from "@/lib/types";
+import { useLikePost, useUnlikePost } from "@/api/PostApi";
 
 type Props = {
   post: FeedPost;
@@ -26,7 +24,9 @@ export default function Post({ post }: Props) {
   const dispatch = useAppDispatch();
   const isLocationGranted = location.lat != -1 && location.long != -1;
 
-  const [hasLiked, likeHandler] = useLike(post.hasLiked, post.id);
+  const { likePost } = useLikePost();
+  const { unlikePost } = useUnlikePost();
+
   const [hasBookmarked, bookmarkHandler] = useBookmark(
     post.hasBookmarked,
     post.id
@@ -100,58 +100,39 @@ export default function Post({ post }: Props) {
       </div>
       <div className="border-t-2 my-2"></div>
       <div className="flex items-center gap-3">
-        <div className="">
-          {hasLiked ? (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: [0, 1.2, 1] }}
-              transition={{
-                duration: 0.3,
-                ease: "easeOut",
-              }}
-            >
-              <AiFillHeart
-                size={30}
-                className="cursor-pointer"
-                onClick={() => likeHandler()}
-                fill="red"
-              />
-            </motion.div>
-          ) : (
-            <AiOutlineHeart
-              size={30}
-              className="cursor-pointer"
-              onClick={() => likeHandler()}
-            />
-          )}
-        </div>
-        <div className="">
-          <PostOpened postId={post.id as string} />
-        </div>
-        <div className="">
-          {hasBookmarked ? (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: [0, 1.2, 1] }}
-              transition={{
-                duration: 0.3,
-                ease: "easeOut",
-              }}
-            >
-              <BsBookmarkDashFill
-                size={23}
-                className="cursor-pointer"
-                onClick={() => bookmarkHandler()}
-              />
-            </motion.div>
-          ) : (
-            <BsBookmarkDash
+        {post.hasLiked ? (
+          <Heart
+            size={25}
+            color="red"
+            fill="red"
+            onClick={() => unlikePost(post.id)}
+          />
+        ) : (
+          <Heart size={25} onClick={() => likePost(post.id)} />
+        )}
+        <PostOpened postId={post.id as string} />
+        {hasBookmarked ? (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: [0, 1.2, 1] }}
+            transition={{
+              duration: 0.3,
+              ease: "easeOut",
+            }}
+          >
+            <BsBookmarkDashFill
               size={23}
               className="cursor-pointer"
               onClick={() => bookmarkHandler()}
             />
-          )}
-        </div>
+          </motion.div>
+        ) : (
+          <BsBookmarkDash
+            size={23}
+            className="cursor-pointer"
+            onClick={() => bookmarkHandler()}
+          />
+        )}
       </div>
       <div>
         {post.likeCount != 0 && (

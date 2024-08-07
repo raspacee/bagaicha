@@ -1,14 +1,11 @@
 import FavoriteIcon from "@mui/icons-material/Favorite";
 
 import { useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import Avatar from "@mui/material/Avatar";
 
-import { useAppSelector, useAppDispatch } from "../hooks";
-import { setPostCreateModal } from "../slice/modalSlice";
-import Post from "../components/review/Post";
+import { useAppSelector } from "../hooks";
+import Post from "../components/post/Post";
 import PostLoader from "../components/loaders/PostLoader";
-import { fetchReviews } from "../api/reviewApi";
 import {
   Select,
   SelectContent,
@@ -17,11 +14,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useFetchMyFeed } from "@/api/PostApi";
-import { z } from "zod";
-import CreatePostDialog from "@/components/review/CreatePostDialog";
+import CreatePostDialog from "@/components/post/CreatePostDialog";
 
 export default function FeedPage() {
-  const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user);
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useAppSelector((state) => state.location);

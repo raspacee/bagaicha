@@ -13,7 +13,7 @@ import Rating from "@mui/material/Rating";
 import Divider from "@mui/material/Divider";
 
 import { useAppSelector, useAppDispatch } from "../../hooks";
-import Comment from "../review/Comment";
+import Comment from "../post/Comment";
 import { AUTH_TOKEN_NAME } from "../../lib/config";
 
 const ReviewModal = forwardRef<HTMLDialogElement, {}>((props, ref) => {

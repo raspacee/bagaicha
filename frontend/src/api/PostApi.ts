@@ -1,7 +1,6 @@
-import { CreatePostForm } from "@/components/review/CreatePostDialog";
-import { CommentForm } from "@/components/review/PostOpened";
 import { AUTH_TOKEN_NAME } from "@/lib/config";
 import type {
+  CommentForm,
   FeedPost,
   LocationType,
   Post,
@@ -21,7 +20,7 @@ const useFetchMyFeed = (sortBy: string, location: LocationType) => {
     sortBy: string,
     location: LocationType
   ): Promise<FeedPost[]> => {
-    const url = `${BASE_API_URL}/review?lat=${location.lat}&long=${location.long}&sort=${sortBy}`;
+    const url = `${BASE_API_URL}/post?lat=${location.lat}&long=${location.long}&sort=${sortBy}`;
     const response = await fetch(url, {
       mode: "cors",
       headers: {
@@ -39,7 +38,7 @@ const useFetchMyFeed = (sortBy: string, location: LocationType) => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["reviews", sortBy],
+    queryKey: ["posts", sortBy],
     queryFn: () => fetchFeedRequest(sortBy, location),
   });
 
@@ -53,7 +52,7 @@ const useFetchMyFeed = (sortBy: string, location: LocationType) => {
 const useFetchPostById = (postId: string) => {
   const [enabled, setEnabled] = useState<boolean>(false);
   const fetchPostByIdRequest = async (): Promise<PostWithComments | null> => {
-    const response = await fetch(`${BASE_API_URL}/review/${postId}`, {
+    const response = await fetch(`${BASE_API_URL}/post/${postId}`, {
       method: "get",
       headers: {
         authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
@@ -70,7 +69,7 @@ const useFetchPostById = (postId: string) => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["post", postId],
+    queryKey: ["posts", postId],
     queryFn: fetchPostByIdRequest,
     enabled: enabled,
   });
@@ -84,19 +83,14 @@ const useFetchPostById = (postId: string) => {
 
 const useCreateComment = () => {
   const createCommentRequest = async (commentForm: CommentForm) => {
-    const response = await fetch(
-      `${BASE_API_URL}/review/${commentForm.postId}/comments`,
-      {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          commentBody: commentForm.commentBody,
-        }),
-      }
-    );
+    const response = await fetch(`${BASE_API_URL}/post/comments`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(commentForm),
+    });
     if (!response.ok) {
       throw new Error("Error while creating comment");
     }
@@ -125,7 +119,7 @@ const useCreateComment = () => {
 
 const useCreatePost = () => {
   const createPostRequest = async (formData: FormData): Promise<Post> => {
-    const response = await fetch(`${BASE_API_URL}/review`, {
+    const response = await fetch(`${BASE_API_URL}/post`, {
       method: "POST",
       body: formData,
       headers: {
@@ -156,4 +150,99 @@ const useCreatePost = () => {
   return { createPost, isPending, isSuccess };
 };
 
-export { useFetchMyFeed, useFetchPostById, useCreateComment, useCreatePost };
+const useLikePost = () => {
+  const queryClient = useQueryClient();
+
+  const likePostRequest = async (postId: string) => {
+    const response = await fetch(`${BASE_API_URL}/post/${postId}/likes`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Error while liking a post");
+    }
+  };
+
+  const { mutateAsync: likePost } = useMutation({
+    mutationFn: likePostRequest,
+    onMutate: async (postId: string) => {
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+
+      const previousPosts = queryClient.getQueriesData({
+        queryKey: ["posts"],
+      })[1];
+
+      queryClient.setQueriesData(
+        { queryKey: ["posts"] },
+        (oldPosts: FeedPost[] | undefined) =>
+          oldPosts?.map((post) =>
+            post.id == postId ? { ...post, hasLiked: true } : post
+          )
+      );
+      return { previousPosts };
+    },
+    onError: (err, postId, context) => {
+      queryClient.setQueryData(["posts"], context?.previousPosts);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
+
+  return { likePost };
+};
+
+const useUnlikePost = () => {
+  const queryClient = useQueryClient();
+
+  const unlikePostRequest = async (postId: string) => {
+    const response = await fetch(`${BASE_API_URL}/post/${postId}/likes`, {
+      method: "DELETE",
+      headers: {
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Error while unliking a post");
+    }
+  };
+
+  const { mutateAsync: unlikePost } = useMutation({
+    mutationFn: unlikePostRequest,
+    onMutate: async (postId: string) => {
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+
+      const previousPosts = queryClient.getQueriesData({
+        queryKey: ["posts"],
+      })[1];
+
+      queryClient.setQueriesData(
+        { queryKey: ["posts"] },
+        (oldPosts: FeedPost[] | undefined) =>
+          oldPosts?.map((post) =>
+            post.id == postId ? { ...post, hasLiked: false } : post
+          )
+      );
+      return { previousPosts };
+    },
+    onError: (err, postId, context) => {
+      queryClient.setQueryData(["posts"], context?.previousPosts);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
+
+  return { unlikePost };
+};
+
+export {
+  useFetchMyFeed,
+  useFetchPostById,
+  useCreateComment,
+  useCreatePost,
+  useLikePost,
+  useUnlikePost,
+};

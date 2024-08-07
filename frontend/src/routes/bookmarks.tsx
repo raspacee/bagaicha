@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 
 import { AUTH_TOKEN_NAME } from "../lib/config";
 import ReviewModal from "../components/modal/ReviewModal";
-import Post from "../components/review/Post";
+import Post from "../components/post/Post";
 import useFetch from "../hooks/useFetch";
 import { FetchState } from "../lib/enums";
 import { FetchOptionType } from "../lib/types";
