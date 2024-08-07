@@ -3,7 +3,7 @@ const router = express.Router();
 import upload from "../multer";
 
 import postController from "../controllers/post.controller";
-import commentController from "../controllers/commentController";
+import commentController from "../controllers/comment.controller";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
 router.post(
@@ -13,7 +13,8 @@ router.post(
   postController.createMyPost
 );
 
-router.post("/like", authMiddleware, postController.like_review);
+router.post("/:postId/likes", authMiddleware, postController.likePost);
+router.delete("/:postId/likes", authMiddleware, postController.unlikePost);
 
 router.get("/", authMiddleware, postController.getFeed);
 
@@ -30,18 +31,7 @@ router.get(
 );
 
 /* Create a comment */
-router.post(
-  "/:review_id/comments",
-  authMiddleware,
-  commentController.create_comment
-);
-
-/* Reply to a comment */
-router.post(
-  "/:review_id/comments/:comment_id",
-  authMiddleware,
-  commentController.reply_comment
-);
+router.post("/comments", authMiddleware, commentController.createComment);
 
 /* Get comments replies */
 router.get(
@@ -56,6 +46,6 @@ router.post(
   commentController.like_comment
 );
 
-router.get("/:postId", postController.getSinglePost);
+router.get("/:postId", authMiddleware, postController.getSinglePost);
 
 export default router;

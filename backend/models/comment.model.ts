@@ -1,5 +1,6 @@
 import { pool } from "../db";
-import { Comment } from "../types";
+import { CommentForm, CommentWhole } from "../types";
+import { v4 as uuid } from "uuid";
 
 const get_comments = async (review_id: string, user_id: string) => {
   const text = `
@@ -20,32 +21,22 @@ u.profile_picture_url as author_picture_url,
   return data.rows;
 };
 
-const create_comment = async (
-  review_id: string,
-  author_id: string,
-  comment_body: string,
-  reply_to: number | null
+const createCommentOnPost = async (
+  commentForm: CommentForm,
+  authorId: string
 ) => {
   const text = `
-with inserted as (
-insert into review_comment (review_id, author_id, body, created_at, reply_to)
-	values ($1, $2, $3, $4, $5)
-returning *)
-
-select io.*, u.first_name || ' ' || u.last_name as author_name,
-u.email as author_email, u.profile_picture_url as author_picture_url
-from inserted as io
-inner join user_ as u on u.id = io.author_id 
+INSERT INTO "comment" ("postId", "authorId", "body", "createdAt", "id")
+  VALUES ($1, $2, $3, $4, $5)
 `;
   const values = [
-    review_id,
-    author_id,
-    comment_body,
+    commentForm.postId,
+    authorId,
+    commentForm.body,
     new Date().toISOString(),
-    reply_to,
+    uuid(),
   ];
-  const data = await pool.query(text, values);
-  return data.rows;
+  await pool.query(text, values);
 };
 
 const get_replies = async (comment_id: number, user_id: string) => {
@@ -74,34 +65,30 @@ const user_has_liked_comment = async (user_id: string, comment_id: number) => {
 const getCommentsOfPost = async (
   postId: string,
   userId: string | null
-): Promise<Comment[]> => {
+): Promise<CommentWhole[]> => {
   const text = `
 SELECT 
-  rc.body, 
-  rc.author_id, 
-  rc.review_id,
-  rc.id, 
-  rc.like_count, 
-  u.first_name || ' ' || u.last_name AS author_name, 
-  u.email AS author_email, 
-  u.profile_picture_url AS author_picture_url,
+  c.*,
+  u."firstName" AS "authorFirstName",
+  u."lastName" AS "authorLastName", 
+  u.email AS "authorEmail", 
+  u."profilePictureUrl" AS "authorPictureUrl",
   (
     SELECT EXISTS (
       SELECT 1 
-      FROM comment_like 
-      WHERE liker_id = $2 
-        AND comment_id = rc.id
+      FROM "commentLike"
+      WHERE "likerId" = $2 
+        AND "commentId" = c.id
     )
-  ) AS has_liked_comment
+  ) AS "hasLiked"
 FROM 
-  review_comment AS rc
-  INNER JOIN user_ AS u ON rc.author_id = u.id
-  INNER JOIN review AS r ON rc.review_id = r.id
+  "comment" AS c
+  INNER JOIN "user_" AS u ON c."authorId" = u.id
+  INNER JOIN "post" AS p ON c."postId" = p.id
 WHERE 
-  rc.reply_to IS NULL 
-  AND rc.review_id = $1
+  c."postId" = $1
 ORDER BY 
-  rc.created_at DESC;
+  c."createdAt" DESC;
 `;
   const values = [postId, userId];
   const result = await pool.query(text, values);
@@ -111,7 +98,7 @@ ORDER BY
 
 const exporter = {
   get_comments,
-  create_comment,
+  createCommentOnPost,
   get_replies,
   user_has_liked_comment,
   getCommentsOfPost,

@@ -12,7 +12,7 @@ const get_notifications = async (
     );
     return res.status(200).json(notifications);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     return res.status(500).send({
       message: err,
     });

@@ -41,7 +41,7 @@ cloudinary.config({
 
 app.use("/api", indexRouter);
 app.use("/api/auth", authRouter);
-app.use("/api/review", postRouter);
+app.use("/api/post", postRouter);
 app.use("/api/user", userRouter);
 app.use("/api/place", placeRouter);
 app.use("/api/notification", notificationRouter);

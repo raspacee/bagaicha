@@ -23,20 +23,7 @@ type Notification = {
   created_at: string;
 };
 
-type Comment = {
-  id: number;
-  review_id: string;
-  author_id: string;
-  body: string;
-  created_at: string;
-  like_count: string;
-  author_name: string;
-  author_email: string;
-  author_picture_url: string;
-  has_liked_comment: boolean;
-};
-
-type PostWithComments = Post & {
+type PostWithComments = FeedPost & {
   comments: Comment[];
 };
 
@@ -74,13 +61,41 @@ type CreatePostForm = {
   image: File;
 };
 
+const commentSchema = z.object({
+  id: z.string().uuid(),
+  postId: z.string().uuid(),
+  authorId: z.string().uuid(),
+  body: z.string().min(1).max(500),
+  createdAt: z.string().datetime(),
+  likeCount: z.number().default(0),
+});
+
+type Comment = z.infer<typeof commentSchema>;
+
+type CommentWhole = Comment & {
+  authorFirstName: string;
+  authorLastName: string;
+  authorEmail: string;
+  authorPictureUrl: string;
+  hasLiked: boolean;
+};
+
+export const commentFormSchema = z.object({
+  postId: z.string().min(1),
+  body: z.string().min(1).max(500),
+});
+
+type CommentForm = z.infer<typeof commentFormSchema>;
+
 export type {
   JwtUserData,
   User,
   Notification,
-  Post,
   Comment,
+  CommentWhole,
+  Post,
   PostWithComments,
   FeedPost,
   CreatePostForm,
+  CommentForm,
 };

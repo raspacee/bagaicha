@@ -5,9 +5,9 @@ import { v2 as cloudinary } from "cloudinary";
 
 import Place from "../models/place.model";
 import PostModel from "../models/post.model";
-import Like from "../models/likeModel";
+import LikeModel from "../models/like.model";
 import ReviewBookmark from "../models/reviewBookmarkModel";
-import Comment from "../models/commentModel";
+import CommentModel from "../models/comment.model";
 import Notification, { NotificationObject } from "../models/notificationModel";
 import { pool } from "../db";
 import { CreatePostForm, Post } from "../types";
@@ -128,36 +128,41 @@ const getFeed = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-/* Handle liking/unliking a review by a user */
-const like_review = async (req: Request, res: Response, next: NextFunction) => {
+const likePost = async (req: Request, res: Response) => {
   try {
-    /* Check if the user has liked the review already */
-    const { review_id } = req.body;
-    const userId = req.jwtUserData!.userId;
-    const has_liked = await Like.user_has_liked_review(userId, review_id);
-    if (!has_liked) {
-      await Like.create_like(userId, review_id);
-      const victim = await pool.query(
-        `select author_id from review where id = $1`,
-        [review_id]
-      );
-      if (victim.rows[0].author_id != userId) {
-        await Notification.create_notification(
-          userId,
-          victim.rows[0].author_id,
-          NotificationObject.Review,
-          review_id,
-          "like"
-        );
-      }
-      return res.status(201).json();
-    } else {
-      await Like.delete_like(userId, review_id);
-      return res.status(204).json();
+    const postId = req.params.postId;
+    const post = await PostModel.getPostById(postId, null);
+    if (!post) {
+      return res.status(400).json({
+        message: "Post ID not found",
+      });
     }
+    await LikeModel.createPostLike(postId, req.jwtUserData!.userId);
+    return res.status(201).send();
   } catch (err) {
-    console.error(err);
-    return next(err);
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while liking a post",
+    });
+  }
+};
+
+const unlikePost = async (req: Request, res: Response) => {
+  try {
+    const postId = req.params.postId;
+    const post = await PostModel.getPostById(postId, null);
+    if (!post) {
+      return res.status(400).json({
+        message: "Post ID not found",
+      });
+    }
+    await LikeModel.deletePostLike(postId, req.jwtUserData!.userId);
+    return res.status(204).send();
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while liking a post",
+    });
   }
 };
 
@@ -236,7 +241,7 @@ const getSinglePost = async (
       req.jwtUserData?.userId || null
     );
     if (post == null) res.status(404).send();
-    const comments = await Comment.getCommentsOfPost(
+    const comments = await CommentModel.getCommentsOfPost(
       postId,
       req.jwtUserData?.userId || null
     );
@@ -258,7 +263,8 @@ const uploadImage = async (image: Express.Multer.File) => {
 const exporter = {
   createMyPost,
   getFeed,
-  like_review,
+  likePost,
+  unlikePost,
   bookmark_handler,
   get_bookmarks,
   getSinglePost,

@@ -65,7 +65,7 @@ const getFeedPosts = async (userId: string): Promise<FeedPost[]> => {
     u."email" AS "authorEmail", 
     pl."lat", 
     pl."lon", 
-    pl."name", 
+    pl."name" AS "placeName", 
     (
       SELECT EXISTS (
         SELECT 1 
@@ -133,39 +133,39 @@ const getPostById = async (
   userId: string | null
 ): Promise<PostWithComments | null> => {
   const text = `
-SELECT 
-  r.*, 
-  u.first_name || ' ' || u.last_name AS author_name, 
-  u.profile_picture_url AS author_profile_picture_url, 
-  u.email AS author_email, 
-  pl.lat AS place_lat, 
-  pl.long AS place_long, 
-  pl.name AS place_name, 
-  pl.openmaps_place_id AS place_openmaps_place_id,
-  (
-    SELECT EXISTS (
-      SELECT 1 
-      FROM review_like AS l 
-      WHERE l.liker_id = $1 
-        AND l.review_id = r.id 
-      LIMIT 1
-    )
-  ) AS user_has_liked,
-  (
-    SELECT EXISTS (
-      SELECT 1 
-      FROM review_bookmark AS b 
-      WHERE b.user_id = $1 
-        AND b.review_id = r.id 
-      LIMIT 1
-    )
-  ) AS user_has_bookmarked
-FROM 
-  review AS r 
-  INNER JOIN user_ AS u ON r.author_id = u.id
-  INNER JOIN place AS pl ON r.place_id = pl.id 
-WHERE 
-  r.id = $2;
+    SELECT 
+    p.*, 
+    u."firstName" AS "authorFirstName",
+    u."lastName" AS "authorLastName", 
+    u."profilePictureUrl" AS "authorPictureUrl", 
+    u."email" AS "authorEmail", 
+    pl."lat", 
+    pl."lon", 
+    pl."name" AS "placeName", 
+    (
+      SELECT EXISTS (
+        SELECT 1 
+        FROM "postLike" AS l 
+        WHERE l."likerId" = $1 
+          AND l."postId" = p."id" 
+        LIMIT 1
+      )
+    ) AS "hasLiked",
+    (
+      SELECT EXISTS (
+        SELECT 1 
+        FROM "postBookmark" AS b 
+        WHERE b."userId" = $1 
+          AND b."postId" = p."id" 
+        LIMIT 1
+      )
+    ) AS "hasBookmarked"
+  FROM 
+    "post" AS p
+    INNER JOIN "user_" AS u ON p."authorId" = u."id"
+    INNER JOIN "place" AS pl ON p."placeId" = pl."id" 
+  WHERE
+   p.id = $2;
   `;
   const values = [userId, postId];
   const result = await pool.query(text, values);

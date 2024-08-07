@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 
 import { pool } from "../db";
-import Comment from "../models/commentModel";
+import CommentModel from "../models/comment.model";
 import CommentLike from "../models/commentLikeModal";
 import Notification, { NotificationObject } from "../models/notificationModel";
+import { CommentForm } from "../types";
 
 const get_review_comments = async (
   req: Request,
@@ -12,7 +13,7 @@ const get_review_comments = async (
 ) => {
   console.log("Hitting get_review_comments");
   try {
-    const comments = await Comment.get_comments(
+    const comments = await CommentModel.get_comments(
       req.params.review_id as string,
       res.locals.user.user_id
     );
@@ -29,68 +30,30 @@ const get_review_comments = async (
   }
 };
 
-const create_comment = async (req: Request, res: Response) => {
+const createComment = async (req: Request, res: Response) => {
   try {
-    const review_id = req.params.review_id;
-    const { commentBody } = req.body;
+    const commentForm: CommentForm = req.body;
     const userId = req.jwtUserData!.userId;
 
-    const comment = await Comment.create_comment(
-      review_id,
-      userId,
-      commentBody,
-      null
-    );
-    const victim = await pool.query(
-      `select author_id from review where id = $1`,
-      [review_id]
-    );
-    if (victim.rows[0].author_id != userId) {
-      await Notification.create_notification(
-        res.locals.user.user_id,
-        victim.rows[0].author_id,
-        NotificationObject.Review,
-        review_id,
-        "comment"
-      );
-    }
-    return res.status(201).send({
-      status: "ok",
-      comment: comment[0],
-    });
+    await CommentModel.createCommentOnPost(commentForm, userId);
+    //TODO: FIX THE NOTIFICATION
+    // const victim = await pool.query(
+    //   `select author_id from post where id = $1`,
+    //   [postId]
+    // );
+    // if (victim.rows[0].author_id != userId) {
+    //   await Notification.create_notification(
+    //     res.locals.user.user_id,
+    //     victim.rows[0].author_id,
+    //     NotificationObject.Post,
+    //     postId,
+    //     "comment"
+    //   );
+    // }
+    return res.status(201).send();
   } catch (err) {
     console.log(err);
     return res.status(500).send({
-      status: "error",
-      message: err,
-    });
-  }
-};
-
-const reply_comment = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const comment_id = req.params.comment_id;
-    const review_id = req.params.review_id;
-    const { comment_body } = req.body;
-
-    const reply = await Comment.create_comment(
-      review_id,
-      res.locals.user.user_id,
-      comment_body,
-      parseInt(comment_id)
-    );
-    return res.status(201).send({
-      status: "ok",
-      reply: reply[0],
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send({
-      status: "error",
       message: err,
     });
   }
@@ -100,7 +63,7 @@ const get_replies = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { comment_id, review_id } = req.params;
 
-    const replies = await Comment.get_replies(
+    const replies = await CommentModel.get_replies(
       parseInt(comment_id),
       res.locals.user.user_id
     );
@@ -126,7 +89,7 @@ const like_comment = async (
     /* Check if the user has liked the review already */
     const { review_id, comment_id } = req.params;
     console.log(review_id, comment_id);
-    const has_liked = await Comment.user_has_liked_comment(
+    const has_liked = await CommentModel.user_has_liked_comment(
       res.locals.user.user_id,
       parseInt(comment_id)
     );
@@ -166,8 +129,7 @@ const like_comment = async (
 
 const exporter = {
   get_review_comments,
-  create_comment,
-  reply_comment,
+  createComment,
   get_replies,
   like_comment,
 };
