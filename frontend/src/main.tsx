@@ -8,7 +8,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./global.css";
 import FeedPage from "./routes/FeedPage";
-import UserProfile from "./routes/user_profile";
+import UserProfilePage from "./routes/UserProfilePage";
 import Login from "./routes/login";
 import Signup from "./routes/signup";
 import ReviewCreate from "./routes/review_create";
@@ -63,10 +63,10 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "user/:slug",
+        path: "user/:userId",
         element: (
           <MainLayout>
-            <UserProfile />
+            <UserProfilePage />
           </MainLayout>
         ),
       },

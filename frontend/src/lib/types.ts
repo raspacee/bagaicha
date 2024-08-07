@@ -189,6 +189,20 @@ export const commentFormSchema = z.object({
 
 type CommentForm = z.infer<typeof commentFormSchema>;
 
+export const userSchema = z.object({
+  id: z.string().uuid(),
+  firstName: z.string().max(50),
+  lastName: z.string().max(50),
+  password: z.string().max(50),
+  email: z.string().email(),
+  createdAt: z.string().datetime(),
+  profilePictureUrl: z.string().url(),
+  moderationLvl: z.number().default(0),
+  bio: z.string().max(500),
+});
+
+type User = z.infer<typeof userSchema>;
+
 export type {
   UserInterface,
   LocationType,
@@ -203,4 +217,5 @@ export type {
   Comment,
   CommentWhole,
   CommentForm,
+  User,
 };

@@ -12,7 +12,7 @@ const MainLayout = ({ children }: Props) => {
   return (
     <div className="h-fit min-h-screen bg-gray-200">
       <Navbar />
-      <main className="flex gap-3">
+      <main className="flex gap-3 mt-3">
         <aside className="hidden md:block">
           <SidebarLeft />
         </aside>

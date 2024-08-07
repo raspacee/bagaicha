@@ -25,12 +25,8 @@ export default function SidebarLeft() {
   }
 
   return (
-    <div className="bg-white w-full py-2 px-4 mt-3 rounded-md sticky top-4 ml-2 shadow-xl border md:w-[20rem]">
-      <SidebarItem
-        text="Profile"
-        link={`/user/${myUser.email}`}
-        isButton={false}
-      >
+    <div className="bg-white w-full py-2 px-4 rounded-md sticky top-4 ml-2 shadow-xl border md:w-[20rem]">
+      <SidebarItem text="Profile" link={`/user/${myUser.id}`} isButton={false}>
         <AccountCircleIcon fontSize="large" style={{ color: "#0d47a1" }} />
       </SidebarItem>
       <SidebarItem text="Find Places" link="/find-places" isButton={false}>
