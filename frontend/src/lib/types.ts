@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 /* User type when logged in */
 type UserInterface = {
   user_id: string;
@@ -103,29 +105,75 @@ type PostWithComments = Post & {
   comments: Comment[];
 };
 
-type Post = {
-  id: string;
-  author_id: string;
-  author_name: string;
-  author_profile_picture_url: string;
-  author_email: string;
-  body: string;
-  picture: string;
-  like_count: number;
-  place_id: string;
-  created_at: string;
-  place_lat: number;
-  place_long: number;
-  place_name: string;
-  place_openmaps_place_id: string;
-  user_has_liked: boolean;
-  user_has_bookmarked: boolean;
-  rating: number;
-};
+export const postSchema = z.object({
+  id: z.string().uuid(),
+  authorId: z.string().uuid(),
+  body: z.string().min(1).max(500),
+  imageUrl: z.string().url(),
+  likeCount: z.number().default(0),
+  placeId: z.string().uuid(),
+  rating: z.number().min(1).max(5),
+  createdAt: z.string().datetime(),
+});
+
+type Post = z.infer<typeof postSchema>;
 
 type FeedPost = Post & {
   score: number;
+  authorFirstName: string;
+  authorLastName: string;
+  authorEmail: string;
+  authorPictureUrl: string;
+  hasLiked: boolean;
+  hasBookmarked: boolean;
+  placeName: string;
+  lat: number;
+  lon: number;
 };
+
+const daySchema = z.enum([
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+]);
+
+export type Day = z.infer<typeof daySchema>;
+
+const placeFeatureSchema = z.enum([
+  "Offers Delivery",
+  "Offers Takeout",
+  "Pet Friendly",
+  "Very Clean",
+  "Affordable",
+]);
+
+export type PlaceFeature = z.infer<typeof placeFeatureSchema>;
+
+const foodsOfferedSchema = z.enum(foodItems);
+
+export type FoodsOffered = z.infer<typeof foodsOfferedSchema>;
+
+const placeSchema = z.object({
+  id: z.string().uuid(),
+  osmId: z.string().max(20),
+  name: z.string().min(2).max(250),
+  lat: z.number(),
+  lon: z.number(),
+  openDays: z.array(daySchema).optional(),
+  openingTime: z.string().time().optional(),
+  closingTime: z.string().time().optional(),
+  placeFeatures: z.array(placeFeatureSchema).optional(),
+  coverImgUrl: z.string().url().optional(),
+  foodsOffered: z.array(foodsOfferedSchema).optional(),
+  ownedBy: z.string().uuid().optional(),
+  createdAt: z.string().datetime(),
+});
+
+export type Place = z.infer<typeof placeSchema>;
 
 export type {
   UserInterface,

@@ -14,7 +14,7 @@ import { setImgModal } from "../../slice/modalSlice";
 import { useBookmark } from "../../hooks/useBookmark";
 import { useLike } from "../../hooks/useLike";
 import { MapPinHouse } from "lucide-react";
-import PostComments from "./PostComments";
+import PostOpened from "./PostOpened";
 import { FeedPost } from "@/lib/types";
 
 type Props = {
@@ -26,27 +26,29 @@ export default function Post({ post }: Props) {
   const dispatch = useAppDispatch();
   const isLocationGranted = location.lat != -1 && location.long != -1;
 
-  const [hasLiked, likeHandler] = useLike(post.user_has_liked, post.id);
+  const [hasLiked, likeHandler] = useLike(post.hasLiked, post.id);
   const [hasBookmarked, bookmarkHandler] = useBookmark(
-    post.user_has_bookmarked,
+    post.hasBookmarked,
     post.id
   );
 
-  const date = DateTime.fromISO(post.created_at);
+  const date = DateTime.fromISO(post.createdAt);
 
   return (
     <div className="bg-white w-full h-fit px-1 md:px-6 py-3 mb-3 border rounded-md border-slate-200">
       <div className="flex flex-col md:flex-row justify-between md:items-center">
         <div className="flex items-center">
           <img
-            src={post.author_profile_picture_url}
+            src={post.authorPictureUrl}
             alt="User profile picture"
             className="rounded-full h-11 w-11 object-cover"
             width="100"
             height="100"
           />
-          <Link to={`/user/${post.author_email}`}>
-            <p className="ml-2">{post.author_name}</p>
+          <Link to={`/user/${post.authorEmail}`}>
+            <p className="ml-2">
+              {post.authorFirstName + " " + post.authorLastName}
+            </p>
           </Link>
         </div>
         <div className="flex">
@@ -57,15 +59,13 @@ export default function Post({ post }: Props) {
           </div>
           <div className="flex">
             <BsDot className="ml-0.5" size={20} />
-            <span className="ml-0.5 text-sm font-normal text-gray-500">{`${
-              post.author_name.split(" ")[0]
-            } rated the food ${post.rating} star`}</span>
+            <span className="ml-0.5 text-sm font-normal text-gray-500">{`${post.authorFirstName} rated the food ${post.rating} star`}</span>
           </div>
         </div>
       </div>
       <div className="border-t mt-2 pt-1 flex md:items-center flex-col md:flex-row gap-3">
-        <Link to={`/place/${post.place_id}`}>
-          at <span className="font-semibold">{post.place_name}</span>
+        <Link to={`/place/${post.placeId}`}>
+          at <span className="font-semibold">{post.placeName}</span>
         </Link>
         {isLocationGranted && (
           <div className="flex">
@@ -74,21 +74,21 @@ export default function Post({ post }: Props) {
             <span className="ml-0.5 text-sm font-normal text-gray-500">{`${haversine(
               location.lat,
               location.long,
-              post.place_lat,
-              post.place_long
+              post.lat,
+              post.lon
             )} km away from you`}</span>
           </div>
         )}
       </div>
       <div className="mt-2 flex">
         <img
-          src={`${post.picture}`}
+          src={`${post.imageUrl}`}
           alt="Food picture"
           onClick={() =>
             dispatch(
               setImgModal({
                 value: true,
-                src: post.picture,
+                src: post.imageUrl,
               })
             )
           }
@@ -126,7 +126,7 @@ export default function Post({ post }: Props) {
           )}
         </div>
         <div className="">
-          <PostComments postId={post.id as string} />
+          <PostOpened postId={post.id as string} />
         </div>
         <div className="">
           {hasBookmarked ? (
@@ -154,9 +154,9 @@ export default function Post({ post }: Props) {
         </div>
       </div>
       <div>
-        {post.like_count != 0 && (
+        {post.likeCount != 0 && (
           <span className="text-sm font-medium ml-2 text-gray-800 select-none">
-            {`${post.like_count} people love this post`}
+            {`${post.likeCount} people love this post`}
           </span>
         )}
       </div>

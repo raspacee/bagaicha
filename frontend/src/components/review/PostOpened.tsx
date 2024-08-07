@@ -26,7 +26,7 @@ export type CommentForm = z.infer<typeof commentSchema>;
 
 type Props = { postId: string };
 
-const PostComments = ({ postId }: Props) => {
+const PostOpened = ({ postId }: Props) => {
   const location = useAppSelector((state) => state.location);
   const {
     post,
@@ -79,7 +79,10 @@ const PostComments = ({ postId }: Props) => {
               <div className="hidden md:block">
                 <div className="w-full">
                   <AspectRatio ratio={16 / 9}>
-                    <img className="object-cover" src={post.picture} />
+                    <img
+                      className="object-cover shadow-md rounded-md"
+                      src={post.picture}
+                    />
                   </AspectRatio>
                 </div>
               </div>
@@ -299,4 +302,4 @@ const PostComments = ({ postId }: Props) => {
   );
 };
 
-export default PostComments;
+export default PostOpened;

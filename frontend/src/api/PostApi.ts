@@ -1,4 +1,5 @@
-import { CommentForm } from "@/components/review/PostComments";
+import { CreatePostForm } from "@/components/review/CreatePostDialog";
+import { CommentForm } from "@/components/review/PostOpened";
 import { AUTH_TOKEN_NAME } from "@/lib/config";
 import type {
   FeedPost,
@@ -122,4 +123,37 @@ const useCreateComment = () => {
   };
 };
 
-export { useFetchMyFeed, useFetchPostById, useCreateComment };
+const useCreatePost = () => {
+  const createPostRequest = async (formData: FormData): Promise<Post> => {
+    const response = await fetch(`${BASE_API_URL}/review`, {
+      method: "POST",
+      body: formData,
+      headers: {
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Error while creating a post");
+    }
+    return response.json();
+  };
+
+  const {
+    mutateAsync: createPost,
+    isPending,
+    isSuccess,
+    error,
+  } = useMutation({ mutationFn: createPostRequest });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  if (isSuccess) {
+    toast.success("Created a post successfully");
+  }
+
+  return { createPost, isPending, isSuccess };
+};
+
+export { useFetchMyFeed, useFetchPostById, useCreateComment, useCreatePost };
