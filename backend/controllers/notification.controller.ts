@@ -1,32 +1,32 @@
-import express, { Request, Response, NextFunction } from "express";
-import Notification from "../models/notificationModel";
+import { Request, Response, NextFunction } from "express";
+import NotificationModel from "../models/notification.model";
 
-const get_notifications = async (
+const getNotifications = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const notifications = await Notification.get_notifications(
+    const notifications = await NotificationModel.getUserNotifications(
       req.jwtUserData!.userId
     );
     return res.status(200).json(notifications);
   } catch (err) {
-    // console.error(err);
+    console.error(err);
     return res.status(500).send({
       message: err,
     });
   }
 };
 
-const read_notification = async (
+const readNotifications = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    await Notification.read_notification(req.jwtUserData!.userId);
-    return res.json();
+    await NotificationModel.readUserNotifications(req.jwtUserData!.userId);
+    return res.send();
   } catch (err) {
     return res.status(500).send({
       status: "error",
@@ -36,8 +36,8 @@ const read_notification = async (
 };
 
 const exporter = {
-  get_notifications,
-  read_notification,
+  getNotifications,
+  readNotifications,
 };
 
 export default exporter;

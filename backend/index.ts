@@ -7,7 +7,7 @@ import authRouter from "./routes/authRouter";
 import postRouter from "./routes/post.router";
 import userRouter from "./routes/user.router";
 import placeRouter from "./routes/place.router";
-import notificationRouter from "./routes/notificationRouter";
+import notificationRouter from "./routes/notification.router";
 import cookieParser from "cookie-parser";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -34,7 +34,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/post", postRouter);
 app.use("/api/user", userRouter);
 app.use("/api/place", placeRouter);
-app.use("/api/notification", notificationRouter);
+app.use("/api/notifications", notificationRouter);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);

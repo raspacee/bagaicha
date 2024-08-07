@@ -3,8 +3,10 @@ import { NextFunction, Request, Response } from "express";
 import { pool } from "../db";
 import CommentModel from "../models/comment.model";
 import CommentLike from "../models/commentLikeModal";
-import Notification, { NotificationObject } from "../models/notificationModel";
+import NotificationModel from "../models/notification.model";
+import PostModel from "../models/post.model";
 import { CommentForm } from "../types";
+import { Notification } from "../types";
 
 const get_review_comments = async (
   req: Request,
@@ -35,21 +37,22 @@ const createComment = async (req: Request, res: Response) => {
     const commentForm: CommentForm = req.body;
     const userId = req.jwtUserData!.userId;
 
+    const post = await PostModel.getPostById(commentForm.postId, null);
+    if (!post) {
+      return res.status(404).send();
+    }
+
     await CommentModel.createCommentOnPost(commentForm, userId);
-    //TODO: FIX THE NOTIFICATION
-    // const victim = await pool.query(
-    //   `select author_id from post where id = $1`,
-    //   [postId]
-    // );
-    // if (victim.rows[0].author_id != userId) {
-    //   await Notification.create_notification(
-    //     res.locals.user.user_id,
-    //     victim.rows[0].author_id,
-    //     NotificationObject.Post,
-    //     postId,
-    //     "comment"
-    //   );
-    // }
+
+    const notification: Notification = {
+      recipientId: post.authorId,
+      senderId: userId,
+      type: "UserCommentsOnPost",
+      isRead: false,
+      postId: post.id,
+    };
+    await NotificationModel.createNotification(notification);
+
     return res.status(201).send();
   } catch (err) {
     console.log(err);
@@ -95,19 +98,19 @@ const like_comment = async (
     );
     if (!has_liked) {
       await CommentLike.create_like(res.locals.user.user_id, comment_id);
-      const victim = await pool.query(
-        `select author_id from review_comment where id = $1`,
-        [comment_id]
-      );
-      if (victim.rows[0].author_id != res.locals.user.user_id) {
-        await Notification.create_notification(
-          res.locals.user.user_id,
-          victim.rows[0].author_id,
-          NotificationObject.Comment,
-          comment_id,
-          "like"
-        );
-      }
+      // const victim = await pool.query(
+      //   `select author_id from review_comment where id = $1`,
+      //   [comment_id]
+      // );
+      // if (victim.rows[0].author_id != res.locals.user.user_id) {
+      //   await Notification.create_notification(
+      //     res.locals.user.user_id,
+      //     victim.rows[0].author_id,
+      //     NotificationObject.Comment,
+      //     comment_id,
+      //     "like"
+      //   );
+      // }
       return res.status(200).send({
         status: "ok",
         action: "like",

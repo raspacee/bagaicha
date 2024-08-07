@@ -6,15 +6,6 @@ type JwtUserData = {
   email: string;
 };
 
-type Notification = {
-  fullname: string;
-  user_profile_picture_url: string;
-  action_type: string;
-  object_type: string;
-  object_url: string;
-  created_at: string;
-};
-
 type PostWithComments = FeedPost & {
   comments: Comment[];
 };
@@ -137,10 +128,36 @@ export const userSchema = z.object({
 
 type User = z.infer<typeof userSchema>;
 
+const notificationTypesSchema = z.enum([
+  "UserLikesPost",
+  "UserLikesComment",
+  "UserCommentsOnPost",
+]);
+type NotificationTypes = z.infer<typeof notificationTypesSchema>;
+
+export const notificationSchema = z.object({
+  id: z.string().uuid().optional(),
+  recipientId: z.string().uuid(),
+  senderId: z.string().uuid(),
+  postId: z.string().uuid().optional(),
+  commentId: z.string().uuid().optional(),
+  type: notificationTypesSchema,
+  isRead: z.boolean().default(false),
+  createdAt: z.string().datetime().optional(),
+});
+
+type Notification = z.infer<typeof notificationSchema>;
+
+type NotificationWhole = Notification & {
+  authorFirstName: string;
+  authorLastName: string;
+  authorEmail: string;
+  authorPictureUrl: string;
+};
+
 export type {
   JwtUserData,
   User,
-  Notification,
   Comment,
   CommentWhole,
   Post,
@@ -152,4 +169,7 @@ export type {
   FoodsOffered,
   Day,
   PlaceFeature,
+  NotificationTypes,
+  Notification,
+  NotificationWhole,
 };

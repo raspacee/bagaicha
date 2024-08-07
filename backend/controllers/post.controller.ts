@@ -8,9 +8,9 @@ import PostModel from "../models/post.model";
 import LikeModel from "../models/like.model";
 import ReviewBookmark from "../models/reviewBookmarkModel";
 import CommentModel from "../models/comment.model";
-import Notification, { NotificationObject } from "../models/notificationModel";
+import NotificationModel from "../models/notification.model";
 import { pool } from "../db";
-import { CreatePostForm, Post } from "../types";
+import { CreatePostForm, Notification, Post } from "../types";
 
 /* create a post */
 const createMyPost = async (
@@ -138,6 +138,17 @@ const likePost = async (req: Request, res: Response) => {
       });
     }
     await LikeModel.createPostLike(postId, req.jwtUserData!.userId);
+
+    /* Send a notification */
+    const notification: Notification = {
+      senderId: req.jwtUserData!.userId,
+      recipientId: post.authorId,
+      type: "UserLikesPost",
+      postId: postId,
+      isRead: false,
+    };
+    await NotificationModel.createNotification(notification);
+
     return res.status(201).send();
   } catch (err) {
     console.log(err);
