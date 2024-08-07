@@ -1,16 +1,8 @@
 import { z } from "zod";
+import { foodItems } from "./config/foods";
 
 type JwtUserData = {
   userId: string;
-  email: string;
-};
-
-type User = {
-  id: string;
-  first_name: string;
-  last_name: string;
-  profile_picture_url: string;
-  moderation_lvl: string;
   email: string;
 };
 
@@ -87,6 +79,64 @@ export const commentFormSchema = z.object({
 
 type CommentForm = z.infer<typeof commentFormSchema>;
 
+export const daySchema = z.enum([
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+]);
+
+type Day = z.infer<typeof daySchema>;
+
+export const placeFeatureSchema = z.enum([
+  "Offers Delivery",
+  "Offers Takeout",
+  "Pet Friendly",
+  "Very Clean",
+  "Affordable",
+]);
+
+type PlaceFeature = z.infer<typeof placeFeatureSchema>;
+
+export const foodsOfferedSchema = z.enum(foodItems);
+
+type FoodsOffered = z.infer<typeof foodsOfferedSchema>;
+
+const placeSchema = z.object({
+  id: z.string().uuid(),
+  osmId: z.string().max(20),
+  name: z.string().min(2).max(250),
+  lat: z.number(),
+  lon: z.number(),
+  openDays: z.array(daySchema).optional(),
+  openingTime: z.string().time().optional(),
+  closingTime: z.string().time().optional(),
+  placeFeatures: z.array(placeFeatureSchema).optional(),
+  coverImgUrl: z.string().url().optional(),
+  foodsOffered: z.array(foodsOfferedSchema).optional(),
+  ownedBy: z.string().uuid().optional(),
+  createdAt: z.string().datetime(),
+});
+
+type Place = z.infer<typeof placeSchema>;
+
+export const userSchema = z.object({
+  id: z.string().uuid(),
+  firstName: z.string().max(50),
+  lastName: z.string().max(50),
+  password: z.string().max(50),
+  email: z.string().email(),
+  createdAt: z.string().datetime(),
+  profilePictureUrl: z.string().url(),
+  moderationLvl: z.number().default(0),
+  bio: z.string().max(500),
+});
+
+type User = z.infer<typeof userSchema>;
+
 export type {
   JwtUserData,
   User,
@@ -98,4 +148,8 @@ export type {
   FeedPost,
   CreatePostForm,
   CommentForm,
+  Place,
+  FoodsOffered,
+  Day,
+  PlaceFeature,
 };

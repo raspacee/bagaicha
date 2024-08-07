@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import User from "../models/userModel";
+import UserModel from "../models/user.model";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
@@ -20,7 +20,7 @@ const signup_handler = async (
     const default_profile_picture_url =
       "https://t3.ftcdn.net/jpg/02/10/49/86/360_F_210498655_ywivjjUe6cgyt52n4BxktRgDCfFg8lKx.jpg";
 
-    await User.create_user(
+    await UserModel.create_user(
       id,
       email,
       first_name,
@@ -50,12 +50,9 @@ const login_handler = async (
   const { email, password } = req.body;
 
   try {
-    const user = await User.get_user_all_info(email);
+    const user = await UserModel.getDataByEmail(email);
     if (user == null) {
-      return res.status(200).send({
-        status: "error",
-        message: "Email not found",
-      });
+      return res.status(404).send();
     }
     if (bcrypt.compareSync(password, user.password)) {
       const token = jwt.sign(
@@ -66,7 +63,6 @@ const login_handler = async (
         process.env.JWT_SECRET!,
         { expiresIn: "30d" }
       );
-      console.log(token);
       return res.status(200).send({ status: "ok", token });
     } else {
       return res.status(200).send({

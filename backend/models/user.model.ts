@@ -36,14 +36,6 @@ const create_user = async (
   return pool.query(text, values);
 };
 
-const get_user_all_info = async (email: string) => {
-  const text = "select * from user_ where email=$1;";
-  const values = [email];
-  const user = await pool.query(text, values);
-  if (user.rowCount == 0) return null;
-  return user.rows[0];
-};
-
 const get_info_by_id = async (user_id: string) => {
   const text =
     "select id, first_name, last_name, profile_picture_url, bio, moderation_lvl, email from user_ where id=$1;";
@@ -92,7 +84,8 @@ const getDataById = async (userId: string): Promise<User | null> => {
     "profilePictureUrl",
     "bio",
     "moderationLvl",
-    "email"
+    "email",
+    "createdAt"
   FROM "user_"
   WHERE "id" = $1;
 `;
@@ -104,14 +97,35 @@ const getDataById = async (userId: string): Promise<User | null> => {
   return result.rows[0] as User;
 };
 
+const getDataByEmail = async (email: string): Promise<User | null> => {
+  const text = `
+  SELECT 
+    "id",
+    "firstName",
+    "lastName",
+    "profilePictureUrl",
+    "bio",
+    "moderationLvl",
+    "email"
+  FROM "user_"
+  WHERE "email" = $1;
+`;
+  const values = [email];
+  const result = await pool.query(text, values);
+  if (result.rowCount == 0) {
+    return null;
+  }
+  return result.rows[0] as User;
+};
+
 const exporter = {
   create_user,
-  get_user_all_info,
   get_info_by_id,
   change_profile_pic_url,
   is_moderator,
   update_profile,
   getDataById,
+  getDataByEmail,
 };
 
 export default exporter;

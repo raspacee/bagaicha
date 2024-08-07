@@ -2,7 +2,7 @@ import express from "express";
 const router = express.Router();
 import upload from "../multer";
 
-import userController from "../controllers/userController";
+import userController from "../controllers/user.controller";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
 router.post(
@@ -20,17 +20,13 @@ router.put(
   userController.update_profile
 );
 
-/* Get reviews posted by a user */
-router.get(
-  "/:user_email/reviews",
-  authMiddleware,
-  userController.get_user_reviews
-);
+/* Get posts of a user */
+router.get("/:userId/posts", authMiddleware, userController.getUserPosts);
 
 /* Get info about logged in user */
 router.get("/my", authMiddleware, userController.getMyUserData);
 
 /* Get info about another user */
-router.get("/:slug", userController.get_user_info);
+router.get("/:userId", userController.getUserData);
 
 export default router;

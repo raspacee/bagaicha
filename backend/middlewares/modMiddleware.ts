@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import User from "../models/userModel";
+import User from "../models/user.model";
 
 export const USER_LEVELS = {
   NORMAL_USER: 0,
@@ -9,7 +9,7 @@ export const USER_LEVELS = {
 export const modMiddleware = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const isMod = await User.is_moderator(res.locals.user.user_id);

@@ -1,51 +1,6 @@
-import { foodItems } from "../config/foods";
 import { pool } from "../db/index";
 import { Distances } from "../lib/enums";
-import { z } from "zod";
-
-const daySchema = z.enum([
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-]);
-
-export type Day = z.infer<typeof daySchema>;
-
-const placeFeatureSchema = z.enum([
-  "Offers Delivery",
-  "Offers Takeout",
-  "Pet Friendly",
-  "Very Clean",
-  "Affordable",
-]);
-
-export type PlaceFeature = z.infer<typeof placeFeatureSchema>;
-
-const foodsOfferedSchema = z.enum(foodItems);
-
-export type FoodsOffered = z.infer<typeof foodsOfferedSchema>;
-
-const placeSchema = z.object({
-  id: z.string().uuid(),
-  osmId: z.string().max(20),
-  name: z.string().min(2).max(250),
-  lat: z.number(),
-  lon: z.number(),
-  openDays: z.array(daySchema).optional(),
-  openingTime: z.string().time().optional(),
-  closingTime: z.string().time().optional(),
-  placeFeatures: z.array(placeFeatureSchema).optional(),
-  coverImgUrl: z.string().url().optional(),
-  foodsOffered: z.array(foodsOfferedSchema).optional(),
-  ownedBy: z.string().uuid().optional(),
-  createdAt: z.string().datetime(),
-});
-
-export type Place = z.infer<typeof placeSchema>;
+import { Place } from "../types";
 
 const getPlacebyId = async (placeId: string): Promise<Place | null> => {
   const result = await pool.query("select * from place where id=$1 limit 1", [

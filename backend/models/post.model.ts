@@ -112,19 +112,49 @@ from review as r inner join user_ as u on r.author_id = u.id
   return result.rows;
 };
 
-const get_reviews_by_email = async (user_id: string, email: string) => {
+const getUserPosts = async (
+  userId: string,
+  requestingUserId: string
+): Promise<FeedPost[]> => {
   const text = `
- select r.*, u.first_name, u.last_name, u.profile_picture_url, u.email, pl.lat, pl.long, pl.name, pl.openmaps_place_id,
-(select exists (select * from review_like as l where l.liker_id=$1 and l.review_id=r.id limit 1)) as user_has_liked,
-(select exists (select * from review_bookmark as b where b.user_id=$1 and b.review_id=r.id limit 1)) as user_has_bookmarked_review
-from review as r inner join user_ as u on r.author_id = u.id
-	inner join place as pl on r.place_id = pl.id 
-where u.email = $2
-  order by created_at desc limit 20;
+  SELECT 
+    p.*, 
+    u."firstName" AS "authorFirstName",
+    u."lastName" AS "authorLastName", 
+    u."profilePictureUrl" AS "authorPictureUrl", 
+    u."email" AS "authorEmail", 
+    pl."lat", 
+    pl."lon", 
+    pl."name" AS "placeName", 
+    (
+      SELECT EXISTS (
+        SELECT 1 
+        FROM "postLike" AS l 
+        WHERE l."likerId" = $2 
+          AND l."postId" = p."id" 
+        LIMIT 1
+      )
+    ) AS "hasLiked",
+    (
+      SELECT EXISTS (
+        SELECT 1 
+        FROM "postBookmark" AS b 
+        WHERE b."userId" = $2 
+          AND b."postId" = p."id" 
+        LIMIT 1
+      )
+    ) AS "hasBookmarked"
+  FROM 
+    "post" AS p
+    INNER JOIN "user_" AS u ON p."authorId" = u."id"
+    INNER JOIN "place" AS pl ON p."placeId" = pl."id" 
+  WHERE u.id = $1
+  ORDER BY p."createdAt" DESC 
+  LIMIT 20;
 `;
-  const values = [user_id, email];
+  const values = [userId, requestingUserId];
   const result = await pool.query(text, values);
-  if (result.rowCount == 0) return null;
+  if (result.rowCount == 0) return [];
   return result.rows;
 };
 
@@ -177,8 +207,8 @@ const exporter = {
   createPost,
   getFeedPosts,
   search_reviews,
-  get_reviews_by_email,
   getPostById,
+  getUserPosts,
 };
 
 export default exporter;
