@@ -1,12 +1,8 @@
-import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
-import { useState } from "react";
 import Button from "@mui/material/Button";
 
 import { AUTH_TOKEN_NAME } from "../lib/config";
-import { useAppSelector, useAppDispatch } from "../hooks";
-import { setSearchModal } from "../slice/modalSlice";
-import SearchModal from "./modal/SearchModal";
 
 import {
   DropdownMenu,
@@ -21,7 +17,6 @@ import {
   SheetHeader,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
 import { Bell, Menu } from "lucide-react";
 import {
   useClearNotification,
@@ -29,14 +24,10 @@ import {
 } from "@/api/NotificationApi";
 import { useQueryClient } from "@tanstack/react-query";
 import NotificationItem from "./notification/NotificationItem";
-import { DateTime } from "luxon";
 import SearchBar from "./forms/SearchBar";
 
 export default function Navbar() {
-  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const isLoggedIn = true;
 
   const cookies = new Cookies(null, {
     path: "/",
@@ -44,7 +35,7 @@ export default function Navbar() {
 
   const { notifications, isLoading: isNotificationLoading } =
     useFetchNotification();
-  const { clearNotification } = useClearNotification();
+  const { clearNotifications } = useClearNotification();
   const queryClient = useQueryClient();
 
   const logout = () => {
@@ -76,7 +67,7 @@ export default function Navbar() {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             onCloseAutoFocus={() => {
-              clearNotification();
+              clearNotifications();
               queryClient.invalidateQueries({ queryKey: ["notifications"] });
             }}
           >
@@ -84,37 +75,9 @@ export default function Navbar() {
               {!isNotificationLoading &&
               !!notifications &&
               notifications.length > 0 ? (
-                notifications?.map((notification) => {
-                  const imageUrl = notification.user_profile_picture_url;
-
-                  const date = DateTime.fromISO(notification.created_at)
-                    .toRelative()
-                    ?.toString()!;
-                  let message = "";
-                  if (
-                    notification.object_type == "review" &&
-                    notification.action_type == "like"
-                  ) {
-                    message = `${notification.fullname} liked your post`;
-                  } else if (
-                    notification.object_type == "comment" &&
-                    notification.action_type == "like"
-                  ) {
-                    message = `${notification.fullname} liked your comment`;
-                  } else if (
-                    notification.object_type == "review" &&
-                    notification.action_type == "comment"
-                  ) {
-                    message = `${notification.fullname} commented on your post`;
-                  }
-                  return (
-                    <NotificationItem
-                      imageUrl={imageUrl}
-                      date={date}
-                      message={message}
-                    />
-                  );
-                })
+                notifications.map((notification) => (
+                  <NotificationItem notification={notification} />
+                ))
               ) : (
                 <h1 className="font-medium">No notifications</h1>
               )}
