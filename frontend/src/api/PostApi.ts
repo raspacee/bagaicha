@@ -238,6 +238,96 @@ const useUnlikePost = () => {
   return { unlikePost };
 };
 
+const useBookmarkPost = () => {
+  const queryClient = useQueryClient();
+
+  const bookmarkPostRequest = async (postId: string) => {
+    const response = await fetch(`${BASE_API_URL}/post/${postId}/bookmarks`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+      },
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+  };
+
+  const { mutateAsync: bookmarkPost } = useMutation({
+    mutationFn: bookmarkPostRequest,
+    onMutate: async (postId: string) => {
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+
+      const previousPosts = queryClient.getQueriesData({
+        queryKey: ["posts"],
+      })[1];
+
+      queryClient.setQueriesData(
+        { queryKey: ["posts"] },
+        (oldPosts: FeedPost[] | undefined) =>
+          oldPosts?.map((post) =>
+            post.id == postId ? { ...post, hasBookmarked: true } : post
+          )
+      );
+      return { previousPosts };
+    },
+    onError: (err, postId, context) => {
+      queryClient.setQueryData(["posts"], context?.previousPosts);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
+
+  return { bookmarkPost };
+};
+
+const useUnbookmarkPost = () => {
+  const queryClient = useQueryClient();
+
+  const unbookmarkPostRequest = async (postId: string) => {
+    const response = await fetch(`${BASE_API_URL}/post/${postId}/bookmarks`, {
+      method: "DELETE",
+      headers: {
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+      },
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+  };
+
+  const { mutateAsync: unbookmarkPost } = useMutation({
+    mutationFn: unbookmarkPostRequest,
+    onMutate: async (postId: string) => {
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+
+      const previousPosts = queryClient.getQueriesData({
+        queryKey: ["posts"],
+      })[1];
+
+      queryClient.setQueriesData(
+        { queryKey: ["posts"] },
+        (oldPosts: FeedPost[] | undefined) =>
+          oldPosts?.map((post) =>
+            post.id == postId ? { ...post, hasBookmarked: true } : post
+          )
+      );
+      return { previousPosts };
+    },
+    onError: (err, postId, context) => {
+      queryClient.setQueryData(["posts"], context?.previousPosts);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
+
+  return { unbookmarkPost };
+};
+
 export {
   useFetchMyFeed,
   useFetchPostById,
@@ -245,4 +335,6 @@ export {
   useCreatePost,
   useLikePost,
   useUnlikePost,
+  useBookmarkPost,
+  useUnbookmarkPost,
 };

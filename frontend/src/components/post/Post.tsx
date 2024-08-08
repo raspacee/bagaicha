@@ -10,10 +10,15 @@ import { haversine } from "../../lib/helpers";
 import { useAppSelector, useAppDispatch } from "../../hooks";
 import { setImgModal } from "../../slice/modalSlice";
 import { useBookmark } from "../../hooks/useBookmark";
-import { Heart, MapPinHouse } from "lucide-react";
+import { Bookmark, Heart, MapPinHouse } from "lucide-react";
 import PostOpened from "./PostOpened";
 import { FeedPost } from "@/lib/types";
-import { useLikePost, useUnlikePost } from "@/api/PostApi";
+import {
+  useBookmarkPost,
+  useLikePost,
+  useUnbookmarkPost,
+  useUnlikePost,
+} from "@/api/PostApi";
 
 type Props = {
   post: FeedPost;
@@ -26,11 +31,8 @@ export default function Post({ post }: Props) {
 
   const { likePost } = useLikePost();
   const { unlikePost } = useUnlikePost();
-
-  const [hasBookmarked, bookmarkHandler] = useBookmark(
-    post.hasBookmarked,
-    post.id
-  );
+  const { bookmarkPost } = useBookmarkPost();
+  const { unbookmarkPost } = useUnbookmarkPost();
 
   const date = DateTime.fromISO(post.createdAt);
 
@@ -106,31 +108,25 @@ export default function Post({ post }: Props) {
             color="red"
             fill="red"
             onClick={() => unlikePost(post.id)}
+            cursor="pointer"
           />
         ) : (
-          <Heart size={25} onClick={() => likePost(post.id)} />
+          <Heart cursor="pointer" size={25} onClick={() => likePost(post.id)} />
         )}
         <PostOpened postId={post.id as string} />
-        {hasBookmarked ? (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: [0, 1.2, 1] }}
-            transition={{
-              duration: 0.3,
-              ease: "easeOut",
-            }}
-          >
-            <BsBookmarkDashFill
-              size={23}
-              className="cursor-pointer"
-              onClick={() => bookmarkHandler()}
-            />
-          </motion.div>
+        {post.hasBookmarked ? (
+          <Bookmark
+            size={25}
+            color="black"
+            fill="black"
+            cursor="pointer"
+            onClick={() => unbookmarkPost(post.id)}
+          />
         ) : (
-          <BsBookmarkDash
-            size={23}
-            className="cursor-pointer"
-            onClick={() => bookmarkHandler()}
+          <Bookmark
+            size={25}
+            onClick={() => bookmarkPost(post.id)}
+            cursor="pointer"
           />
         )}
       </div>
