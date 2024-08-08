@@ -45,7 +45,7 @@ export default function Post({ post }: Props) {
             width="100"
             height="100"
           />
-          <Link to={`/user/${post.authorEmail}`}>
+          <Link to={`/user/${post.authorId}`}>
             <p className="ml-2">
               {post.authorFirstName + " " + post.authorLastName}
             </p>

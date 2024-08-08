@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Cookies from "universal-cookie";
 import { AUTH_TOKEN_NAME } from "../lib/config";
 import { FeedPost, User } from "@/lib/types";
@@ -29,6 +29,7 @@ export const useGetMyUserData = () => {
     data: myUser,
     isLoading,
     error,
+    isError,
   } = useQuery({
     queryKey: ["myUser"],
     queryFn: fetchMyUserDataRequest,
@@ -38,7 +39,7 @@ export const useGetMyUserData = () => {
     toast.error("Error while fetching your data");
   }
 
-  return { myUser, isLoading };
+  return { myUser, isLoading, isError };
 };
 
 export const useGetUserData = (userId: string) => {
@@ -104,4 +105,44 @@ export const useGetUserPosts = (userId: string) => {
   }
 
   return { posts, isLoading, setEnabled };
+};
+
+export const useUpdateUserProfile = () => {
+  const queryClient = useQueryClient();
+
+  const updateUserRequest = async (formData: FormData) => {
+    const response = await fetch(`${BASE_API_URL}/user/settings`, {
+      method: "put",
+      body: formData,
+      headers: {
+        Authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+      },
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+  };
+
+  const {
+    mutateAsync: updateUser,
+    isPending,
+    isSuccess,
+    error,
+  } = useMutation({
+    mutationFn: updateUserRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["myUser"] });
+    },
+  });
+
+  if (isSuccess) {
+    toast.success("User updated successfully");
+  }
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { updateUser, isPending };
 };

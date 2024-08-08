@@ -254,6 +254,26 @@ export const signupFormSchema = userSchema.pick({
 
 export type SignupForm = z.infer<typeof signupFormSchema>;
 
+export const updateProfileFormSchema = userSchema
+  .pick({
+    firstName: true,
+    lastName: true,
+    bio: true,
+    profilePictureUrl: true,
+  })
+  .extend({
+    profilePictureUrl: z.string().url().optional(),
+    newProfilePictureImage: z
+      .instanceof(File, { message: "Image is required" })
+      .optional(),
+  })
+  .refine((data) => data.newProfilePictureImage || data.profilePictureUrl, {
+    message: "Either image URL or file is required",
+    path: ["newProfilePictureImage"],
+  });
+
+export type UpdateProfileForm = z.infer<typeof updateProfileFormSchema>;
+
 export type {
   UserInterface,
   LocationType,
