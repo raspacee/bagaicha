@@ -5,7 +5,7 @@ import { NextFunction, Request, Response } from "express";
 import Place from "../models/place.model";
 import PostModel from "../models/post.model";
 import LikeModel from "../models/like.model";
-import ReviewBookmark from "../models/reviewBookmarkModel";
+import BookmarkModel from "../models/bookmark.model";
 import CommentModel from "../models/comment.model";
 import NotificationModel from "../models/notification.model";
 import { pool } from "../db";
@@ -177,44 +177,43 @@ const unlikePost = async (req: Request, res: Response) => {
   }
 };
 
-const bookmark_handler = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const bookmarkPost = async (req: Request, res: Response) => {
   try {
-    /* Check if the user has liked the review already */
-    const { review_id } = req.body;
-    if (review_id == undefined) {
-      throw new Error("Review ID is empty");
-    }
-    const has_bookmarked = await ReviewBookmark.user_has_bookmarked_review(
-      res.locals.user.user_id,
-      review_id
-    );
-    if (!has_bookmarked) {
-      const created_at = new Date().toISOString();
-      await ReviewBookmark.create_bookmark(
-        res.locals.user.user_id,
-        review_id,
-        created_at
-      );
-      return res.status(200).send({
-        status: "ok",
-        action: "bookmark",
-        message: "Bookmarked the review",
-      });
-    } else {
-      await ReviewBookmark.delete_bookmark(res.locals.user.user_id, review_id);
-      return res.status(200).send({
-        status: "ok",
-        action: "unbookmark",
-        message: "Unbookmarked dthe review",
+    const postId = req.params.postId;
+    const post = await PostModel.getPostById(postId, null);
+    if (!post) {
+      return res.status(400).json({
+        message: "Post ID not found",
       });
     }
+    await BookmarkModel.createPostBookmark(postId, req.jwtUserData!.userId);
+
+    return res.status(201).send();
   } catch (err) {
-    console.error(err);
-    return next(err);
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while bookmarking a post",
+    });
+  }
+};
+
+const unbookmarkPost = async (req: Request, res: Response) => {
+  try {
+    const postId = req.params.postId;
+    const post = await PostModel.getPostById(postId, null);
+    if (!post) {
+      return res.status(400).json({
+        message: "Post ID not found",
+      });
+    }
+    await BookmarkModel.deletePostBookmark(postId, req.jwtUserData!.userId);
+
+    return res.status(201).send();
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while bookmarking a post",
+    });
   }
 };
 
@@ -226,7 +225,7 @@ const get_bookmarks = async (
   try {
     const user_id = res.locals.user.user_id;
 
-    const bookmarks = await ReviewBookmark.get_bookmarks(user_id);
+    const bookmarks = await BookmarkModel.get_bookmarks(user_id);
     return res.status(200).send({
       status: "ok",
       bookmarks,
@@ -269,9 +268,10 @@ const exporter = {
   getFeed,
   likePost,
   unlikePost,
-  bookmark_handler,
   get_bookmarks,
   getSinglePost,
+  bookmarkPost,
+  unbookmarkPost,
 };
 
 export default exporter;

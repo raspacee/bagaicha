@@ -19,7 +19,12 @@ router.delete("/:postId/likes", authMiddleware, postController.unlikePost);
 router.get("/", authMiddleware, postController.getFeed);
 
 /* Bookmark a review */
-router.post("/bookmark", authMiddleware, postController.bookmark_handler);
+router.post("/:postId/bookmarks", authMiddleware, postController.bookmarkPost);
+router.delete(
+  "/:postId/bookmarks",
+  authMiddleware,
+  postController.unbookmarkPost
+);
 
 /* Get all bookmarked reviews by a user */
 router.get("/bookmark", authMiddleware, postController.get_bookmarks);

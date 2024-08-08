@@ -1,30 +1,14 @@
 import { pool } from "../db/index";
-
-const create_bookmark = async (
-  user_id: string,
-  review_id: string,
-  created_at: string,
-) => {
-  const text = `insert into review_bookmark (user_id, review_id, created_at) values ($1, $2, $3)`;
-  const values = [user_id, review_id, created_at];
-  return await pool.query(text, values);
-};
-
-const delete_bookmark = async (user_id: string, review_id: string) => {
-  await pool.query(
-    "delete from review_bookmark where user_id = $1 and review_id = $2",
-    [user_id, review_id],
-  );
-};
+import { v4 as uuid } from "uuid";
 
 const user_has_bookmarked_review = async (
   user_id: string,
-  review_id: string,
+  review_id: string
 ) => {
   const bookmark = await pool.query(
     "select * from review_bookmark where \
     user_id=$1 and review_id=$2 limit 1",
-    [user_id, review_id],
+    [user_id, review_id]
   );
   return bookmark.rowCount == 1;
 };
@@ -45,11 +29,40 @@ where b.user_id = $1
   return res.rows;
 };
 
+const createPostBookmark = async (postId: string, userId: string) => {
+  const id = uuid();
+  const text = `
+  INSERT INTO "postBookmark" (
+    "id", 
+    "userId", 
+    "postId", 
+    "createdAt"
+  )
+  VALUES (
+    $1, 
+    $2, 
+    $3, 
+    $4
+  );`;
+
+  const values = [id, userId, postId, new Date().toISOString()];
+  await pool.query(text, values);
+};
+
+const deletePostBookmark = async (postId: string, userId: string) => {
+  const text = `
+  DELETE FROM "postBookmark"
+  WHERE "userId" = $1
+    AND "postId" = $2;`;
+  const values = [userId, postId];
+  await pool.query(text, values);
+};
+
 const exporter = {
-  create_bookmark,
   get_bookmarks,
-  delete_bookmark,
   user_has_bookmarked_review,
+  createPostBookmark,
+  deletePostBookmark,
 };
 
 export default exporter;
