@@ -3,7 +3,7 @@ dotenv.config();
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import indexRouter from "./routes/indexRouter";
-import authRouter from "./routes/authRouter";
+import authRouter from "./routes/auth.router";
 import postRouter from "./routes/post.router";
 import userRouter from "./routes/user.router";
 import placeRouter from "./routes/place.router";

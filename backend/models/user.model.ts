@@ -1,6 +1,7 @@
 import { pool } from "../db/index";
 import { USER_LEVELS } from "../middlewares/modMiddleware";
-import { User } from "../types";
+import { SignupForm, User } from "../types";
+import { v4 as uuid } from "uuid";
 
 const is_moderator = async (id: string) => {
   const text = `select moderation_lvl from user_ where id=$1`;
@@ -12,28 +13,34 @@ const is_moderator = async (id: string) => {
   return false;
 };
 
-const create_user = async (
-  id: string,
-  email: string,
-  first_name: string,
-  last_name: string,
-  password: string,
-  created_at: string,
-  profile_picture_url: string
-) => {
-  const text =
-    "insert into user_ (id, email, first_name, last_name, password, \
-    created_at, profile_picture_url) values ($1, $2, $3, $4, $5, $6, $7)";
+const createUser = async (data: SignupForm) => {
+  const id = uuid();
+  const createdAt = new Date().toISOString();
+  const defaultPictureUrl =
+    "https://t3.ftcdn.net/jpg/02/10/49/86/360_F_210498655_ywivjjUe6cgyt52n4BxktRgDCfFg8lKx.jpg";
+
+  const text = `
+  INSERT INTO "user_" (
+    "id",
+    "email",
+    "firstName",
+    "lastName",
+    "password",
+    "createdAt",
+    "profilePictureUrl"
+  ) VALUES ($1, $2, $3, $4, $5, $6, $7);
+`;
+
   const values = [
     id,
-    email,
-    first_name,
-    last_name,
-    password,
-    created_at,
-    profile_picture_url,
+    data.email,
+    data.firstName,
+    data.lastName,
+    data.password,
+    createdAt,
+    defaultPictureUrl,
   ];
-  return pool.query(text, values);
+  await pool.query(text, values);
 };
 
 const get_info_by_id = async (user_id: string) => {
@@ -118,14 +125,32 @@ const getDataByEmail = async (email: string): Promise<User | null> => {
   return result.rows[0] as User;
 };
 
+const getPasswordByEmail = async (email: string): Promise<User | null> => {
+  const text = `
+  SELECT 
+    "id",
+    "email",
+    "password"
+  FROM "user_"
+  WHERE "email" = $1;
+`;
+  const values = [email];
+  const result = await pool.query(text, values);
+  if (result.rowCount == 0) {
+    return null;
+  }
+  return result.rows[0] as User;
+};
+
 const exporter = {
-  create_user,
+  createUser,
   get_info_by_id,
   change_profile_pic_url,
   is_moderator,
   update_profile,
   getDataById,
   getDataByEmail,
+  getPasswordByEmail,
 };
 
 export default exporter;
