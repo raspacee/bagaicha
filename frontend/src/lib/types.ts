@@ -182,10 +182,23 @@ type CommentForm = z.infer<typeof commentFormSchema>;
 
 export const userSchema = z.object({
   id: z.string().uuid(),
-  firstName: z.string().max(50),
-  lastName: z.string().max(50),
-  password: z.string().max(50),
-  email: z.string().email(),
+  firstName: z
+    .string()
+    .min(2, {
+      message: "At least 2 characters required",
+    })
+    .max(20),
+  lastName: z
+    .string()
+    .min(2, {
+      message: "At least 2 characters required",
+    })
+    .max(20),
+  password: z
+    .string()
+    .min(6, { message: "Password should be atleast 6 characters" })
+    .max(50),
+  email: z.string().min(1).email("Valid email is required"),
   createdAt: z.string().datetime(),
   profilePictureUrl: z.string().url(),
   moderationLvl: z.number().default(0),
@@ -221,6 +234,26 @@ type NotificationWhole = Notification & {
   authorPictureUrl: string;
 };
 
+type LoginResponse = {
+  token: string;
+};
+
+export const loginFormSchema = userSchema.pick({
+  email: true,
+  password: true,
+});
+
+export type LoginForm = z.infer<typeof loginFormSchema>;
+
+export const signupFormSchema = userSchema.pick({
+  firstName: true,
+  lastName: true,
+  email: true,
+  password: true,
+});
+
+export type SignupForm = z.infer<typeof signupFormSchema>;
+
 export type {
   UserInterface,
   LocationType,
@@ -238,4 +271,5 @@ export type {
   User,
   NotificationTypes,
   NotificationWhole,
+  LoginResponse,
 };

@@ -31,7 +31,7 @@ export default function FeedPage() {
   return (
     <div className="w-full flex flex-col md:flex-row">
       <div className="px-1 md:px-4 flex-1">
-        <div className="bg-white h-fit px-6 py-3 mt-3 border rounded-md border-slate-200 flex items-center shadow-xl">
+        <div className="bg-white h-fit px-6 py-3 border rounded-md border-slate-200 flex items-center shadow-xl">
           <Avatar alt={user.first_name} src={user.profile_picture_url} />
           <div className="flex-1 ml-3">
             <CreatePostDialog />

@@ -9,8 +9,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./global.css";
 import FeedPage from "./routes/FeedPage";
 import UserProfilePage from "./routes/UserProfilePage";
-import Login from "./routes/login";
-import Signup from "./routes/signup";
+import LoginPage from "./routes/LoginPage";
+import SignupPage from "./routes/SignupPage";
 import ReviewCreate from "./routes/review_create";
 import Bookmarks from "./routes/bookmarks";
 //import Place from "./routes/place_archived";
@@ -123,12 +123,12 @@ const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <Login />,
+    element: <LoginPage />,
     loader: notAuthenticated,
   },
   {
     path: "/signup",
-    element: <Signup />,
+    element: <SignupPage />,
     loader: notAuthenticated,
   },
 ]);
