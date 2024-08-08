@@ -1,6 +1,6 @@
 import { pool } from "../db/index";
 import { USER_LEVELS } from "../middlewares/modMiddleware";
-import { SignupForm, User } from "../types";
+import { SignupForm, UpdateProfileForm, User } from "../types";
 import { v4 as uuid } from "uuid";
 
 const is_moderator = async (id: string) => {
@@ -43,15 +43,6 @@ const createUser = async (data: SignupForm) => {
   await pool.query(text, values);
 };
 
-const get_info_by_id = async (user_id: string) => {
-  const text =
-    "select id, first_name, last_name, profile_picture_url, bio, moderation_lvl, email from user_ where id=$1;";
-  const values = [user_id];
-  const user = await pool.query(text, values);
-  if (user.rowCount == 0) return null;
-  return user.rows[0];
-};
-
 const change_profile_pic_url = async (user_id: string, new_url: string) => {
   await pool.query(
     "update user_ set profile_picture_url = $1 \
@@ -60,26 +51,28 @@ const change_profile_pic_url = async (user_id: string, new_url: string) => {
   );
 };
 
-const update_profile = async (
-  user_id: string,
-  first_name: string,
-  last_name: string,
-  bio: string,
-  profile_pic: string | null
+const updateProfileInfo = async (
+  userId: string,
+  formData: UpdateProfileForm,
+  profilePictureUrl: string
 ) => {
-  if (profile_pic == null) {
-    await pool.query(
-      `update user_ set first_name = $1, last_name = $2, bio = $3
-    where id = $4;`,
-      [first_name, last_name, bio, user_id]
-    );
-  } else {
-    await pool.query(
-      `update user_ set first_name = $1, last_name = $2, bio = $3, profile_picture_url = $4
-    where id = $5;`,
-      [first_name, last_name, bio, profile_pic, user_id]
-    );
-  }
+  const text = `
+  UPDATE "user_" 
+  SET 
+    "firstName" = $1,
+    "lastName" = $2,
+    "bio" = $3,
+    "profilePictureUrl" = $4
+  WHERE "id" = $5;
+  `;
+  const values = [
+    formData.firstName,
+    formData.lastName,
+    formData.bio,
+    profilePictureUrl,
+    userId,
+  ];
+  await pool.query(text, values);
 };
 
 const getDataById = async (userId: string): Promise<User | null> => {
@@ -144,10 +137,9 @@ const getPasswordByEmail = async (email: string): Promise<User | null> => {
 
 const exporter = {
   createUser,
-  get_info_by_id,
   change_profile_pic_url,
   is_moderator,
-  update_profile,
+  updateProfileInfo,
   getDataById,
   getDataByEmail,
   getPasswordByEmail,

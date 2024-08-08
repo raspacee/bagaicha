@@ -16,8 +16,8 @@ router.post(
 router.put(
   "/settings",
   authMiddleware,
-  upload.fields([{ name: "new_profile_pic", maxCount: 1 }]),
-  userController.update_profile
+  upload.single("newProfilePictureImage"),
+  userController.updateUserProfile
 );
 
 /* Get posts of a user */

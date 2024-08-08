@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import UserModel from "../models/user.model";
 import PostModel from "../models/post.model";
 import { v2 as cloudinary } from "cloudinary";
+import { UpdateProfileForm } from "../types";
+import { uploadImage } from "../utils/image";
 
 const getUserData = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -66,38 +68,26 @@ const getUserPosts = async (req: Request, res: Response) => {
   }
 };
 
-interface ImageInterface {
-  new_profile_pic?: any;
-}
-
-const update_profile = async (req: Request, res: Response) => {
+const updateUserProfile = async (req: Request, res: Response) => {
   try {
-    const user = res.locals.user;
+    const formData = req.body as UpdateProfileForm;
+    const userId = req.jwtUserData!.userId;
 
-    const { first_name, last_name, bio } = req.body;
-
-    let profile_pic: string | null = null;
-    const files = req.files as ImageInterface;
-    if (files.new_profile_pic) {
-      const picture_upload = await cloudinary.uploader.upload(
-        files.new_profile_pic[0].path
-      );
-      profile_pic = picture_upload.secure_url;
+    const user = await UserModel.getDataById(userId);
+    if (!user) {
+      return res.status(404).json();
     }
-    await UserModel.update_profile(
-      user.user_id,
-      first_name,
-      last_name,
-      bio,
-      profile_pic
-    );
 
-    return res.status(200).send({
-      status: "ok",
-      message: "Successfully updated user settings",
-    });
+    let profilePictureUrl = user.profilePictureUrl;
+    if (req.file) {
+      profilePictureUrl = await uploadImage(req.file as Express.Multer.File);
+    }
+
+    await UserModel.updateProfileInfo(userId, formData, profilePictureUrl);
+
+    return res.status(200).json();
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return res.status(500).send({
       status: "error",
       message: err,
@@ -107,7 +97,7 @@ const update_profile = async (req: Request, res: Response) => {
 
 const exporter = {
   change_profile_picture,
-  update_profile,
+  updateUserProfile,
   getMyUserData,
   getUserData,
   getUserPosts,

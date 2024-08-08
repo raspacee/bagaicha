@@ -17,16 +17,16 @@ export const authMiddleware = (
 ) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
+    console.error("Auth missing");
     return res.status(400).send({
-      status: "error",
       message: "Authentication token missing, try logging in again",
     });
   }
 
   jwt.verify(token, process.env.JWT_SECRET!, function (err, decoded) {
     if (err) {
+      console.error("Auth invalid");
       return res.status(400).send({
-        status: "error",
         message: "Invalid authentication token, try logging in again",
       });
     }

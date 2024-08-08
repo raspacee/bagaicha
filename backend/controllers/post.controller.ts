@@ -1,7 +1,6 @@
 import path from "path";
 import { DateTime } from "luxon";
 import { NextFunction, Request, Response } from "express";
-import { v2 as cloudinary } from "cloudinary";
 
 import Place from "../models/place.model";
 import PostModel from "../models/post.model";
@@ -11,6 +10,7 @@ import CommentModel from "../models/comment.model";
 import NotificationModel from "../models/notification.model";
 import { pool } from "../db";
 import { CreatePostForm, Notification, Post } from "../types";
+import { uploadImage } from "../utils/image";
 
 /* create a post */
 const createMyPost = async (
@@ -262,13 +262,6 @@ const getSinglePost = async (
     console.error(err);
     return next("Error while fetching post by id");
   }
-};
-
-const uploadImage = async (image: Express.Multer.File) => {
-  const base64Image = Buffer.from(image.buffer).toString("base64");
-  const dataURI = `data:${image.mimetype};base64,${base64Image}`;
-  const uploadResponse = await cloudinary.uploader.upload(dataURI);
-  return uploadResponse.secure_url;
 };
 
 const exporter = {

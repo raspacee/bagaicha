@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { pool } from "../db/index";
 import { Distances } from "../lib/enums";
 import { FeedPost, PostWithComments } from "../types";
