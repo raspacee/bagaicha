@@ -2,25 +2,21 @@ import { Request, Response, NextFunction } from "express";
 import UserModel from "../models/user.model";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
 import { JwtUserData, LoginForm, SignupForm } from "../types";
+import { hashPassword } from "../utils/password";
 
-const signupHandler = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const signupHandler = async (req: Request, res: Response) => {
   const data = req.body as SignupForm;
 
   try {
     const existingUser = await UserModel.getDataByEmail(data.email);
     if (existingUser) {
-      return res.status(409).json();
+      return res.status(409).json({
+        message: "Email is already used",
+      });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(data.password, salt);
-    data.password = hashedPassword;
+    data.password = await hashPassword(data.password);
 
     await UserModel.createUser(data);
 

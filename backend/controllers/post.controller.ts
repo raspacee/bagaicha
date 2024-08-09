@@ -133,7 +133,7 @@ const likePost = async (req: Request, res: Response) => {
     const postId = req.params.postId;
     const post = await PostModel.getPostById(postId, null);
     if (!post) {
-      return res.status(400).json({
+      return res.status(404).json({
         message: "Post ID not found",
       });
     }
@@ -149,7 +149,7 @@ const likePost = async (req: Request, res: Response) => {
     };
     await NotificationModel.createNotification(notification);
 
-    return res.status(201).send();
+    return res.status(201).json();
   } catch (err) {
     console.log(err);
     return res.status(500).json({
@@ -163,12 +163,12 @@ const unlikePost = async (req: Request, res: Response) => {
     const postId = req.params.postId;
     const post = await PostModel.getPostById(postId, null);
     if (!post) {
-      return res.status(400).json({
+      return res.status(404).json({
         message: "Post ID not found",
       });
     }
     await LikeModel.deletePostLike(postId, req.jwtUserData!.userId);
-    return res.status(204).send();
+    return res.status(204).json();
   } catch (err) {
     console.log(err);
     return res.status(500).json({
