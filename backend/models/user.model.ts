@@ -53,8 +53,7 @@ const change_profile_pic_url = async (user_id: string, new_url: string) => {
 
 const updateProfileInfo = async (
   userId: string,
-  formData: UpdateProfileForm,
-  profilePictureUrl: string
+  formData: UpdateProfileForm
 ) => {
   const text = `
   UPDATE "user_" 
@@ -69,7 +68,7 @@ const updateProfileInfo = async (
     formData.firstName,
     formData.lastName,
     formData.bio,
-    profilePictureUrl,
+    formData.profilePictureUrl,
     userId,
   ];
   await pool.query(text, values);

@@ -31,29 +31,6 @@ const getMyUserData = async (
   }
 };
 
-const change_profile_picture = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const picture_path = req.file!.path;
-    const picture_upload = await cloudinary.uploader.upload(picture_path);
-
-    await UserModel.change_profile_pic_url(
-      res.locals.user.user_id,
-      picture_upload.secure_url
-    );
-
-    return res.status(200).send({
-      status: "ok",
-      message: "Profile picture changed",
-    });
-  } catch (err) {
-    return next(err);
-  }
-};
-
 const getUserPosts = async (req: Request, res: Response) => {
   // TODO ADD PAGINATION
   try {
@@ -78,12 +55,13 @@ const updateUserProfile = async (req: Request, res: Response) => {
       return res.status(404).json();
     }
 
-    let profilePictureUrl = user.profilePictureUrl;
     if (req.file) {
-      profilePictureUrl = await uploadImage(req.file as Express.Multer.File);
+      formData.profilePictureUrl = await uploadImage(
+        req.file as Express.Multer.File
+      );
     }
 
-    await UserModel.updateProfileInfo(userId, formData, profilePictureUrl);
+    await UserModel.updateProfileInfo(userId, formData);
 
     return res.status(200).json();
   } catch (err) {
@@ -96,7 +74,6 @@ const updateUserProfile = async (req: Request, res: Response) => {
 };
 
 const exporter = {
-  change_profile_picture,
   updateUserProfile,
   getMyUserData,
   getUserData,

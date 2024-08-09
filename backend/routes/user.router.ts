@@ -5,13 +5,6 @@ import upload from "../multer";
 import userController from "../controllers/user.controller";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
-router.post(
-  "/profile-picture",
-  authMiddleware,
-  upload.single("profile-picture"),
-  userController.change_profile_picture
-);
-
 /* Update a user's profile */
 router.put(
   "/settings",
