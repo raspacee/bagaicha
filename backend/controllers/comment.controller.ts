@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 
-import { pool } from "../db";
 import CommentModel from "../models/comment.model";
 import CommentLike from "../models/commentLikeModal";
 import NotificationModel from "../models/notification.model";
@@ -39,7 +38,7 @@ const createComment = async (req: Request, res: Response) => {
 
     const post = await PostModel.getPostById(commentForm.postId, null);
     if (!post) {
-      return res.status(404).send();
+      return res.status(404).json();
     }
 
     await CommentModel.createCommentOnPost(commentForm, userId);
@@ -53,10 +52,10 @@ const createComment = async (req: Request, res: Response) => {
     };
     await NotificationModel.createNotification(notification);
 
-    return res.status(201).send();
+    return res.status(201).json();
   } catch (err) {
     console.log(err);
-    return res.status(500).send({
+    return res.status(500).json({
       message: err,
     });
   }
