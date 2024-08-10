@@ -21,13 +21,16 @@ import Search from "./routes/search";
 import EditProfilePage from "./routes/EditProfilePage";
 import NotAuthorized from "./routes/not_authorized";
 import Suggestions from "./routes/suggestions";
-import Place from "./routes/place";
+import PlacePage from "./routes/PlacePage";
 import { notAuthenticated, isModerator } from "./lib/loaders";
 import { store } from "./store";
 import { Provider } from "react-redux";
 import MainLayout from "./layouts/MainLayout";
 import AuthenticatedRoute from "./auth/AuthenticatedRoute";
 import { Toaster } from "./components/ui/sonner";
+import RequestOwnershipPage from "./routes/RequestOwnershipPage";
+import AdminDashboardPage from "./routes/AdminDashboardPage";
+import AdminRoute from "./auth/AdminRoute";
 
 const router = createBrowserRouter([
   {
@@ -71,8 +74,20 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "place/:place_id",
-        element: <Place />,
+        path: "place/:placeId",
+        element: (
+          <MainLayout>
+            <PlacePage />
+          </MainLayout>
+        ),
+      },
+      {
+        path: "place/:placeId/request-ownership",
+        element: (
+          <MainLayout>
+            <RequestOwnershipPage />
+          </MainLayout>
+        ),
       },
       {
         path: "place/add",
@@ -117,6 +132,16 @@ const router = createBrowserRouter([
           <MainLayout>
             <Suggestions />
           </MainLayout>
+        ),
+      },
+      {
+        path: "admin/",
+        element: (
+          <AdminRoute>
+            <MainLayout>
+              <AdminDashboardPage />
+            </MainLayout>
+          </AdminRoute>
         ),
       },
     ],

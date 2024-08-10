@@ -274,6 +274,30 @@ export const updateProfileFormSchema = userSchema
 
 export type UpdateProfileForm = z.infer<typeof updateProfileFormSchema>;
 
+export const ownershipRequestSchema = z.object({
+  id: z.string().uuid(),
+  requestedBy: z.string().uuid(),
+  placeId: z.string().uuid(),
+  ownershipGranted: z.boolean(),
+  documentImageUrl: z.string().url(),
+  requestedDate: z.string().datetime(),
+});
+
+export type OwnershipRequest = z.infer<typeof ownershipRequestSchema>;
+
+export const ownershipRequestFormSchema = ownershipRequestSchema
+  .pick({
+    placeId: true,
+  })
+  .extend({
+    documentImageFile: z.instanceof(File, { message: "Image is required" }),
+  });
+export type OwnershipRequestForm = z.infer<typeof ownershipRequestFormSchema>;
+
+export type AdminVerifyResponse = {
+  isAdmin: boolean;
+};
+
 export type {
   UserInterface,
   LocationType,
