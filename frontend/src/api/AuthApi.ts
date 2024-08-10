@@ -17,6 +17,9 @@ type AuthenticateUserResponse = {
 export const useAuthenticateUser = () => {
   const authenticateUserRequest =
     async (): Promise<AuthenticateUserResponse> => {
+      if (!cookies.get(AUTH_TOKEN_NAME)) {
+        return new Promise((resolve) => resolve({ authenticated: false }));
+      }
       const response = await fetch(`${BASE_API_URL}/auth/authenticate`, {
         method: "POST",
         headers: {
