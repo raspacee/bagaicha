@@ -2,7 +2,7 @@ import express from "express";
 const router = express.Router();
 
 import notificationController from "../controllers/notification.controller";
-import { authMiddleware } from "../middlewares/authMiddleware";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 /* Get a user's unread notifications */
 router.get("/my", authMiddleware, notificationController.getNotifications);

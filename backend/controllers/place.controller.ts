@@ -4,20 +4,22 @@ import { v4 as uuidv4 } from "uuid";
 
 import PlaceModel from "../models/place.model";
 import PlaceReview from "../models/placeReviewModel";
+import UserModel from "../models/user.model";
+import OwnershipRequestModel from "../models/ownershipRequest.model";
 import { Distances } from "../lib/enums";
+import { uploadImage } from "../utils/image";
+import { OwnershipRequestForm } from "../types";
 
-const get_place_info = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const place_id = req.params.place_id as string;
+const getPlace = async (req: Request, res: Response, next: NextFunction) => {
+  const placeId = req.params.placeId as string;
   try {
-    const place = await PlaceModel.get_place_by_uuid(place_id);
-    return res.status(200).send({
-      status: "ok",
-      place,
-    });
+    const place = await PlaceModel.getPlacebyId(placeId);
+    if (!place) {
+      return res.status(404).json({
+        message: "Place not found",
+      });
+    }
+    return res.status(200).json(place);
   } catch (err) {
     return next(err);
   }
@@ -288,8 +290,73 @@ const getPlaceSuggestions = async (req: Request, res: Response) => {
   }
 };
 
+const requestPlaceOwnership = async (req: Request, res: Response) => {
+  try {
+    const { placeId } = req.params;
+
+    const place = await PlaceModel.getPlacebyId(placeId);
+    if (!place) {
+      return res.status(404).json({
+        message: "Place not found",
+      });
+    }
+    if (place.ownedBy) {
+      return res.status(403).json({
+        message: "Place is already owned by someone",
+      });
+    }
+    const user = await UserModel.getDataById(req.jwtUserData!.userId);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const imageUrl = await uploadImage(req.file as Express.Multer.File);
+    await OwnershipRequestModel.createOwnershipRequest(
+      {
+        placeId: placeId,
+      } as OwnershipRequestForm,
+      imageUrl,
+      req.jwtUserData!.userId
+    );
+    return res.status(201).json();
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while requesting place ownership",
+    });
+  }
+};
+
+const getAllOwnershipRequests = async (req: Request, res: Response) => {
+  try {
+    const ownershipRequests =
+      await OwnershipRequestModel.getAllPlaceOwnershipRequests();
+    return res.json(ownershipRequests);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while getting all place ownership",
+    });
+  }
+};
+
+const updatePlaceOwnership = async (req: Request, res: Response) => {
+  try {
+    const { requestId } = req.body;
+    await OwnershipRequestModel.grantRequestOwnership(requestId);
+    return res.json();
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while getting all place ownership",
+    });
+  }
+};
+
 const exporter = {
-  get_place_info,
+  getPlace,
   get_review,
   top_places,
   update_place_info,
@@ -298,6 +365,9 @@ const exporter = {
   create_place_review,
   get_place_review,
   getPlaceSuggestions,
+  requestPlaceOwnership,
+  getAllOwnershipRequests,
+  updatePlaceOwnership,
 };
 
 export default exporter;

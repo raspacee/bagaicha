@@ -2,7 +2,10 @@ import express from "express";
 const router = express.Router();
 
 import authController from "../controllers/auth.controller";
-import { authMiddleware } from "../middlewares/authMiddleware";
+import {
+  authMiddleware,
+  verifyAdminMiddleware,
+} from "../middlewares/auth.middleware";
 import { modMiddleware } from "../middlewares/modMiddleware";
 
 router.post("/signup", authController.signupHandler);
@@ -15,6 +18,13 @@ router.post(
   authMiddleware,
   modMiddleware,
   authController.mod_authenticate
+);
+/* Verify a admin */
+router.post(
+  "/admin",
+  authMiddleware,
+  verifyAdminMiddleware,
+  authController.adminHandler
 );
 
 export default router;

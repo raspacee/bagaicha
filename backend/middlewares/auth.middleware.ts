@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { JwtUserData } from "../types";
+import { JwtUserData, UserModerationLevel } from "../types";
+import UserModel from "../models/user.model";
 
 declare global {
   namespace Express {
@@ -35,4 +36,30 @@ export const authMiddleware = (
     req.jwtUserData = decoded as JwtUserData;
     return next();
   });
+};
+
+export const verifyAdminMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = await UserModel.getDataById(req.jwtUserData!.userId);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    if (user.moderationLvl == UserModerationLevel.Admin) {
+      return next();
+    } else {
+      return res.status(401).json();
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Error while verifying admin",
+    });
+  }
 };

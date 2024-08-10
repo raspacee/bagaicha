@@ -1,14 +1,12 @@
-import path from "path";
 import { DateTime } from "luxon";
 import { NextFunction, Request, Response } from "express";
 
-import Place from "../models/place.model";
+import PlaceModel from "../models/place.model";
 import PostModel from "../models/post.model";
 import LikeModel from "../models/like.model";
 import BookmarkModel from "../models/bookmark.model";
 import CommentModel from "../models/comment.model";
 import NotificationModel from "../models/notification.model";
-import { pool } from "../db";
 import { CreatePostForm, Notification, Post } from "../types";
 import { uploadImage } from "../utils/image";
 
@@ -21,7 +19,7 @@ const createMyPost = async (
   try {
     const { placeName, placeId, body, rating }: CreatePostForm = req.body;
 
-    const place = await Place.getPlacebyId(placeId);
+    const place = await PlaceModel.getPlacebyId(placeId);
     if (!place) {
       return res.status(400).json({
         message: "Bad placeId",

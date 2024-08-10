@@ -3,7 +3,7 @@ const router = express.Router();
 import upload from "../multer";
 
 import userController from "../controllers/user.controller";
-import { authMiddleware } from "../middlewares/authMiddleware";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 /* Update a user's profile */
 router.put(

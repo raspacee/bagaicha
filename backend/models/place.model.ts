@@ -18,44 +18,6 @@ enum Rating {
   one = "1",
 }
 
-const get_place_by_uuid = async (uuid: string) => {
-  try {
-    const result = await pool.query("select * from place where id=$1 limit 1", [
-      uuid,
-    ]);
-    if (result.rowCount == 1) {
-      const total_count = await pool.query(
-        "select count(*) as total_count from \
-      place_review where place_id=$1",
-        [uuid]
-      );
-      const text = `
-with counts as (select count(*) as reviews_count, rating as rating_star from place_review 
-where place_id=$1 group by rating order by rating_star asc)
-
-select star as rating_star, 
-case
-when counts.reviews_count is null then 0
-else counts.reviews_count end from generate_series(1, 5) as star left join counts on counts.rating_star::text = star::text
-`;
-      const values = [uuid];
-      const data = await pool.query(text, values);
-      return {
-        place: result.rows[0],
-        total_count: total_count.rows[0].total_count,
-        five_star_count: data.rows[0].reviews_count,
-        four_star_count: data.rows[1].reviews_count,
-        three_star_count: data.rows[2].reviews_count,
-        two_star_count: data.rows[3].reviews_count,
-        one_star_count: data.rows[4].reviews_count,
-      };
-    }
-  } catch (err) {
-    console.error(err);
-    return null;
-  }
-};
-
 const update_place = async (
   id: string,
   open_days: string[],
@@ -184,7 +146,6 @@ const getPlaceSuggestionsByQuery = async (query: string): Promise<Place[]> => {
 
 const exporter = {
   getPlacebyId,
-  get_place_by_uuid,
   create_place,
   get_review_by_rating,
   get_top_places,

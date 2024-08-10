@@ -4,7 +4,7 @@ import upload from "../multer";
 
 import postController from "../controllers/post.controller";
 import commentController from "../controllers/comment.controller";
-import { authMiddleware } from "../middlewares/authMiddleware";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 router.post(
   "/",

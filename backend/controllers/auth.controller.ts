@@ -2,7 +2,12 @@ import { Request, Response, NextFunction } from "express";
 import UserModel from "../models/user.model";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { JwtUserData, LoginForm, SignupForm } from "../types";
+import {
+  JwtUserData,
+  LoginForm,
+  SignupForm,
+  UserModerationLevel,
+} from "../types";
 import { hashPassword } from "../utils/password";
 
 const signupHandler = async (req: Request, res: Response) => {
@@ -76,11 +81,18 @@ const mod_authenticate = async (req: Request, res: Response) => {
   });
 };
 
+const adminHandler = (req: Request, res: Response) => {
+  return res.json({
+    isAdmin: true,
+  });
+};
+
 const exporter = {
   signupHandler,
   loginHandler,
   auth_handler,
   mod_authenticate,
+  adminHandler,
 };
 
 export default exporter;
