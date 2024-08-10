@@ -250,12 +250,12 @@ const getSinglePost = async (
       postId,
       req.jwtUserData?.userId || null
     );
-    if (post == null) res.status(404).send();
+    if (post == null) return res.status(404).json();
     const comments = await CommentModel.getCommentsOfPost(
       postId,
       req.jwtUserData?.userId || null
     );
-    post!.comments = comments;
+    post.comments = comments;
     return res.json(post);
   } catch (err) {
     console.error(err);

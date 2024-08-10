@@ -23,9 +23,6 @@ export const useAuthenticateUser = () => {
           Authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
         },
       });
-      if (!response.ok) {
-        throw new Error("Failed to authenticate user");
-      }
 
       return response.json();
     };

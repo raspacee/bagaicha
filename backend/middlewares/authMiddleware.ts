@@ -20,6 +20,7 @@ export const authMiddleware = (
     console.error("Auth missing");
     return res.status(400).send({
       message: "Authentication token missing, try logging in again",
+      authenticated: false,
     });
   }
 
@@ -28,6 +29,7 @@ export const authMiddleware = (
       console.error("Auth invalid");
       return res.status(400).send({
         message: "Invalid authentication token, try logging in again",
+        authenticated: false,
       });
     }
     req.jwtUserData = decoded as JwtUserData;
