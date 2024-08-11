@@ -230,6 +230,45 @@ export enum UserModerationLevel {
   Admin,
 }
 
+export const editPlaceFormSchema = placeSchema
+  .pick({
+    name: true,
+    openDays: true,
+    placeFeatures: true,
+    foodsOffered: true,
+  })
+  .extend({
+    openingTime: z
+      .string()
+      .regex(/^\d{2}:\d{2}$/)
+      .nullable()
+      .optional(),
+    closingTime: z
+      .string()
+      .regex(/^\d{2}:\d{2}$/)
+      .nullable()
+      .optional(),
+    coverImgUrl: z.string().url().nullable().optional(),
+    newCoverImgFile: z
+      .instanceof(File, { message: "Image is required" })
+      .optional(),
+  })
+  .refine((data) => data.coverImgUrl || data.newCoverImgFile, {
+    message: "Atleast url or new image is required",
+    path: ["newCoverImgFile"],
+  })
+  .refine(
+    (data) =>
+      (data.openingTime && data.closingTime) ||
+      (!data.openingTime && !data.closingTime),
+    {
+      message: "Both opening and closing time is required",
+      path: ["openingTime", "closingTime"],
+    }
+  );
+
+export type EditPlaceForm = z.infer<typeof editPlaceFormSchema>;
+
 export type {
   JwtUserData,
   User,

@@ -72,6 +72,7 @@ const auth_handler = async (
 ) => {
   return res.json({
     authenticated: true,
+    user: req.jwtUserData,
   });
 };
 

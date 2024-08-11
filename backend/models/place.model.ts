@@ -1,6 +1,6 @@
 import { pool } from "../db/index";
 import { Distances } from "../lib/enums";
-import { Place } from "../types";
+import { EditPlaceForm, Place } from "../types";
 
 const getPlacebyId = async (placeId: string): Promise<Place | null> => {
   const result = await pool.query("select * from place where id=$1 limit 1", [
@@ -17,30 +17,6 @@ enum Rating {
   two = "2",
   one = "1",
 }
-
-const update_place = async (
-  id: string,
-  open_days: string[],
-  opening_time: string,
-  closing_time: string,
-  place_features: number[],
-  thumbnail_img: string,
-  cover_img: string
-) => {
-  const text = `update place set open_days=$2,
-  opening_time=$3, closing_time=$4, place_features=$5,
-  thumbnail_img_url=$6, cover_img_url=$7 where id=$1`;
-  const values = [
-    id,
-    open_days,
-    opening_time,
-    closing_time,
-    place_features,
-    thumbnail_img == "null" ? null : thumbnail_img,
-    cover_img == "null" ? null : cover_img,
-  ];
-  await pool.query(text, values);
-};
 
 const get_review_by_rating = async (uuid: string, rating: string) => {
   const text = `select r.*, u.first_name || ' ' || u.last_name as author_name 
@@ -144,15 +120,41 @@ const getPlaceSuggestionsByQuery = async (query: string): Promise<Place[]> => {
   return result.rows;
 };
 
+const updatePlaceById = async (data: EditPlaceForm, placeId: string) => {
+  const text = `
+  UPDATE place
+  SET 
+    "name" = $1,
+    "openDays" = $2,
+    "placeFeatures" = $3,
+    "foodsOffered" = $4,
+    "coverImgUrl" = $5,
+    "openingTime" = $6,
+    "closingTime" = $7
+  WHERE "id" = $8;
+  `;
+  const values = [
+    data.name,
+    JSON.parse(data.openDays as any),
+    JSON.parse(data.placeFeatures as any),
+    JSON.parse(data.foodsOffered as any),
+    data.coverImgUrl,
+    JSON.parse(data.openingTime as any),
+    JSON.parse(data.closingTime as any),
+    placeId,
+  ];
+  await pool.query(text, values);
+};
+
 const exporter = {
   getPlacebyId,
   create_place,
   get_review_by_rating,
   get_top_places,
-  update_place,
   add_place,
   search_place,
   getPlaceSuggestionsByQuery,
+  updatePlaceById,
 };
 
 export default exporter;

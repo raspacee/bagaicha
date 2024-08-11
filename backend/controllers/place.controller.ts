@@ -8,7 +8,7 @@ import UserModel from "../models/user.model";
 import OwnershipRequestModel from "../models/ownershipRequest.model";
 import { Distances } from "../lib/enums";
 import { uploadImage } from "../utils/image";
-import { OwnershipRequestForm } from "../types";
+import { EditPlaceForm, OwnershipRequestForm } from "../types";
 
 const getPlace = async (req: Request, res: Response, next: NextFunction) => {
   const placeId = req.params.placeId as string;
@@ -30,60 +30,6 @@ interface ImageInterface {
   cover_img?: any;
   displayPic?: any;
 }
-
-const update_place_info = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const place_id = req.params.place_id as string;
-  const {
-    open_days,
-    opening_time,
-    closing_time,
-    place_features,
-    thumbnail_img_old,
-    cover_img_old,
-  } = req.body;
-
-  try {
-    const files = req.files as ImageInterface;
-    let thumbnail_img: string = thumbnail_img_old;
-    let cover_img: string = cover_img_old;
-    if (files.thumbnail_img) {
-      const picture_upload = await cloudinary.uploader.upload(
-        files.thumbnail_img[0].path
-      );
-      thumbnail_img = picture_upload.secure_url;
-    }
-    if (files.cover_img) {
-      const picture_upload = await cloudinary.uploader.upload(
-        files.cover_img[0].path
-      );
-      cover_img = picture_upload.secure_url;
-    }
-
-    await PlaceModel.update_place(
-      place_id,
-      JSON.parse(open_days),
-      JSON.parse(opening_time) || null,
-      JSON.parse(closing_time) || null,
-      JSON.parse(place_features),
-      thumbnail_img,
-      cover_img
-    );
-    return res.status(200).send({
-      status: "ok",
-      message: "Place information updated successfully",
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send({
-      status: "error",
-      err,
-    });
-  }
-};
 
 const get_review = async (req: Request, res: Response, next: NextFunction) => {
   const place_id = req.params.place_id;
@@ -355,11 +301,41 @@ const updatePlaceOwnership = async (req: Request, res: Response) => {
   }
 };
 
+const updatePlaceData = async (req: Request, res: Response) => {
+  try {
+    const formData = req.body as EditPlaceForm;
+    const { placeId } = req.body;
+    const place = await PlaceModel.getPlacebyId(placeId);
+    if (!place)
+      return res.status(404).json({
+        message: "Place not found",
+      });
+
+    if (place.ownedBy !== req.jwtUserData!.userId) {
+      return res.status(403).json({
+        message: "Unauthorized action to update place data",
+      });
+    }
+
+    if (req.file as Express.Multer.File) {
+      const imageUrl = await uploadImage(req.file as Express.Multer.File);
+      formData.coverImgUrl = imageUrl;
+    }
+
+    await PlaceModel.updatePlaceById(formData, placeId);
+    return res.json();
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while updating place data",
+    });
+  }
+};
+
 const exporter = {
   getPlace,
   get_review,
   top_places,
-  update_place_info,
   create_place,
   search_place,
   create_place_review,
@@ -368,6 +344,7 @@ const exporter = {
   requestPlaceOwnership,
   getAllOwnershipRequests,
   updatePlaceOwnership,
+  updatePlaceData,
 };
 
 export default exporter;

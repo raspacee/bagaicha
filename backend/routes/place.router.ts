@@ -35,18 +35,6 @@ router.get(
   placeController.getAllOwnershipRequests
 );
 
-/* Update place information */
-router.put(
-  "/:place_id",
-  authMiddleware,
-  modMiddleware,
-  upload.fields([
-    { name: "thumbnail_img", maxCount: 1 },
-    { name: "cover_img", maxCount: 1 },
-  ]),
-  placeController.update_place_info
-);
-
 router.get("/:place_id/rating/:rating", placeController.get_review);
 
 /* Get place data */
@@ -72,6 +60,14 @@ router.delete(
   authMiddleware,
   verifyAdminMiddleware,
   placeController.requestPlaceOwnership
+);
+
+/* Update place information */
+router.put(
+  "/:placeId",
+  authMiddleware,
+  upload.single("image"),
+  placeController.updatePlaceData
 );
 
 export default router;
