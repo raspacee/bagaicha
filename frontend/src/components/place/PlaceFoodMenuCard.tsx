@@ -7,13 +7,13 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Place } from "@/lib/types";
+import { FoodsOffered, Place } from "@/lib/types";
 
 type Props = {
-  place: Place;
+  foodsOffered: FoodsOffered[] | undefined;
 };
 
-const PlaceFoodMenuCard = ({ place }: Props) => {
+const PlaceFoodMenuCard = ({ foodsOffered }: Props) => {
   return (
     <Card className="flex-1">
       <CardHeader>
@@ -23,8 +23,8 @@ const PlaceFoodMenuCard = ({ place }: Props) => {
       <CardContent>
         <ScrollArea className="h-[10rem] w-full">
           <div className="flex gap-1 flex-wrap">
-            {place.foodsOffered
-              ? place.foodsOffered.map((food) => (
+            {foodsOffered
+              ? foodsOffered.map((food) => (
                   <Badge variant="default" key={food}>
                     {food}
                   </Badge>

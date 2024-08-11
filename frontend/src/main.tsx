@@ -11,9 +11,7 @@ import FeedPage from "./routes/FeedPage";
 import UserProfilePage from "./routes/UserProfilePage";
 import LoginPage from "./routes/LoginPage";
 import SignupPage from "./routes/SignupPage";
-import ReviewCreate from "./routes/review_create";
 import Bookmarks from "./routes/bookmarks";
-//import Place from "./routes/place_archived";
 import FindPlaces from "./routes/find_places";
 import EditPlace from "./routes/edit_place";
 import AddPlace from "./routes/add_place";
@@ -31,6 +29,7 @@ import { Toaster } from "./components/ui/sonner";
 import RequestOwnershipPage from "./routes/RequestOwnershipPage";
 import AdminDashboardPage from "./routes/AdminDashboardPage";
 import AdminRoute from "./auth/AdminRoute";
+import EditPlacePage from "./routes/EditPlacePage";
 
 const router = createBrowserRouter([
   {
@@ -54,10 +53,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "feed/create",
-        element: <ReviewCreate />,
-      },
-      {
         path: "user/edit-profile",
         element: (
           <MainLayout>
@@ -78,6 +73,14 @@ const router = createBrowserRouter([
         element: (
           <MainLayout>
             <PlacePage />
+          </MainLayout>
+        ),
+      },
+      {
+        path: "place/:placeId/edit",
+        element: (
+          <MainLayout>
+            <EditPlacePage />
           </MainLayout>
         ),
       },

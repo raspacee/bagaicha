@@ -4,6 +4,7 @@ import { AUTH_TOKEN_NAME } from "../lib/config";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   AdminVerifyResponse,
+  JwtUserData,
   LoginForm,
   LoginResponse,
   SignupForm,
@@ -18,13 +19,16 @@ const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 type AuthenticateUserResponse = {
   authenticated: Boolean;
+  user: JwtUserData | null;
 };
 
 export const useAuthenticateUser = () => {
   const authenticateUserRequest =
     async (): Promise<AuthenticateUserResponse> => {
       if (!cookies.get(AUTH_TOKEN_NAME)) {
-        return new Promise((resolve) => resolve({ authenticated: false }));
+        return new Promise((resolve) =>
+          resolve({ authenticated: false, user: null })
+        );
       }
       const response = await fetch(`${BASE_API_URL}/auth/authenticate`, {
         method: "POST",

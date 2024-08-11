@@ -110,7 +110,7 @@ type FeedPost = Post & {
   lon: number;
 };
 
-const daySchema = z.enum([
+export const daySchema = z.enum([
   "Sunday",
   "Monday",
   "Tuesday",
@@ -122,7 +122,7 @@ const daySchema = z.enum([
 
 export type Day = z.infer<typeof daySchema>;
 
-const placeFeatureSchema = z.enum([
+export const placeFeatureSchema = z.enum([
   "Offers Delivery",
   "Offers Takeout",
   "Pet Friendly",
@@ -142,15 +142,54 @@ const placeSchema = z.object({
   name: z.string().min(2).max(250),
   lat: z.number(),
   lon: z.number(),
-  openDays: z.array(daySchema).optional(),
+  openDays: z.array(daySchema).nullable().optional(),
   openingTime: z.string().time().optional(),
   closingTime: z.string().time().optional(),
-  placeFeatures: z.array(placeFeatureSchema).optional(),
+  placeFeatures: z.array(placeFeatureSchema).nullable().optional(),
   coverImgUrl: z.string().url().optional(),
-  foodsOffered: z.array(foodsOfferedSchema).optional(),
+  foodsOffered: z.array(foodsOfferedSchema).nullable().optional(),
   ownedBy: z.string().uuid().optional(),
   createdAt: z.string().datetime(),
 });
+
+export const editPlaceFormSchema = placeSchema
+  .pick({
+    name: true,
+    openDays: true,
+    placeFeatures: true,
+    foodsOffered: true,
+  })
+  .extend({
+    openingTime: z
+      .string()
+      .regex(/^\d{2}:\d{2}$/)
+      .nullable()
+      .optional(),
+    closingTime: z
+      .string()
+      .regex(/^\d{2}:\d{2}$/)
+      .nullable()
+      .optional(),
+    coverImgUrl: z.string().url().nullable().optional(),
+    newCoverImgFile: z
+      .instanceof(File, { message: "Image is required" })
+      .optional(),
+  })
+  .refine((data) => data.coverImgUrl || data.newCoverImgFile, {
+    message: "Atleast url or new image is required",
+    path: ["newCoverImgFile"],
+  })
+  .refine(
+    (data) =>
+      (data.openingTime && data.closingTime) ||
+      (!data.openingTime && !data.closingTime),
+    {
+      message: "Both opening and closing time is required",
+      path: ["openingTime", "closingTime"],
+    }
+  );
+
+export type EditPlaceForm = z.infer<typeof editPlaceFormSchema>;
 
 export type Place = z.infer<typeof placeSchema>;
 
@@ -296,6 +335,11 @@ export type OwnershipRequestForm = z.infer<typeof ownershipRequestFormSchema>;
 
 export type AdminVerifyResponse = {
   isAdmin: boolean;
+};
+
+export type JwtUserData = {
+  userId: string;
+  email: string;
 };
 
 export type {

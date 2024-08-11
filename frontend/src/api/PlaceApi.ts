@@ -1,6 +1,6 @@
 import { AUTH_TOKEN_NAME } from "@/lib/config";
 import { Place } from "@/lib/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -103,4 +103,48 @@ const useRequestOwnership = (placeId: string) => {
   return { requestOwnership, isPending };
 };
 
-export { useGetPlaceSuggestions, useGetPlaceData, useRequestOwnership };
+const useUpdatePlaceData = () => {
+  const updatePlaceRequest = async (formData: FormData) => {
+    const response = await fetch(
+      `${BASE_API_URL}/place/${(formData as any).placeId}/`,
+      {
+        method: "PUT",
+        headers: {
+          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+        },
+        body: formData,
+      }
+    );
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+  };
+
+  const {
+    mutateAsync: updatePlace,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: updatePlaceRequest,
+    onSuccess: () => {
+      toast.success("Update Successful");
+    },
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return {
+    updatePlace,
+    isPending,
+  };
+};
+
+export {
+  useGetPlaceSuggestions,
+  useGetPlaceData,
+  useRequestOwnership,
+  useUpdatePlaceData,
+};
