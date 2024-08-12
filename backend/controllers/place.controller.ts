@@ -8,7 +8,14 @@ import UserModel from "../models/user.model";
 import OwnershipRequestModel from "../models/ownershipRequest.model";
 import { Distances } from "../lib/enums";
 import { uploadImage } from "../utils/image";
-import { EditPlaceForm, OwnershipRequestForm } from "../types";
+import {
+  Distance,
+  EditPlaceForm,
+  FoodsOffered,
+  OwnershipRequestForm,
+  PlaceFeature,
+  UserLocation,
+} from "../types";
 
 const getPlace = async (req: Request, res: Response, next: NextFunction) => {
   const placeId = req.params.placeId as string;
@@ -62,55 +69,33 @@ export const place_features = [
   { key: "affordable", value: 4 },
 ];
 
-const top_places = async (req: Request, res: Response, next: NextFunction) => {
+const getMyTopPlaces = async (req: Request, res: Response) => {
   try {
-    const category = req.query.category as string;
-    const suggested = req.query.suggested as string;
-    const lat = req.query.lat as string;
-    const long = req.query.long as string;
-    if (lat == "" || long == "") {
-      return res.status(400).send({
-        status: "error",
-        message: "Please provide user latitude and longitude",
-      });
-    }
-
-    let categories: string[] | null;
-    if (category == "") categories = null;
-    else categories = category.split(",");
-
-    let suggestions: number[] | null;
-    if (suggested == "") suggestions = null;
-    else {
-      let tmp: any = suggested.split(",");
-      /* Map strings to number representations */
-      tmp = tmp.map((s: any) => {
-        for (let i = 0; i < place_features.length; i++) {
-          if (place_features[i].key == s) return place_features[i].value;
-        }
-        return null;
-      });
-      suggestions = tmp!.filter((s: any) => s != null);
-    }
-
-    let distance: Distances | null = parseInt(req.query.distance as string);
-    if (distance == Distances.NONE) distance = null;
-    const places = await PlaceModel.get_top_places(
-      parseFloat(lat),
-      parseFloat(long),
-      categories,
-      suggestions,
-      distance
+    const features = req.query.selectedFeatures as string;
+    const selectedFeatures =
+      features !== "" ? (features?.split(",") as PlaceFeature[]) : null;
+    const foods = req.query.selectedFoods as string;
+    const selectedFoods =
+      foods !== "" ? (foods?.split(",") as FoodsOffered[]) : null;
+    const selectedDistance: Distance = JSON.parse(
+      req.query.selectedDistance as string
     );
-    return res.status(200).send({
-      status: "ok",
-      places,
-    });
+    const userCoordinates: UserLocation = {
+      lat: parseInt(req.query.lat as string),
+      lon: parseInt(req.query.lon as string),
+    };
+
+    const places = await PlaceModel.getTopPlaces(
+      selectedFoods,
+      selectedFeatures,
+      selectedDistance,
+      userCoordinates
+    );
+    return res.json(places);
   } catch (err) {
-    console.log(err);
-    return res.status(500).send({
-      status: "error",
-      error: err,
+    console.error(err);
+    return res.status(500).json({
+      message: "Error while getting top places",
     });
   }
 };
@@ -335,7 +320,6 @@ const updatePlaceData = async (req: Request, res: Response) => {
 const exporter = {
   getPlace,
   get_review,
-  top_places,
   create_place,
   search_place,
   create_place_review,
@@ -345,6 +329,7 @@ const exporter = {
   getAllOwnershipRequests,
   updatePlaceOwnership,
   updatePlaceData,
+  getMyTopPlaces,
 };
 
 export default exporter;

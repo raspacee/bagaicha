@@ -20,7 +20,7 @@ router.post(
 /* Search place names by query */
 router.get("/search", placeController.search_place);
 
-router.get("/top_places", placeController.top_places);
+router.get("/top", authMiddleware, placeController.getMyTopPlaces);
 
 /* Get a place reviews */
 router.get("/review", authMiddleware, placeController.get_place_review);

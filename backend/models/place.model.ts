@@ -1,6 +1,13 @@
 import { pool } from "../db/index";
 import { Distances } from "../lib/enums";
-import { EditPlaceForm, Place } from "../types";
+import {
+  Distance,
+  EditPlaceForm,
+  FoodsOffered,
+  Place,
+  PlaceFeature,
+  UserLocation,
+} from "../types";
 
 const getPlacebyId = async (placeId: string): Promise<Place | null> => {
   const result = await pool.query("select * from place where id=$1 limit 1", [
@@ -74,30 +81,6 @@ const add_place = async (
   return pool.query(text, values);
 };
 
-const get_top_places = async (
-  user_lat: number,
-  user_long: number,
-  categories: string[] | null,
-  suggestions: number[] | null,
-  distance: Distances | null
-) => {
-  const text = `
-select *, haversine(place.lat::decimal, place.long::decimal, $1, $2) as distance,
-	(select count(*) from review where place_id=place.id) as total_reviews,
-	(select avg(rating) from review where place_id=place.id) as avg_rating
-  from place
-	where ($3::varchar[] is null or (foods_offered && $3::varchar[]))
-	and ($4::smallint[] is null or ($4::smallint[] && place_features))
-  and
-  ($5::integer is null or haversine(lat::decimal, long::decimal, $1, $2) < $5::integer)
-	order by distance asc limit 10;
-`;
-  const values = [user_lat, user_long, categories, suggestions, distance];
-  const data = await pool.query(text, values);
-  if (data.rowCount == 0) return null;
-  return data.rows;
-};
-
 const search_place = async (name: string) => {
   const text = `select *, (select avg(rating) from review where place_id=place.id) as avg_rating,
 	(select count(*) from review where place_id=place.id) as total_reviews
@@ -146,15 +129,52 @@ const updatePlaceById = async (data: EditPlaceForm, placeId: string) => {
   await pool.query(text, values);
 };
 
+const getTopPlaces = async (
+  selectedFoods: FoodsOffered[] | null,
+  selectedFeatures: PlaceFeature[] | null,
+  selectedDistance: Distance,
+  userCoordinates: UserLocation
+): Promise<Place[]> => {
+  const text = `
+  WITH "PlaceDistance" AS (
+  SELECT 
+    id,
+    haversine(place.lat::numeric, place.lon::numeric, $3::numeric, $4::numeric) AS distance
+  FROM place
+  )
+  SELECT place.*, pd.distance
+  FROM "place"
+  INNER JOIN "PlaceDistance" AS pd ON place.id = pd.id
+  WHERE 
+    ($1::text[] IS NULL OR ($1::text[] && "foodsOffered"))
+    AND 
+    ($2::text[] IS NULL OR ($2::text[] && "placeFeatures"))
+    AND
+    ($5::numeric IS NULL OR distance < $5::numeric)
+  ORDER BY distance ASC
+  LIMIT 10;
+`;
+  const values = [
+    selectedFoods,
+    selectedFeatures,
+    userCoordinates.lat,
+    userCoordinates.lon,
+    selectedDistance,
+  ];
+  const result = await pool.query(text, values);
+  if (result.rowCount == 0) return [];
+  return result.rows;
+};
+
 const exporter = {
   getPlacebyId,
   create_place,
   get_review_by_rating,
-  get_top_places,
   add_place,
   search_place,
   getPlaceSuggestionsByQuery,
   updatePlaceById,
+  getTopPlaces,
 };
 
 export default exporter;

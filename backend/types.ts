@@ -269,6 +269,13 @@ export const editPlaceFormSchema = placeSchema
 
 export type EditPlaceForm = z.infer<typeof editPlaceFormSchema>;
 
+export type UserLocation = {
+  lat: number;
+  lon: number;
+};
+
+export type Distance = 1 | 2 | 5 | 10 | null;
+
 export type {
   JwtUserData,
   User,
