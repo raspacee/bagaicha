@@ -11,21 +11,34 @@ import { FoodsOffered, Place } from "@/lib/types";
 
 type Props = {
   foodsOffered: FoodsOffered[] | undefined;
+  description: string;
+  header?: string;
+  onClick?: (food: FoodsOffered) => void;
 };
 
-const PlaceFoodMenuCard = ({ foodsOffered }: Props) => {
+const FoodsMenuCard = ({
+  foodsOffered,
+  header,
+  description,
+  onClick,
+}: Props) => {
   return (
     <Card className="flex-1">
       <CardHeader>
-        <CardTitle>Food Menu</CardTitle>
-        <CardDescription>Delicious foods served by this place</CardDescription>
+        {header && <CardTitle>{header}</CardTitle>}
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[10rem] w-full">
           <div className="flex gap-1 flex-wrap">
             {foodsOffered
               ? foodsOffered.map((food) => (
-                  <Badge variant="default" key={food}>
+                  <Badge
+                    variant="default"
+                    key={food}
+                    onClick={onClick ? () => onClick(food) : undefined}
+                    className="cursor-pointer"
+                  >
                     {food}
                   </Badge>
                 ))
@@ -37,4 +50,4 @@ const PlaceFoodMenuCard = ({ foodsOffered }: Props) => {
   );
 };
 
-export default PlaceFoodMenuCard;
+export default FoodsMenuCard;

@@ -12,8 +12,6 @@ import UserProfilePage from "./routes/UserProfilePage";
 import LoginPage from "./routes/LoginPage";
 import SignupPage from "./routes/SignupPage";
 import Bookmarks from "./routes/bookmarks";
-import FindPlaces from "./routes/find_places";
-import EditPlace from "./routes/edit_place";
 import AddPlace from "./routes/add_place";
 import Search from "./routes/search";
 import EditProfilePage from "./routes/EditProfilePage";
@@ -30,6 +28,7 @@ import RequestOwnershipPage from "./routes/RequestOwnershipPage";
 import AdminDashboardPage from "./routes/AdminDashboardPage";
 import AdminRoute from "./auth/AdminRoute";
 import EditPlacePage from "./routes/EditPlacePage";
+import FindPlacesPage from "./routes/FindPlacesPage";
 
 const router = createBrowserRouter([
   {
@@ -112,14 +111,9 @@ const router = createBrowserRouter([
         path: "find-places",
         element: (
           <MainLayout>
-            <FindPlaces />
+            <FindPlacesPage />
           </MainLayout>
         ),
-      },
-      {
-        path: "edit-place/:place_id",
-        loader: isModerator,
-        element: <EditPlace />,
       },
       {
         path: "search/",

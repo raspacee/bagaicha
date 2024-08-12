@@ -2,7 +2,7 @@ import { useGetPlaceData } from "@/api/PlaceApi";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import PlaceInformationCard from "@/components/place/PlaceInformationCard";
-import PlaceFoodMenuCard from "@/components/place/PlaceFoodMenuCard";
+import FoodsMenuCard from "@/components/place/FoodsMenuCard";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,7 +59,11 @@ const PlacePage = () => {
       </div>
       <div className="flex flex-col md:flex-row gap-2 w-full">
         <PlaceInformationCard place={place} />
-        <PlaceFoodMenuCard foodsOffered={place.foodsOffered || []} />
+        <FoodsMenuCard
+          foodsOffered={place.foodsOffered || []}
+          header="Foods Menu"
+          description="Delicious foods served by this place"
+        />
       </div>
       {place.ownedBy == null && (
         <Link to="request-ownership">

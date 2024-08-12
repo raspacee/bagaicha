@@ -25,7 +25,7 @@ export default function SidebarLeft() {
   }
 
   return (
-    <div className="bg-white w-full py-2 px-4 rounded-md sticky top-4 ml-2 shadow-xl border md:w-[20rem]">
+    <div className="w-full py-2 px-4 sticky top-0 border-r md:w-[15rem] h-screen">
       <SidebarItem text="Profile" link={`/user/${myUser.id}`} isButton={false}>
         <AccountCircleIcon fontSize="large" style={{ color: "#0d47a1" }} />
       </SidebarItem>

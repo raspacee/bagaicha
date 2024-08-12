@@ -342,6 +342,14 @@ export type JwtUserData = {
   email: string;
 };
 
+export type Distance = 1 | 2 | 5 | 10 | null;
+
+export type FindPlaceSearchState = {
+  selectedFoods: FoodsOffered[];
+  selectedFeatures: PlaceFeature[];
+  selectedDistance: Distance;
+};
+
 export type {
   UserInterface,
   LocationType,

@@ -14,7 +14,6 @@ import { motion } from "framer-motion";
 
 import RatingStar from "../components/place/RatingStar";
 import { useAppDispatch } from "../hooks";
-import { place_features } from "./edit_place";
 import { useBookmark } from "../hooks/useBookmark";
 import { useLike } from "../hooks/useLike";
 import { setImgModal } from "../slice/modalSlice";
@@ -158,20 +157,7 @@ const PlaceSearchResult = ({ place }: { place: any }) => {
             <p className="text-gray-600">{place.name.split(",")[1]}</p>
           </div>
           <h2 className="font-medium mt-3">Offers</h2>
-          <div className="mt-2">
-            {place.place_features?.map((f: any, index: number) => {
-              if (index == 3) return;
-              const feature = place_features.find((data) => data.value == f);
-              return (
-                <span
-                  key={feature?.label}
-                  className="mr-2 font-light border px-3 py-2 rounded-md"
-                >
-                  {feature?.label}
-                </span>
-              );
-            })}
-          </div>
+          <div className="mt-2"></div>
         </div>
       </div>
     </Link>

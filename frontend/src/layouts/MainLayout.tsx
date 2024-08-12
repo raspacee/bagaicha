@@ -9,7 +9,7 @@ type Props = {
 
 const MainLayout = ({ children }: Props) => {
   return (
-    <div className="h-fit min-h-screen bg-gray-200">
+    <div className="h-fit min-h-screen bg-white">
       <Navbar />
       <main className="flex gap-3 mt-3">
         <aside className="hidden md:block">

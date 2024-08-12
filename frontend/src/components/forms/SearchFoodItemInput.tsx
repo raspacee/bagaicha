@@ -16,7 +16,7 @@ import {
 import { foodItems } from "@/config/foods";
 import { ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
-import PlaceFoodMenuCard from "../place/PlaceFoodMenuCard";
+import FoodsMenuCard from "../place/FoodsMenuCard";
 import { useFormContext } from "react-hook-form";
 
 const SearchFoodItemInput = () => {
@@ -68,10 +68,13 @@ const SearchFoodItemInput = () => {
                 </CommandGroup>
               </CommandList>
             </Command>
+            <FoodsMenuCard
+              foodsOffered={foodsOffered}
+              description="Selected Foods Appear Below"
+            />
           </PopoverContent>
         </Popover>
       </FormControl>
-      <PlaceFoodMenuCard foodsOffered={foodsOffered} />
     </FormItem>
   );
 };

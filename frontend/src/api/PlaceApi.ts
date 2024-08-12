@@ -1,5 +1,5 @@
 import { AUTH_TOKEN_NAME } from "@/lib/config";
-import { Place } from "@/lib/types";
+import { FindPlaceSearchState, Place } from "@/lib/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -142,9 +142,67 @@ const useUpdatePlaceData = () => {
   };
 };
 
+const getUserPosition = (): Promise<GeolocationPosition> => {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      return reject(new Error("Geolocation is not supported by your browser"));
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve(position),
+      (error) => reject(error)
+    );
+  });
+};
+
+const useGetTopPlaces = (searchState: FindPlaceSearchState) => {
+  const getTopPlacesRequest = async (): Promise<Place[]> => {
+    const params = new URLSearchParams();
+    params.set("selectedFoods", searchState.selectedFoods.join(","));
+    params.set("selectedFeatures", searchState.selectedFeatures.join(","));
+    params.set(
+      "selectedDistance",
+      JSON.stringify(searchState.selectedDistance)
+    );
+    const userPosition = await getUserPosition();
+    params.set("lat", userPosition.coords.latitude.toString());
+    params.set("lon", userPosition.coords.longitude.toString());
+    const response = await fetch(
+      `${BASE_API_URL}/place/top?${params.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+    return response.json();
+  };
+
+  const {
+    data: places,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["topPlaces", searchState],
+    queryFn: getTopPlacesRequest,
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { places, isLoading };
+};
+
 export {
   useGetPlaceSuggestions,
   useGetPlaceData,
   useRequestOwnership,
   useUpdatePlaceData,
+  useGetTopPlaces,
 };
