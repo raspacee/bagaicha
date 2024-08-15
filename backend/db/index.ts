@@ -11,6 +11,7 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false,
   },
+  max: 10,
 });
 
 const query = async <I = any[]>(text: string, params: QueryConfigValues<I>) => {

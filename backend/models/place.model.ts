@@ -6,6 +6,7 @@ import {
   FoodsOffered,
   Place,
   PlaceFeature,
+  SearchResultTotalCount,
   UserLocation,
 } from "../types";
 
@@ -81,13 +82,17 @@ const add_place = async (
   return pool.query(text, values);
 };
 
-const search_place = async (name: string) => {
-  const text = `select *, (select avg(rating) from review where place_id=place.id) as avg_rating,
-	(select count(*) from review where place_id=place.id) as total_reviews
- from place where name ilike $1;`;
-  const data = await pool.query(text, [`%${name}%`]);
-  if (data.rowCount == 0) return null;
-  return data.rows;
+const searchPlace = async (name: string, offset: number): Promise<Place[]> => {
+  const text = `
+  SELECT *
+  FROM place
+  WHERE name ILIKE $1
+  LIMIT 10
+  OFFSET $2;
+  `;
+  const result = await pool.query(text, [`%${name}%`, offset]);
+  if (result.rowCount == 0) return [];
+  return result.rows;
 };
 
 const getPlaceSuggestionsByQuery = async (query: string): Promise<Place[]> => {
@@ -139,18 +144,18 @@ const getTopPlaces = async (
   WITH "PlaceDistance" AS (
   SELECT 
     id,
-    haversine(place.lat::numeric, place.lon::numeric, $3::numeric, $4::numeric) AS distance
+    haversine(place.lat::double precision, place.lon::double precision, $3::double precision, $4::double precision) AS distance
   FROM place
-  )
-  SELECT place.*, pd.distance
-  FROM "place"
-  INNER JOIN "PlaceDistance" AS pd ON place.id = pd.id
   WHERE 
     ($1::text[] IS NULL OR ($1::text[] && "foodsOffered"))
     AND 
     ($2::text[] IS NULL OR ($2::text[] && "placeFeatures"))
-    AND
-    ($5::numeric IS NULL OR distance < $5::numeric)
+  )
+  SELECT place.*, pd.distance
+  FROM "place"
+  INNER JOIN "PlaceDistance" AS pd ON place.id = pd.id
+  WHERE
+    ($5::double precision IS NULL OR distance < $5::double precision)
   ORDER BY distance ASC
   LIMIT 10;
 `;
@@ -166,15 +171,35 @@ const getTopPlaces = async (
   return result.rows;
 };
 
+const getTotalSearchResults = async (
+  query: string
+): Promise<SearchResultTotalCount> => {
+  const result = await pool.query(
+    `
+    select count(*)
+    from place
+    where name ilike $1;
+    `,
+    [`%${query}%`]
+  );
+  if (result.rowCount == 0) {
+    return {
+      count: 0,
+    } as SearchResultTotalCount;
+  }
+  return result.rows[0];
+};
+
 const exporter = {
   getPlacebyId,
   create_place,
   get_review_by_rating,
   add_place,
-  search_place,
+  searchPlace,
   getPlaceSuggestionsByQuery,
   updatePlaceById,
   getTopPlaces,
+  getTotalSearchResults,
 };
 
 export default exporter;

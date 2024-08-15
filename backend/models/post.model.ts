@@ -1,6 +1,6 @@
 import { pool } from "../db/index";
 import { Distances } from "../lib/enums";
-import { FeedPost, PostWithComments } from "../types";
+import { FeedPost, PostWithComments, SearchResultTotalCount } from "../types";
 import { v4 as uuidv4 } from "uuid";
 
 const createPost = async (
@@ -57,7 +57,7 @@ const createPost = async (
 const getFeedPosts = async (userId: string): Promise<FeedPost[]> => {
   const text = `
   SELECT 
-    p.*, 
+    p.*,
     u."firstName" AS "authorFirstName",
     u."lastName" AS "authorLastName", 
     u."profilePictureUrl" AS "authorPictureUrl", 
@@ -97,17 +97,51 @@ const getFeedPosts = async (userId: string): Promise<FeedPost[]> => {
   return result.rows;
 };
 
-const search_reviews = async (user_id: string, query: string) => {
-  const text = ` select r.*, u.first_name, u.last_name, u.profile_picture_url, u.email, pl.lat, pl.long, pl.name, pl.openmaps_place_id,
-(select exists (select * from review_like as l where l.liker_id=$1 and l.review_id=r.id limit 1)) as user_has_liked,
-(select exists (select * from review_bookmark as b where b.user_id=$1 and b.review_id=r.id limit 1)) as user_has_bookmarked_review
-from review as r inner join user_ as u on r.author_id = u.id
-	inner join place as pl on r.place_id = pl.id 
-	 where r.body ilike $2 or r.foods_ate @> $3 
-  order by created_at desc limit 20;`;
-  const values = [user_id, `%${query}%`, Array.from(query)];
+const searchPosts = async (
+  userId: string,
+  query: string,
+  offset: number
+): Promise<FeedPost[]> => {
+  const text = `
+  SELECT 
+    p.*,
+    u."firstName" AS "authorFirstName",
+    u."lastName" AS "authorLastName", 
+    u."profilePictureUrl" AS "authorPictureUrl", 
+    u."email" AS "authorEmail", 
+    pl."lat", 
+    pl."lon", 
+    pl."name" AS "placeName", 
+    (
+      SELECT EXISTS (
+        SELECT 1 
+        FROM "postLike" AS l 
+        WHERE l."likerId" = $1 
+          AND l."postId" = p."id" 
+        LIMIT 1
+      )
+    ) AS "hasLiked",
+    (
+      SELECT EXISTS (
+        SELECT 1 
+        FROM "postBookmark" AS b 
+        WHERE b."userId" = $1 
+          AND b."postId" = p."id" 
+        LIMIT 1
+      )
+    ) AS "hasBookmarked"
+  FROM 
+    "post" AS p
+    INNER JOIN "user_" AS u ON p."authorId" = u."id"
+    INNER JOIN "place" AS pl ON p."placeId" = pl."id" 
+  WHERE
+    p."body" ILIKE $2
+  LIMIT 10
+  OFFSET $3;
+  `;
+  const values = [userId, `%${query}%`, offset];
   const result = await pool.query(text, values);
-  if (result.rowCount == 0) return null;
+  if (result.rowCount == 0) return [];
   return result.rows;
 };
 
@@ -202,12 +236,32 @@ const getPostById = async (
   return result.rows[0];
 };
 
+const getTotalSearchResults = async (
+  query: string
+): Promise<SearchResultTotalCount> => {
+  const result = await pool.query(
+    `
+    select count(*)
+    from post 
+    where body ilike $1;
+    `,
+    [`%${query}%`]
+  );
+  if (result.rowCount == 0) {
+    return {
+      count: 0,
+    } as SearchResultTotalCount;
+  }
+  return result.rows[0];
+};
+
 const exporter = {
   createPost,
   getFeedPosts,
-  search_reviews,
+  searchPosts,
   getPostById,
   getUserPosts,
+  getTotalSearchResults,
 };
 
 export default exporter;

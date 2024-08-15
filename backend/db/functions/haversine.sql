@@ -1,13 +1,13 @@
-create function haversine(lat1 decimal, long1 decimal, lat2 decimal, long2 decimal)
-	returns decimal
+create function haversine(lat1 double precision, long1 double precision, lat2 double precision, long2 double precision)
+	returns double precision
 	immutable as
 	$function$
 	declare 
-	dLat decimal;
-	dLon decimal;
-	a decimal;
+	dLat double precision;
+	dLon double precision;
+	a double precision;
 	rad smallint;
-	c decimal;
+	c double precision;
 	begin
 		dLat := ((lat2 - lat1) * PI())/180.0;
 		dLon := ((long2 - long1) * PI())/180.0;
@@ -18,6 +18,6 @@ create function haversine(lat1 decimal, long1 decimal, lat2 decimal, long2 decim
 		a := POWER(SIN(dLat / 2), 2) + POWER(SIN(dLon / 2), 2) * COS(lat1) * COS(lat2);
 		rad := 6371; -- Earth's radius in kilometers
   		c := 2 * ASIN(SQRT(a));
-		RETURN ROUND(rad * c, 1);
+		RETURN ROUND((rad * c)::real, 1);
 	end
 	$function$ language plpgsql

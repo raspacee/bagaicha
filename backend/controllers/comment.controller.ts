@@ -43,14 +43,16 @@ const createComment = async (req: Request, res: Response) => {
 
     await CommentModel.createCommentOnPost(commentForm, userId);
 
-    const notification: Notification = {
-      recipientId: post.authorId,
-      senderId: userId,
-      type: "UserCommentsOnPost",
-      isRead: false,
-      postId: post.id,
-    };
-    await NotificationModel.createNotification(notification);
+    if (post.authorId !== req.jwtUserData!.userId) {
+      const notification: Notification = {
+        recipientId: post.authorId,
+        senderId: userId,
+        type: "UserCommentsOnPost",
+        isRead: false,
+        postId: post.id,
+      };
+      await NotificationModel.createNotification(notification);
+    }
 
     return res.status(201).json();
   } catch (err) {

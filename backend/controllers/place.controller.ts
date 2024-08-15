@@ -148,23 +148,6 @@ const create_place = async (req: Request, res: Response) => {
   }
 };
 
-const search_place = async (req: Request, res: Response) => {
-  try {
-    const q = req.query.q as string;
-    const places = await PlaceModel.search_place(q);
-    return res.status(200).send({
-      status: "ok",
-      places,
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send({
-      status: "error",
-      error: err,
-    });
-  }
-};
-
 const create_place_review = async (req: Request, res: Response) => {
   try {
     const { place_id, rating, textbody } = req.body;
@@ -321,7 +304,6 @@ const exporter = {
   getPlace,
   get_review,
   create_place,
-  search_place,
   create_place_review,
   get_place_review,
   getPlaceSuggestions,

@@ -1,11 +1,11 @@
 import express from "express";
 const router = express.Router();
 
-import indexController from "../controllers/indexController";
+import indexController from "../controllers/index.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
 /* Get search results */
-router.get("/search", authMiddleware, indexController.search_results);
+router.get("/search", authMiddleware, indexController.getSearchResults);
 
 /* Get search history */
 router.get(

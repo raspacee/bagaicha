@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
-import indexRouter from "./routes/indexRouter";
+import indexRouter from "./routes/index.router";
 import authRouter from "./routes/auth.router";
 import postRouter from "./routes/post.router";
 import userRouter from "./routes/user.router";
@@ -10,9 +10,11 @@ import placeRouter from "./routes/place.router";
 import notificationRouter from "./routes/notification.router";
 import cookieParser from "cookie-parser";
 import { v2 as cloudinary } from "cloudinary";
+import compression from "compression";
 
 const app = express();
 
+app.use(compression());
 app.use(
   cors({
     origin: process.env.FRONTEND_URL,

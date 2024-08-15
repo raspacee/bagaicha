@@ -137,16 +137,17 @@ const likePost = async (req: Request, res: Response) => {
     }
     await LikeModel.createPostLike(postId, req.jwtUserData!.userId);
 
-    /* Send a notification */
-    const notification: Notification = {
-      senderId: req.jwtUserData!.userId,
-      recipientId: post.authorId,
-      type: "UserLikesPost",
-      postId: postId,
-      isRead: false,
-    };
-    await NotificationModel.createNotification(notification);
-
+    if (post.authorId !== req.jwtUserData!.userId) {
+      /* Send a notification */
+      const notification: Notification = {
+        senderId: req.jwtUserData!.userId,
+        recipientId: post.authorId,
+        type: "UserLikesPost",
+        postId: postId,
+        isRead: false,
+      };
+      await NotificationModel.createNotification(notification);
+    }
     return res.status(201).json();
   } catch (err) {
     console.log(err);

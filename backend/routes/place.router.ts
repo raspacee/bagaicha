@@ -17,9 +17,6 @@ router.post(
   placeController.create_place
 );
 
-/* Search place names by query */
-router.get("/search", placeController.search_place);
-
 router.get("/top", authMiddleware, placeController.getMyTopPlaces);
 
 /* Get a place reviews */

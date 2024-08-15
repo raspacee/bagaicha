@@ -276,6 +276,23 @@ export type UserLocation = {
 
 export type Distance = 1 | 2 | 5 | 10 | null;
 
+export type SearchResultTotalCount = {
+  count: number;
+};
+
+export type SearchResultsResponse = {
+  place: {
+    totalItems: number;
+    totalPages: number;
+    places: Place[];
+  };
+  post: {
+    totalItems: number;
+    totalPages: number;
+    posts: FeedPost[];
+  };
+};
+
 export type {
   JwtUserData,
   User,
