@@ -1,6 +1,7 @@
 import { Place } from "@/lib/types";
 import { Rating } from "@mui/material";
 import { Dot } from "lucide-react";
+import { Link } from "react-router-dom";
 
 type Props = {
   place: Place;
@@ -17,7 +18,9 @@ const PlaceListItem = ({ place }: Props) => {
         }
       />
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold">{place.name}</h1>
+        <Link to={`/place/${place.id}`}>
+          <h1 className="text-2xl font-bold">{place.name}</h1>
+        </Link>
         <div className="flex flex-row gap-2 items-center">
           <p className="text-sm text-muted-foreground">
             412 rating{" "}

@@ -350,6 +350,25 @@ export type FindPlaceSearchState = {
   selectedDistance: Distance;
 };
 
+export type SearchResultsResponse = {
+  place: {
+    totalItems: number;
+    totalPages: number;
+    places: Place[];
+  };
+  post: {
+    totalItems: number;
+    totalPages: number;
+    posts: FeedPost[];
+  };
+};
+
+export type SearchState = {
+  query: string;
+  placePage: number;
+  postPage: number;
+};
+
 export type {
   UserInterface,
   LocationType,

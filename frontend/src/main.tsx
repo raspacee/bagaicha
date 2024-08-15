@@ -13,7 +13,7 @@ import LoginPage from "./routes/LoginPage";
 import SignupPage from "./routes/SignupPage";
 import Bookmarks from "./routes/bookmarks";
 import AddPlace from "./routes/add_place";
-import Search from "./routes/search";
+import SearchPage from "./routes/SearchPage";
 import EditProfilePage from "./routes/EditProfilePage";
 import NotAuthorized from "./routes/not_authorized";
 import Suggestions from "./routes/suggestions";
@@ -119,7 +119,7 @@ const router = createBrowserRouter([
         path: "search/",
         element: (
           <MainLayout>
-            <Search />
+            <SearchPage />
           </MainLayout>
         ),
       },

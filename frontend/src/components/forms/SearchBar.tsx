@@ -30,16 +30,17 @@ const SearchBar = () => {
   };
 
   const handleReset = () => {
-    form.clearErrors("searchQuery");
     form.reset({
       searchQuery: "",
     });
+    form.clearErrors("searchQuery");
   };
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
+        // onKeyDown={}
         className={`flex flex-row h-[3rem] gap-2 items-center justify-between p-3 border-2 rounded-full
             ${form.formState.errors.searchQuery && "border-red-500 border"}`}
       >
@@ -59,7 +60,7 @@ const SearchBar = () => {
             </FormItem>
           )}
         />
-        <Button onClick={() => handleReset()} variant="ghost">
+        <Button onClick={() => handleReset()} variant="ghost" type="reset">
           <X />
         </Button>
         <Button
