@@ -1,6 +1,11 @@
 import { pool } from "../db/index";
 import { Distances } from "../lib/enums";
-import { FeedPost, PostWithComments, SearchResultTotalCount } from "../types";
+import {
+  EditPostForm,
+  FeedPost,
+  PostWithComments,
+  SearchResultTotalCount,
+} from "../types";
 import { v4 as uuidv4 } from "uuid";
 
 const createPost = async (
@@ -255,6 +260,23 @@ const getTotalSearchResults = async (
   return result.rows[0];
 };
 
+const updatePostById = async (form: EditPostForm, postId: string) => {
+  const text = `
+  UPDATE "post" 
+    SET "body" = $1, "rating" = $2 
+  WHERE "id" = $3`;
+  const values = [form.body, form.rating, postId];
+  await pool.query(text, values);
+};
+
+const deletePostById = async (postId: string) => {
+  const text = `
+  DELETE FROM "post"
+  WHERE "id" = $1;`;
+  const values = [postId];
+  await pool.query(text, values);
+};
+
 const exporter = {
   createPost,
   getFeedPosts,
@@ -262,6 +284,8 @@ const exporter = {
   getPostById,
   getUserPosts,
   getTotalSearchResults,
+  updatePostById,
+  deletePostById,
 };
 
 export default exporter;

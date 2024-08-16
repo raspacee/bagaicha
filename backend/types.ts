@@ -293,6 +293,13 @@ export type SearchResultsResponse = {
   };
 };
 
+export const editPostFormSchema = postSchema.pick({
+  body: true,
+  rating: true,
+});
+
+export type EditPostForm = z.infer<typeof editPostFormSchema>;
+
 export type {
   JwtUserData,
   User,

@@ -53,4 +53,8 @@ router.post(
 
 router.get("/:postId", authMiddleware, postController.getSinglePost);
 
+router.put("/:postId", authMiddleware, postController.updateMyPost);
+
+router.delete("/:postId", authMiddleware, postController.deleteMyPost);
+
 export default router;

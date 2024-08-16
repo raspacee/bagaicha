@@ -7,7 +7,7 @@ import LikeModel from "../models/like.model";
 import BookmarkModel from "../models/bookmark.model";
 import CommentModel from "../models/comment.model";
 import NotificationModel from "../models/notification.model";
-import { CreatePostForm, Notification, Post } from "../types";
+import { CreatePostForm, EditPostForm, Notification, Post } from "../types";
 import { uploadImage } from "../utils/image";
 
 /* create a post */
@@ -262,6 +262,52 @@ const getSinglePost = async (
   }
 };
 
+const updateMyPost = async (req: Request, res: Response) => {
+  try {
+    const form: EditPostForm = req.body as EditPostForm;
+    const { postId } = req.params;
+
+    const post = await PostModel.getPostById(postId, null);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    if (post.authorId !== req.jwtUserData!.userId) {
+      return res.status(403).json({ message: "You cannot update this post" });
+    }
+
+    await PostModel.updatePostById(form, postId);
+    return res.status(200).json();
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Error while updating post",
+    });
+  }
+};
+
+const deleteMyPost = async (req: Request, res: Response) => {
+  try {
+    const { postId } = req.params;
+    const post = await PostModel.getPostById(postId, null);
+
+    if (!post)
+      return res.status(404).json({
+        message: "Post not found",
+      });
+
+    if (post.authorId !== req.jwtUserData!.userId) {
+      return res.status(403).json({ message: "You cannot delete this post" });
+    }
+
+    await PostModel.deletePostById(postId);
+    return res.status(204).json();
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Error while deleting post",
+    });
+  }
+};
+
 const exporter = {
   createMyPost,
   getFeed,
@@ -271,6 +317,8 @@ const exporter = {
   getSinglePost,
   bookmarkPost,
   unbookmarkPost,
+  updateMyPost,
+  deleteMyPost,
 };
 
 export default exporter;
