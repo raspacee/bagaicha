@@ -1,6 +1,7 @@
 import { AUTH_TOKEN_NAME } from "@/lib/config";
 import type {
   CommentForm,
+  EditPostForm,
   FeedPost,
   LocationType,
   Post,
@@ -328,6 +329,78 @@ const useUnbookmarkPost = () => {
   return { unbookmarkPost };
 };
 
+const useUpdateMyPost = (postId: string) => {
+  const queryClient = useQueryClient();
+
+  const updatePostRequest = async (form: EditPostForm) => {
+    const response = await fetch(`${BASE_API_URL}/post/${postId}`, {
+      method: "PUT",
+      headers: {
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(form),
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+  };
+
+  const {
+    mutateAsync: updateMyPost,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: updatePostRequest,
+    onSuccess: () => {
+      toast.success("Post updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { updateMyPost, isPending };
+};
+
+const useDeleteMyPost = () => {
+  const queryClient = useQueryClient();
+
+  const deletePostRequest = async (postId: string) => {
+    const response = await fetch(`${BASE_API_URL}/post/${postId}`, {
+      method: "DELETE",
+      headers: {
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+      },
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+  };
+
+  const {
+    mutateAsync: deletePost,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: deletePostRequest,
+    onSuccess: () => {
+      toast.success("Post deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { deletePost, isPending };
+};
+
 export {
   useFetchMyFeed,
   useFetchPostById,
@@ -337,4 +410,6 @@ export {
   useUnlikePost,
   useBookmarkPost,
   useUnbookmarkPost,
+  useUpdateMyPost,
+  useDeleteMyPost,
 };

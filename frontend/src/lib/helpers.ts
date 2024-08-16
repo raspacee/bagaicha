@@ -17,4 +17,8 @@ function haversine(lat1: number, lon1: number, lat2: number, lon2: number) {
   return (rad * c).toFixed(1);
 }
 
+export const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text);
+};
+
 export { haversine };

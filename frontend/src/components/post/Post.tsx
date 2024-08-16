@@ -1,16 +1,21 @@
 import { BsDot } from "@react-icons/all-files/bs/BsDot";
-import { BsBookmarkDash } from "@react-icons/all-files/bs/BsBookmarkDash";
-import { BsBookmarkDashFill } from "@react-icons/all-files/bs/BsBookmarkDashFill";
 
 import { Link } from "react-router-dom";
 import { DateTime } from "luxon";
-import { motion } from "framer-motion";
 
-import { haversine } from "../../lib/helpers";
+import { copyToClipboard, haversine } from "../../lib/helpers";
 import { useAppSelector, useAppDispatch } from "../../hooks";
 import { setImgModal } from "../../slice/modalSlice";
-import { useBookmark } from "../../hooks/useBookmark";
-import { Bookmark, Heart, MapPinHouse } from "lucide-react";
+import {
+  Bookmark,
+  Copy,
+  Dot,
+  Ellipsis,
+  Heart,
+  MapPinHouse,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import PostOpened from "./PostOpened";
 import { FeedPost } from "@/lib/types";
 import {
@@ -19,6 +24,19 @@ import {
   useUnbookmarkPost,
   useUnlikePost,
 } from "@/api/PostApi";
+import EditPostDialog from "./EditPostDialog";
+import { Rating } from "@mui/material";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { useState } from "react";
+import DeletePostDialog from "./DeletePostDialog";
+import { useGetMyUserData } from "@/api/UserApi";
 
 type Props = {
   post: FeedPost;
@@ -29,10 +47,15 @@ export default function Post({ post }: Props) {
   const dispatch = useAppDispatch();
   const isLocationGranted = location.lat != -1 && location.long != -1;
 
+  const { myUser } = useGetMyUserData();
+
   const { likePost } = useLikePost();
   const { unlikePost } = useUnlikePost();
   const { bookmarkPost } = useBookmarkPost();
   const { unbookmarkPost } = useUnbookmarkPost();
+
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const date = DateTime.fromISO(post.createdAt);
 
@@ -53,15 +76,54 @@ export default function Post({ post }: Props) {
             </p>
           </Link>
         </div>
-        <div className="flex">
+        <div className="flex gap-1 px-1 mt-1 md:mt-0">
+          <span className="font-normal text-sm text-muted-foreground">
+            {date.toRelative()}
+          </span>
+          <Dot size={25} />
           <div className="flex">
-            <span className="ml-0.5 font-normal text-sm text-gray-500">
-              {date.toRelative()}
-            </span>
+            <Rating value={post.rating} readOnly />
           </div>
-          <div className="flex">
-            <BsDot className="ml-0.5" size={20} />
-            <span className="ml-0.5 text-sm font-normal text-gray-500">{`${post.authorFirstName} rated the food ${post.rating} star`}</span>
+          <div className="flex ml-2 md:ml-4 flex-1 justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Ellipsis />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {myUser && myUser.id == post.authorId && (
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      onSelect={() => setIsEditDialogOpen(true)}
+                    >
+                      <Pencil size={20} className="mr-2" />
+                      <span>Edit Post</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onSelect={() => setIsDeleteDialogOpen(true)}
+                      className="text-red-600 focus:text-red-600"
+                    >
+                      <Trash2 size={20} className="mr-2" />
+                      <span>Delete Post</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </DropdownMenuGroup>
+                )}
+                <DropdownMenuItem onClick={() => copyToClipboard(post.id)}>
+                  <Copy size={20} className="mr-2" />
+                  <span>Copy ID</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+              <EditPostDialog
+                postId={post.id}
+                open={isEditDialogOpen}
+                setOpen={setIsEditDialogOpen}
+              />
+              <DeletePostDialog
+                postId={post.id}
+                open={isDeleteDialogOpen}
+                setOpen={setIsDeleteDialogOpen}
+              />
+            </DropdownMenu>
           </div>
         </div>
       </div>
