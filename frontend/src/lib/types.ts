@@ -376,6 +376,26 @@ export const editPostFormSchema = postSchema.pick({
 
 export type EditPostForm = z.infer<typeof editPostFormSchema>;
 
+export const addPlaceFormSchema = placeSchema
+  .pick({
+    name: true,
+    openDays: true,
+    ownedBy: true,
+    placeFeatures: true,
+    foodsOffered: true,
+  })
+  .extend({
+    imageFile: z.instanceof(File, { message: "Image is required" }),
+    lat: z.string().min(1),
+    lon: z.string().min(1),
+  });
+
+export type AddPlaceForm = z.infer<typeof addPlaceFormSchema>;
+
+export type CreatePlaceResponse = {
+  id: string;
+};
+
 export type {
   UserInterface,
   LocationType,

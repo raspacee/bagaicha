@@ -51,7 +51,7 @@ const SearchPlaceFeatureInput = () => {
           </PopoverTrigger>
           <PopoverContent className="w-[14rem] p-0">
             <Command>
-              <CommandInput placeholder="Type a food name" />
+              <CommandInput placeholder="Type a feature" />
               <CommandList>
                 <CommandEmpty>No item found</CommandEmpty>
                 <CommandGroup>
@@ -90,13 +90,12 @@ const SearchPlaceFeatureInput = () => {
         <CardContent>
           <ScrollArea className="h-[8rem] w-full">
             <div className="flex gap-1 flex-wrap">
-              {placeFeatures
-                ? placeFeatures.map((item) => (
-                    <Badge variant="default" key={item}>
-                      {item}
-                    </Badge>
-                  ))
-                : "Unspecified"}
+              {placeFeatures &&
+                placeFeatures.map((item) => (
+                  <Badge variant="default" key={item}>
+                    {item}
+                  </Badge>
+                ))}
             </div>
           </ScrollArea>
         </CardContent>

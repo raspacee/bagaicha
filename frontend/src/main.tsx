@@ -11,8 +11,8 @@ import FeedPage from "./routes/FeedPage";
 import UserProfilePage from "./routes/UserProfilePage";
 import LoginPage from "./routes/LoginPage";
 import SignupPage from "./routes/SignupPage";
-import Bookmarks from "./routes/bookmarks";
-import AddPlace from "./routes/add_place";
+import BookmarksPage from "./routes/BookmarksPage";
+import AddPlacePage from "./routes/AddPlacePage";
 import SearchPage from "./routes/SearchPage";
 import EditProfilePage from "./routes/EditProfilePage";
 import NotAuthorized from "./routes/not_authorized";
@@ -95,7 +95,7 @@ const router = createBrowserRouter([
         path: "place/add",
         element: (
           <MainLayout>
-            <AddPlace />
+            <AddPlacePage />
           </MainLayout>
         ),
       },
@@ -103,7 +103,7 @@ const router = createBrowserRouter([
         path: "bookmarks",
         element: (
           <MainLayout>
-            <Bookmarks />
+            <BookmarksPage />
           </MainLayout>
         ),
       },

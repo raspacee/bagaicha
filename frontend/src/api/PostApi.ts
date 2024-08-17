@@ -313,7 +313,7 @@ const useUnbookmarkPost = () => {
         { queryKey: ["posts"] },
         (oldPosts: FeedPost[] | undefined) =>
           oldPosts?.map((post) =>
-            post.id == postId ? { ...post, hasBookmarked: true } : post
+            post.id == postId ? { ...post, hasBookmarked: false } : post
           )
       );
       return { previousPosts };
@@ -401,6 +401,30 @@ const useDeleteMyPost = () => {
   return { deletePost, isPending };
 };
 
+const useGetMyBookmarks = () => {
+  const getBookmarksRequest = async (): Promise<FeedPost[]> => {
+    const response = await fetch(`${BASE_API_URL}/post/bookmarks`, {
+      method: "GET",
+      headers: {
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+      },
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+
+    return response.json();
+  };
+
+  const { data: bookmarks, isLoading } = useQuery({
+    queryKey: ["posts", "bookmarks"],
+    queryFn: getBookmarksRequest,
+  });
+
+  return { bookmarks, isLoading };
+};
+
 export {
   useFetchMyFeed,
   useFetchPostById,
@@ -412,4 +436,5 @@ export {
   useUnbookmarkPost,
   useUpdateMyPost,
   useDeleteMyPost,
+  useGetMyBookmarks,
 };

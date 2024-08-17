@@ -1,5 +1,5 @@
 import { AUTH_TOKEN_NAME } from "@/lib/config";
-import { FindPlaceSearchState, Place } from "@/lib/types";
+import { CreatePlaceResponse, FindPlaceSearchState, Place } from "@/lib/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -199,10 +199,50 @@ const useGetTopPlaces = (searchState: FindPlaceSearchState) => {
   return { places, isLoading };
 };
 
+const useCreatePlace = () => {
+  const navigate = useNavigate();
+
+  const createPlaceRequest = async (
+    formData: FormData
+  ): Promise<CreatePlaceResponse> => {
+    const response = await fetch(`${BASE_API_URL}/place`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+    return response.json();
+  };
+
+  const {
+    mutateAsync: createPlace,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: createPlaceRequest,
+    onSuccess: (createdPlace) => {
+      toast.success("Place created successfully");
+      navigate(`/place/${createdPlace.id}`);
+    },
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { isPending, createPlace };
+};
+
 export {
   useGetPlaceSuggestions,
   useGetPlaceData,
   useRequestOwnership,
   useUpdatePlaceData,
   useGetTopPlaces,
+  useCreatePlace,
 };

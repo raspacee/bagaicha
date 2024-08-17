@@ -60,15 +60,17 @@ const FilterByFoods = ({ foodsList, onChange }: Props) => {
             <CommandList>
               <CommandEmpty>No food item found</CommandEmpty>
               <CommandGroup>
-                {foodItems.map((food) => (
-                  <CommandItem
-                    key={food + Math.random()}
-                    value={food}
-                    onSelect={handleSelect}
-                  >
-                    {food}
-                  </CommandItem>
-                ))}
+                {foodItems
+                  .filter((food) => !foodsList.includes(food))
+                  .map((food) => (
+                    <CommandItem
+                      key={food + Math.random()}
+                      value={food}
+                      onSelect={handleSelect}
+                    >
+                      {food}
+                    </CommandItem>
+                  ))}
               </CommandGroup>
             </CommandList>
           </Command>
