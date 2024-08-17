@@ -27,7 +27,7 @@ router.delete(
 );
 
 /* Get all bookmarked reviews by a user */
-router.get("/bookmark", authMiddleware, postController.get_bookmarks);
+router.get("/bookmarks", authMiddleware, postController.getMyBookmarks);
 
 router.get(
   "/:review_id/comments",

@@ -9,6 +9,7 @@ import OwnershipRequestModel from "../models/ownershipRequest.model";
 import { Distances } from "../lib/enums";
 import { uploadImage } from "../utils/image";
 import {
+  AddPlaceForm,
   Distance,
   EditPlaceForm,
   FoodsOffered,
@@ -96,54 +97,6 @@ const getMyTopPlaces = async (req: Request, res: Response) => {
     console.error(err);
     return res.status(500).json({
       message: "Error while getting top places",
-    });
-  }
-};
-
-const create_place = async (req: Request, res: Response) => {
-  try {
-    const {
-      placeName,
-      placeLat,
-      placeLong,
-      foods,
-      drinks,
-      relation,
-      alcoholAllowed,
-    } = req.body;
-    const files = req.files as ImageInterface;
-    const picture_upload = await cloudinary.uploader.upload(
-      files.displayPic[0].path
-    );
-    let foods_offered = JSON.parse(foods);
-    foods_offered.concat(JSON.parse(drinks));
-    const displayPic = picture_upload.secure_url;
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${placeLat}&lon=${placeLong}&format=json`
-    );
-    const data = await response.json();
-    const owned_by = relation == "owner" ? res.locals.user.user_id : null;
-    await PlaceModel.add_place(
-      uuidv4(),
-      placeName,
-      placeLat,
-      placeLong,
-      foods_offered,
-      data.display_name,
-      displayPic,
-      owned_by,
-      JSON.parse(alcoholAllowed),
-      data.place_id
-    );
-    return res.status(200).send({
-      status: "ok",
-      message: "Successfully created the place",
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send({
-      status: "error",
-      error: err,
     });
   }
 };
@@ -300,10 +253,26 @@ const updatePlaceData = async (req: Request, res: Response) => {
   }
 };
 
+const createPlace = async (req: Request, res: Response) => {
+  try {
+    const form: AddPlaceForm = req.body as AddPlaceForm;
+
+    const imageUrl = await uploadImage(req.file as Express.Multer.File);
+
+    const createdPlace = await PlaceModel.createMyPlace(form, imageUrl);
+
+    return res.status(201).json(createdPlace);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while creating place ",
+    });
+  }
+};
+
 const exporter = {
   getPlace,
   get_review,
-  create_place,
   create_place_review,
   get_place_review,
   getPlaceSuggestions,
@@ -312,6 +281,7 @@ const exporter = {
   updatePlaceOwnership,
   updatePlaceData,
   getMyTopPlaces,
+  createPlace,
 };
 
 export default exporter;

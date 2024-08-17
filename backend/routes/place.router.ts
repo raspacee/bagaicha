@@ -13,8 +13,8 @@ import upload from "../multer";
 router.post(
   "/",
   authMiddleware,
-  upload.fields([{ name: "displayPic", maxCount: 1 }]),
-  placeController.create_place
+  upload.single("imageFile"),
+  placeController.createPlace
 );
 
 router.get("/top", authMiddleware, placeController.getMyTopPlaces);

@@ -1,6 +1,8 @@
 import { pool } from "../db/index";
 import { Distances } from "../lib/enums";
 import {
+  AddPlaceForm,
+  CreatePlaceResponse,
   Distance,
   EditPlaceForm,
   FoodsOffered,
@@ -9,6 +11,7 @@ import {
   SearchResultTotalCount,
   UserLocation,
 } from "../types";
+import { v4 as uuid } from "uuid";
 
 const getPlacebyId = async (placeId: string): Promise<Place | null> => {
   const result = await pool.query("select * from place where id=$1 limit 1", [
@@ -33,22 +36,6 @@ from review as r inner join user_ as u on r.author_id = u.id where r.place_id=$1
   const reviews = await pool.query(text, values);
   if (reviews.rowCount == 0) return null;
   return reviews.rows;
-};
-
-/* create_place is used for creating places that are already in openmaps */
-const create_place = async (
-  id: string,
-  openmaps_place_id: string,
-  name: string,
-  lat: string,
-  long: string,
-  display_name: string
-) => {
-  let text =
-    "insert into place (id, openmaps_place_id, name, lat, long, display_name) \
-    values ($1, $2, $3, $4, $5, $6)";
-  let values = [id, openmaps_place_id, name, lat, long, display_name];
-  return pool.query(text, values);
 };
 
 /* add_place is used for adding places that are not in openmaps */
@@ -190,9 +177,41 @@ const getTotalSearchResults = async (
   return result.rows[0];
 };
 
+const createMyPlace = async (
+  data: AddPlaceForm,
+  imageUrl: string
+): Promise<CreatePlaceResponse> => {
+  const id = uuid();
+  const date = new Date().toISOString();
+  const text = `
+  INSERT INTO "place" (
+  "id", "osmId", "name", "lat", "lon", "openDays", "placeFeatures", "coverImgUrl",
+  "foodsOffered", "ownedBy", "createdAt"
+  ) 
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+  RETURNING "id";`;
+
+  const values = [
+    id,
+    "Custom",
+    data.name,
+    parseFloat(data.lat),
+    parseFloat(data.lon),
+    JSON.parse(data.openDays as any),
+    JSON.parse(data.placeFeatures as any),
+    imageUrl,
+    JSON.parse(data.foodsOffered as any),
+    JSON.parse(data.ownedBy as any),
+    date,
+  ];
+  const result = await pool.query(text, values);
+  return {
+    id: result.rows[0].id,
+  };
+};
+
 const exporter = {
   getPlacebyId,
-  create_place,
   get_review_by_rating,
   add_place,
   searchPlace,
@@ -200,6 +219,7 @@ const exporter = {
   updatePlaceById,
   getTopPlaces,
   getTotalSearchResults,
+  createMyPlace,
 };
 
 export default exporter;

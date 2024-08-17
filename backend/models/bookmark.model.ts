@@ -1,5 +1,6 @@
 import { pool } from "../db/index";
 import { v4 as uuid } from "uuid";
+import { FeedPost } from "../types";
 
 const user_has_bookmarked_review = async (
   user_id: string,
@@ -11,22 +12,6 @@ const user_has_bookmarked_review = async (
     [user_id, review_id]
   );
   return bookmark.rowCount == 1;
-};
-
-const get_bookmarks = async (user_id: string) => {
-  const text = `
- select r.*, u.first_name, u.last_name, u.profile_picture_url, u.email, pl.lat, pl.long, pl.name, pl.openmaps_place_id,
-(select exists (select * from review_like as l where l.liker_id=$1 and l.review_id=r.id limit 1)) as user_has_liked,
-(select exists (select * from review_bookmark as b where b.user_id=$1 and b.review_id=r.id limit 1)) as user_has_bookmarked_review
-from review_bookmark as b inner join user_ as u on b.user_id = u.id
-inner join review as r on r.id = b.review_id
-	inner join place as pl on r.place_id = pl.id 
-where b.user_id = $1
-  order by b.created_at desc;`;
-  const values = [user_id];
-  const res = await pool.query(text, values);
-  if (res.rowCount == 0) return null;
-  return res.rows;
 };
 
 const createPostBookmark = async (postId: string, userId: string) => {
@@ -58,11 +43,45 @@ const deletePostBookmark = async (postId: string, userId: string) => {
   await pool.query(text, values);
 };
 
+const getBoomarksOfUser = async (userId: string): Promise<FeedPost[]> => {
+  const text = `
+  SELECT     
+    p.*, 
+    u."firstName" AS "authorFirstName",
+    u."lastName" AS "authorLastName", 
+    u."profilePictureUrl" AS "authorPictureUrl", 
+    u."email" AS "authorEmail", 
+    pl."lat", 
+    pl."lon", 
+    pl."name" AS "placeName", 
+    (
+      SELECT EXISTS (
+        SELECT 1 
+        FROM "postLike" AS l 
+        WHERE l."likerId" = $1
+          AND l."postId" = p."id" 
+        LIMIT 1
+      )
+    ) AS "hasLiked",
+    true AS "hasBookmarked" 
+  FROM "postBookmark" AS b
+  INNER JOIN "post" AS p ON p."authorId" = b."userId" AND p."id" = b."postId"
+  INNER JOIN "user_" AS u ON u."id" = p."authorId"
+  INNER JOIN "place" AS pl ON pl."id" = p."placeId"
+  WHERE b."userId" = $1
+  ORDER BY b."createdAt" DESC;
+`;
+  const values = [userId];
+  const result = await pool.query(text, values);
+  if (result.rowCount == 0) return [];
+  return result.rows;
+};
+
 const exporter = {
-  get_bookmarks,
   user_has_bookmarked_review,
   createPostBookmark,
   deletePostBookmark,
+  getBoomarksOfUser,
 };
 
 export default exporter;

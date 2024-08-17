@@ -216,28 +216,6 @@ const unbookmarkPost = async (req: Request, res: Response) => {
   }
 };
 
-const get_bookmarks = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const user_id = res.locals.user.user_id;
-
-    const bookmarks = await BookmarkModel.get_bookmarks(user_id);
-    return res.status(200).send({
-      status: "ok",
-      bookmarks,
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send({
-      status: "error",
-      message: err,
-    });
-  }
-};
-
 const getSinglePost = async (
   req: Request,
   res: Response,
@@ -308,17 +286,31 @@ const deleteMyPost = async (req: Request, res: Response) => {
   }
 };
 
+const getMyBookmarks = async (req: Request, res: Response) => {
+  try {
+    const posts = await BookmarkModel.getBoomarksOfUser(
+      req.jwtUserData!.userId
+    );
+    return res.json(posts);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Error while getting bookmarks",
+    });
+  }
+};
+
 const exporter = {
   createMyPost,
   getFeed,
   likePost,
   unlikePost,
-  get_bookmarks,
   getSinglePost,
   bookmarkPost,
   unbookmarkPost,
   updateMyPost,
   deleteMyPost,
+  getMyBookmarks,
 };
 
 export default exporter;
