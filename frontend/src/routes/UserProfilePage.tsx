@@ -39,7 +39,7 @@ export default function UserProfilePage() {
     );
   }
   return (
-    <div className="w-full md:w-[80%] gap-3 flex flex-col ">
+    <div className="w-full md:w-[70%] gap-3 flex flex-col ">
       <div className="w-full flex flex-col gap-4 bg-white py-6 px-2 shadow rounded-lg">
         <div className="w-full flex flex-col md:flex-row gap-6 justify-center items-center">
           <div>
@@ -70,7 +70,7 @@ export default function UserProfilePage() {
           {user.bio ? user.bio : "User has not written any bio"}
         </div>
       </div>
-      <div className="bg-white w-full flex flex-col gap-3 items-center py-5 px-3 shadow rounded-md">
+      <div className="bg-white w-full flex flex-col gap-3 items-center py-5 px-3 rounded-md">
         <h1 className="text-lg font-medium">User's Activity</h1>
         {isPostsLoading && <h1>Loading...</h1>}
         {posts?.length == 0 ? (

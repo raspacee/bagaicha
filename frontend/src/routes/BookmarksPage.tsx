@@ -14,7 +14,10 @@ const BookmarksPage = () => {
 
   return (
     <div className="px-2 py-3 flex flex-col gap-3 w-full md:w-[45rem]">
-      <h1 className="text-3xl font-extrabold">Your Bookmarked Posts</h1>
+      <h1 className="text-3xl font-extrabold">Bookmarked Posts</h1>
+      {bookmarks.length == 0 && (
+        <h1 className="text-lg">You have no bookmarks</h1>
+      )}
       {bookmarks.map((post) => (
         <Post post={post} key={post.id} />
       ))}

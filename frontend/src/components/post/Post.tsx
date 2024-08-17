@@ -1,8 +1,5 @@
-import { BsDot } from "@react-icons/all-files/bs/BsDot";
-
 import { Link } from "react-router-dom";
 import { DateTime } from "luxon";
-
 import { copyToClipboard, haversine } from "../../lib/helpers";
 import { useAppSelector, useAppDispatch } from "../../hooks";
 import { setImgModal } from "../../slice/modalSlice";
@@ -37,6 +34,8 @@ import {
 import { useState } from "react";
 import DeletePostDialog from "./DeletePostDialog";
 import { useGetMyUserData } from "@/api/UserApi";
+import { AspectRatio } from "../ui/aspect-ratio";
+import { Separator } from "../ui/separator";
 
 type Props = {
   post: FeedPost;
@@ -60,7 +59,7 @@ export default function Post({ post }: Props) {
   const date = DateTime.fromISO(post.createdAt);
 
   return (
-    <div className="bg-white w-full h-fit px-1 md:px-6 py-3 mb-3 border rounded-md border-slate-200">
+    <div className="bg-white w-full h-fit px-1 md:px-6 py-3 mb-3">
       <div className="flex flex-col md:flex-row justify-between md:items-center">
         <div className="flex items-center">
           <img
@@ -127,13 +126,13 @@ export default function Post({ post }: Props) {
           </div>
         </div>
       </div>
-      <div className="border-t mt-2 pt-1 flex md:items-center flex-col md:flex-row gap-3">
+      <div className="mt-2 pt-1 flex md:items-center flex-col md:flex-row gap-3">
         <Link to={`/place/${post.placeId}`}>
           at <span className="font-semibold">{post.placeName}</span>
         </Link>
         {isLocationGranted && (
           <div className="flex">
-            <BsDot className="hidden md:block" size={20} />
+            <Dot className="hidden md:block" size={25} />
             <MapPinHouse className="block md:hidden" />
             <span className="ml-0.5 text-sm font-normal text-gray-500">{`${haversine(
               location.lat,
@@ -144,25 +143,26 @@ export default function Post({ post }: Props) {
           </div>
         )}
       </div>
-      <div className="mt-2 flex">
-        <img
-          src={`${post.imageUrl}`}
-          alt="Food picture"
-          onClick={() =>
-            dispatch(
-              setImgModal({
-                value: true,
-                src: post.imageUrl,
-              })
-            )
-          }
-          className="flex-1 h-[22rem] object-cover cursor-pointer"
-        />
+      <div className="mt-2 md:w-[40rem]">
+        <AspectRatio ratio={16 / 9}>
+          <img
+            src={`${post.imageUrl}`}
+            alt="Food picture"
+            onClick={() =>
+              dispatch(
+                setImgModal({
+                  value: true,
+                  src: post.imageUrl,
+                })
+              )
+            }
+            className="w-full h-full object-cover cursor-pointer"
+          />
+        </AspectRatio>
       </div>
       <div className="my-3">
         <p>{post.body}</p>
       </div>
-      <div className="border-t-2 my-2"></div>
       <div className="flex items-center gap-3">
         {post.hasLiked ? (
           <Heart
@@ -199,6 +199,7 @@ export default function Post({ post }: Props) {
           </span>
         )}
       </div>
+      <Separator className="mt-5" />
     </div>
   );
 }

@@ -137,7 +137,7 @@ const FindPlacesPage = () => {
         {isLoading ? (
           "Loading.."
         ) : places && places.length > 0 ? (
-          places.map((place) => <PlaceListItem place={place} />)
+          places.map((place) => <PlaceListItem place={place} key={place.id} />)
         ) : (
           <h1>No Place Found</h1>
         )}

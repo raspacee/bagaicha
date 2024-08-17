@@ -1,8 +1,5 @@
 import FavoriteIcon from "@mui/icons-material/Favorite";
-
 import { useSearchParams } from "react-router-dom";
-import Avatar from "@mui/material/Avatar";
-
 import { useAppSelector } from "../hooks";
 import Post from "../components/post/Post";
 import PostLoader from "../components/loaders/PostLoader";
@@ -17,7 +14,6 @@ import { useFetchMyFeed } from "@/api/PostApi";
 import CreatePostDialog from "@/components/post/CreatePostDialog";
 
 export default function FeedPage() {
-  const user = useAppSelector((state) => state.user);
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useAppSelector((state) => state.location);
   const sortBy = searchParams.get("sort") || "trending";
@@ -58,7 +54,11 @@ export default function FeedPage() {
             </div>
           </>
         )}
-        {posts && posts.map((post) => <Post key={post.id} post={post} />)}
+        <div className="w-full flex flex-col items-center">
+          <div className="w-full md:w-[80%]">
+            {posts && posts.map((post) => <Post key={post.id} post={post} />)}
+          </div>
+        </div>
         {posts && posts.length == 0 && (
           <div className="card lg:card-side bg-base-100 shadow-xl">
             <div className="h-[10rem] w-full flex justify-center items-center">

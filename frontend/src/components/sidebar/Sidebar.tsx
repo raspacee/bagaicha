@@ -1,17 +1,19 @@
-/* IMPORTANT - don't use this icon, causes error - 
-import { CiCloudOn } from "@react-icons/all-files/ci/CiCloudOn";*/
-import { IoCreateOutline } from "@react-icons/all-files/io5/IoCreateOutline";
-import { FaUser } from "@react-icons/all-files/fa/FaUser";
-import { BsBookmarkDashFill } from "@react-icons/all-files/bs/BsBookmarkDashFill";
-import { MdOutlinePlace } from "@react-icons/all-files/md/MdOutlinePlace";
-import StorefrontIcon from "@mui/icons-material/Storefront";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import PlaceIcon from "@mui/icons-material/Place";
-import BookmarksIcon from "@mui/icons-material/Bookmarks";
-import AssistantIcon from "@mui/icons-material/Assistant";
-
-import SidebarItem from "./SidebarItem";
+import {
+  BookmarkCheck,
+  BookOpen,
+  HandHelping,
+  HousePlus,
+  Salad,
+  User,
+} from "lucide-react";
 import { useGetMyUserData } from "../../api/UserApi";
+import { NavLink } from "react-router-dom";
+
+type SidebarLink = {
+  label: string;
+  url: string;
+  icon: JSX.Element;
+};
 
 export default function SidebarLeft() {
   const { myUser, isLoading } = useGetMyUserData();
@@ -24,23 +26,52 @@ export default function SidebarLeft() {
     return <h1>Failed to get user data, logout & login</h1>;
   }
 
+  const links: SidebarLink[] = [
+    { label: "Feed", url: "/feed", icon: <BookOpen size={36} /> },
+    {
+      label: "My Profile",
+      url: `/user/${myUser.id}`,
+      icon: <User size={36} className="text-blue-900" />,
+    },
+    {
+      label: "Find Places",
+      url: `/find-places`,
+      icon: <Salad size={36} />,
+    },
+    {
+      label: "Bookmarks",
+      url: `/bookmarks`,
+      icon: <BookmarkCheck size={36} />,
+    },
+    {
+      label: "Add Place",
+      url: `/place/add`,
+      icon: <HousePlus size={36} />,
+    },
+    {
+      label: "Suggestions",
+      url: `/suggestions`,
+      icon: <HandHelping size={36} />,
+    },
+  ];
+
   return (
-    <div className="w-full py-2 px-4 sticky top-0 border-r md:w-[15rem] h-screen">
-      <SidebarItem text="Profile" link={`/user/${myUser.id}`} isButton={false}>
-        <AccountCircleIcon fontSize="large" style={{ color: "#0d47a1" }} />
-      </SidebarItem>
-      <SidebarItem text="Find Places" link="/find-places" isButton={false}>
-        <PlaceIcon fontSize="large" />
-      </SidebarItem>
-      <SidebarItem text="Bookmarks" link="/bookmarks" isButton={false}>
-        <BookmarksIcon fontSize="large" />
-      </SidebarItem>
-      <SidebarItem isButton={false} text="Add a place" link="/place/add">
-        <StorefrontIcon fontSize="large" />
-      </SidebarItem>
-      <SidebarItem isButton={false} text="Suggestions" link="/suggestions">
-        <AssistantIcon fontSize="large" />
-      </SidebarItem>
+    <div className="py-2 px-4 sticky top-0 border-r md:w-[15rem] h-screen flex flex-col gap-6 pt-5">
+      {links.map((link) => (
+        <div key={link.label} className="flex gap-4">
+          {link.icon}
+          <NavLink
+            to={link.url}
+            className={({ isActive }) => {
+              let cls = "text-lg w-[10rem]";
+              if (isActive) cls += " font-semibold";
+              return cls;
+            }}
+          >
+            {link.label}
+          </NavLink>
+        </div>
+      ))}
     </div>
   );
 }
