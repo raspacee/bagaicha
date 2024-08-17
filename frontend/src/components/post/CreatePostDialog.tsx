@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import PlaceSuggestionInput from "./PlaceSuggestionInput";
 import { Textarea } from "../ui/textarea";
 import { useEffect, useState } from "react";
+import { useGetMyUserData } from "@/api/UserApi";
 
 const createPostSchema = z.object({
   placeName: z.string().min(1).max(300),
@@ -48,6 +49,7 @@ const CreatePostDialog = () => {
   const [open, setOpen] = useState(false);
 
   const { createPost, isPending, isSuccess } = useCreatePost();
+  const { myUser } = useGetMyUserData();
 
   const image: File | undefined = form.watch("image");
 
@@ -74,10 +76,13 @@ const CreatePostDialog = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="w-full">
-        <input
-          className="w-full border bg-gray-200 border-gray-200 rounded-full cursor-pointer px-3 py-2"
-          placeholder="Post a review"
-        />
+        <div className="flex flex-row gap-5 items-center">
+          <img
+            src={myUser?.profilePictureUrl}
+            className="h-[2rem] w-[2rem] object-cover rounded-full"
+          />
+          <h1 className="text-lg text-muted-foreground hover:bg-slate-200 hover:rounded-full">{`Want to share something, ${myUser?.firstName}?`}</h1>
+        </div>
       </DialogTrigger>
       <DialogContent className="h-screen md:h-[90vh] flex flex-col gap-6">
         <DialogHeader className="h-[2rem]">

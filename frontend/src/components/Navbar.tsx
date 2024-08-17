@@ -25,6 +25,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import NotificationItem from "./notification/NotificationItem";
 import SearchBar from "./forms/SearchBar";
+import { useGetMyUserData } from "@/api/UserApi";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -32,6 +33,8 @@ export default function Navbar() {
   const cookies = new Cookies(null, {
     path: "/",
   });
+
+  const { myUser } = useGetMyUserData();
 
   const { notifications, isLoading: isNotificationLoading } =
     useFetchNotification();
@@ -89,9 +92,11 @@ export default function Navbar() {
           <DropdownMenu>
             <DropdownMenuTrigger>My Account</DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link to="/user/edit-profile">My Setting</Link>
+              <DropdownMenuItem onClick={() => navigate(`/user/${myUser?.id}`)}>
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/user/edit-profile")}>
+                My Setting
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
