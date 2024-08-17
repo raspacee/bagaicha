@@ -179,16 +179,15 @@ const useLikePost = () => {
         { queryKey: ["posts"] },
         (oldPosts: FeedPost[] | undefined) =>
           oldPosts?.map((post) =>
-            post.id == postId ? { ...post, hasLiked: true } : post
+            post.id == postId
+              ? { ...post, hasLiked: true, likeCount: post.likeCount + 1 }
+              : post
           )
       );
       return { previousPosts };
     },
     onError: (err, postId, context) => {
       queryClient.setQueryData(["posts"], context?.previousPosts);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
   });
 
@@ -223,16 +222,15 @@ const useUnlikePost = () => {
         { queryKey: ["posts"] },
         (oldPosts: FeedPost[] | undefined) =>
           oldPosts?.map((post) =>
-            post.id == postId ? { ...post, hasLiked: false } : post
+            post.id == postId
+              ? { ...post, hasLiked: false, likeCount: post.likeCount - 1 }
+              : post
           )
       );
       return { previousPosts };
     },
     onError: (err, postId, context) => {
       queryClient.setQueryData(["posts"], context?.previousPosts);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
   });
 
@@ -417,10 +415,18 @@ const useGetMyBookmarks = () => {
     return response.json();
   };
 
-  const { data: bookmarks, isLoading } = useQuery({
+  const {
+    data: bookmarks,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["posts", "bookmarks"],
     queryFn: getBookmarksRequest,
   });
+
+  if (error) {
+    toast.error(error.message);
+  }
 
   return { bookmarks, isLoading };
 };

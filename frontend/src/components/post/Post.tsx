@@ -194,7 +194,7 @@ export default function Post({ post }: Props) {
       </div>
       <div>
         {post.likeCount != 0 && (
-          <span className="text-sm font-medium ml-2 text-gray-800 select-none">
+          <span className="text-sm mt-2 font-medium text-muted-foreground select-none">
             {`${post.likeCount} people love this post`}
           </span>
         )}
