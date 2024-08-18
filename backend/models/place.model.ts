@@ -210,6 +210,18 @@ const createMyPlace = async (
   };
 };
 
+const getPlacesOfUser = async (userId: string): Promise<Place[]> => {
+  const text = `
+  SELECT "id", "name", "coverImgUrl", "createdAt"
+  FROM "place"
+  WHERE "ownedBy" = $1
+  `;
+  const values = [userId];
+  const result = await pool.query(text, values);
+  if (result.rowCount == 0) return [];
+  return result.rows;
+};
+
 const exporter = {
   getPlacebyId,
   get_review_by_rating,
@@ -220,6 +232,7 @@ const exporter = {
   getTopPlaces,
   getTotalSearchResults,
   createMyPlace,
+  getPlacesOfUser,
 };
 
 export default exporter;

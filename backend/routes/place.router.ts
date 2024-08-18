@@ -34,9 +34,6 @@ router.get(
 
 router.get("/:place_id/rating/:rating", placeController.get_review);
 
-/* Get place data */
-router.get("/:placeId", placeController.getPlace);
-
 /* Endpoint to get place names suggestions */
 router.get("/suggestion/:query", placeController.getPlaceSuggestions);
 
@@ -59,6 +56,8 @@ router.delete(
   placeController.requestPlaceOwnership
 );
 
+router.get("/my", authMiddleware, placeController.getMyPlaces);
+
 /* Update place information */
 router.put(
   "/:placeId",
@@ -66,5 +65,8 @@ router.put(
   upload.single("image"),
   placeController.updatePlaceData
 );
+
+/* Get place data */
+router.get("/:placeId", placeController.getPlace);
 
 export default router;

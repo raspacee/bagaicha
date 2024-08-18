@@ -1,12 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { v2 as cloudinary } from "cloudinary";
-import { v4 as uuidv4 } from "uuid";
-
 import PlaceModel from "../models/place.model";
 import PlaceReview from "../models/placeReviewModel";
 import UserModel from "../models/user.model";
 import OwnershipRequestModel from "../models/ownershipRequest.model";
-import { Distances } from "../lib/enums";
 import { uploadImage } from "../utils/image";
 import {
   AddPlaceForm,
@@ -32,12 +28,6 @@ const getPlace = async (req: Request, res: Response, next: NextFunction) => {
     return next(err);
   }
 };
-
-interface ImageInterface {
-  thumbnail_img?: any;
-  cover_img?: any;
-  displayPic?: any;
-}
 
 const get_review = async (req: Request, res: Response, next: NextFunction) => {
   const place_id = req.params.place_id;
@@ -270,6 +260,18 @@ const createPlace = async (req: Request, res: Response) => {
   }
 };
 
+const getMyPlaces = async (req: Request, res: Response) => {
+  try {
+    const places = await PlaceModel.getPlacesOfUser(req.jwtUserData!.userId);
+    return res.json(places);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while getting your places",
+    });
+  }
+};
+
 const exporter = {
   getPlace,
   get_review,
@@ -282,6 +284,7 @@ const exporter = {
   updatePlaceData,
   getMyTopPlaces,
   createPlace,
+  getMyPlaces,
 };
 
 export default exporter;
