@@ -29,6 +29,7 @@ import AdminDashboardPage from "./routes/AdminDashboardPage";
 import AdminRoute from "./auth/AdminRoute";
 import EditPlacePage from "./routes/EditPlacePage";
 import FindPlacesPage from "./routes/FindPlacesPage";
+import ManagePlaces from "./routes/ManagePlaces";
 
 const router = createBrowserRouter([
   {
@@ -96,6 +97,14 @@ const router = createBrowserRouter([
         element: (
           <MainLayout>
             <AddPlacePage />
+          </MainLayout>
+        ),
+      },
+      {
+        path: "place/my",
+        element: (
+          <MainLayout>
+            <ManagePlaces />
           </MainLayout>
         ),
       },

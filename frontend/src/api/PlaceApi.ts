@@ -238,6 +238,37 @@ const useCreatePlace = () => {
   return { isPending, createPlace };
 };
 
+const useGetMyPlaces = () => {
+  const getMyPlacesRequest = async (): Promise<Place[] | null> => {
+    const response = await fetch(`${BASE_API_URL}/place/my`, {
+      method: "GET",
+      headers: {
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+      },
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+    return response.json();
+  };
+
+  const {
+    data: places,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["myPlaces"],
+    queryFn: getMyPlacesRequest,
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { places, isLoading };
+};
+
 export {
   useGetPlaceSuggestions,
   useGetPlaceData,
@@ -245,4 +276,5 @@ export {
   useUpdatePlaceData,
   useGetTopPlaces,
   useCreatePlace,
+  useGetMyPlaces,
 };

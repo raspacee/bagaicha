@@ -49,8 +49,8 @@ export default function SidebarLeft() {
       icon: <HousePlus size={36} />,
     },
     {
-      label: "Suggestions",
-      url: `/suggestions`,
+      label: "Manage Places",
+      url: `/place/my`,
       icon: <HandHelping size={36} />,
     },
   ];
