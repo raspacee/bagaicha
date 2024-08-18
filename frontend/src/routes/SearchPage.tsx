@@ -41,10 +41,6 @@ const SearchPage = () => {
     });
   }, [query]);
 
-  if (!searchResults) {
-    return <h1>Error while fetching search results</h1>;
-  }
-
   return (
     <div className="w-[99%] px-2 py-3">
       <h1 className="text-xl font-bold">{`Search Results for ${query}`}</h1>
