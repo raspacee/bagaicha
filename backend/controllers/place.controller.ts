@@ -272,6 +272,26 @@ const getMyPlaces = async (req: Request, res: Response) => {
   }
 };
 
+const checkPermissionToEditPlace = async (req: Request, res: Response) => {
+  try {
+    const { placeId } = req.params;
+
+    const place = await PlaceModel.getPlacebyId(placeId);
+    if (!place) return res.status(404).json();
+
+    if (place.ownedBy == req.jwtUserData!.userId) {
+      return res.status(200).json();
+    } else {
+      return res.status(403).json();
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while checking permission",
+    });
+  }
+};
+
 const exporter = {
   getPlace,
   get_review,
@@ -285,6 +305,7 @@ const exporter = {
   getMyTopPlaces,
   createPlace,
   getMyPlaces,
+  checkPermissionToEditPlace,
 };
 
 export default exporter;

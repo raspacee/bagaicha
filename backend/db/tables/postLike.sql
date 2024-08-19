@@ -3,6 +3,6 @@ CREATE TABLE
         "likerId" UUID NOT NULL,
         "postId" UUID NOT NULL,
         CONSTRAINT "fkLiker" FOREIGN KEY ("likerId") REFERENCES "user_" ("id"),
-        CONSTRAINT "fkPost" FOREIGN KEY ("postId") REFERENCES "post" ("id"),
+        CONSTRAINT "fkPost" FOREIGN KEY ("postId") REFERENCES "post" ("id") ON DELETE CASCADE,
         CONSTRAINT "uniqueLikerPost" UNIQUE ("likerId", "postId")
     );

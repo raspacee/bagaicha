@@ -10,6 +10,6 @@ CREATE TABLE
 		"createdAt" TIMESTAMPTZ NOT NULL,
 		CONSTRAINT "fkRecipient" FOREIGN KEY ("recipientId") REFERENCES "user_" ("id"),
 		CONSTRAINT "fkSender" FOREIGN KEY ("senderId") REFERENCES "user_" ("id"),
-		CONSTRAINT "fkPost" FOREIGN KEY ("postId") REFERENCES "post" ("id"),
-		CONSTRAINT "fkComment" FOREIGN KEY ("commentId") REFERENCES "comment" ("id")
+		CONSTRAINT "fkPost" FOREIGN KEY ("postId") REFERENCES "post" ("id") ON DELETE CASCADE,
+		CONSTRAINT "fkComment" FOREIGN KEY ("commentId") REFERENCES "comment" ("id") ON DELETE CASCADE
 	);

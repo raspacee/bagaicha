@@ -5,6 +5,6 @@ CREATE TABLE
         "postId" UUID NOT NULL,
         "createdAt" TIMESTAMPTZ NOT NULL,
         CONSTRAINT "fkUser" FOREIGN KEY ("userId") REFERENCES "user_" ("id"),
-        CONSTRAINT "fkPost" FOREIGN KEY ("postId") REFERENCES "post" ("id"),
+        CONSTRAINT "fkPost" FOREIGN KEY ("postId") REFERENCES "post" ("id") ON DELETE CASCADE,
         CONSTRAINT "uniquePostBookmark" UNIQUE ("userId", "postId")
     );

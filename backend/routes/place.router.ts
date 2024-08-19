@@ -58,6 +58,12 @@ router.delete(
 
 router.get("/my", authMiddleware, placeController.getMyPlaces);
 
+router.get(
+  "/:placeId/checkPermission",
+  authMiddleware,
+  placeController.checkPermissionToEditPlace
+);
+
 /* Update place information */
 router.put(
   "/:placeId",
