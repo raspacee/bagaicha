@@ -7,7 +7,13 @@ import LikeModel from "../models/like.model";
 import BookmarkModel from "../models/bookmark.model";
 import CommentModel from "../models/comment.model";
 import NotificationModel from "../models/notification.model";
-import { CreatePostForm, EditPostForm, Notification, Post } from "../types";
+import {
+  CreatePostForm,
+  EditPostForm,
+  FetchFeedResponse,
+  Notification,
+  Post,
+} from "../types";
 import { uploadImage } from "../utils/image";
 
 /* create a post */
@@ -83,7 +89,13 @@ const getFeed = async (req: Request, res: Response, next: NextFunction) => {
     const sort = req.query.sort;
     const lat = req.query.lat as string;
     const long = req.query.long as string;
-    const posts = await PostModel.getFeedPosts(req.jwtUserData!.userId);
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = 20;
+
+    const posts = await PostModel.getFeedPosts(
+      req.jwtUserData!.userId,
+      (page - 1) * pageSize
+    );
     if (posts.length == 0 || sort == "recent") {
       return res.json(posts);
     }
@@ -116,7 +128,14 @@ const getFeed = async (req: Request, res: Response, next: NextFunction) => {
       if (a.score > b.score) return -1;
       else return 1;
     });
-    return res.json(posts);
+
+    /* For infinite scrolling */
+    const remainingFeedPosts = await PostModel.getRemainingFeedPosts(
+      (page - 1) * posts.length
+    );
+    let nextPage: number | null = null;
+    if (remainingFeedPosts > 0) nextPage = page + 1;
+    return res.json({ posts, nextPage: nextPage } as FetchFeedResponse);
   } catch (err: any) {
     console.log(err);
     return res.status(500).send({

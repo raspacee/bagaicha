@@ -59,7 +59,10 @@ const createPost = async (
   return result.rows[0];
 };
 
-const getFeedPosts = async (userId: string): Promise<FeedPost[]> => {
+const getFeedPosts = async (
+  userId: string,
+  skip: number
+): Promise<FeedPost[]> => {
   const text = `
   SELECT 
     p.*,
@@ -93,10 +96,11 @@ const getFeedPosts = async (userId: string): Promise<FeedPost[]> => {
     INNER JOIN "user_" AS u ON p."authorId" = u."id"
     INNER JOIN "place" AS pl ON p."placeId" = pl."id" 
   ORDER BY p."createdAt" DESC 
-  LIMIT 20;
+  LIMIT 20
+  OFFSET $2;
 `;
 
-  const values = [userId];
+  const values = [userId, skip];
   const result = await pool.query(text, values);
   if (result.rowCount == 0) return [];
   return result.rows;
@@ -277,6 +281,20 @@ const deletePostById = async (postId: string) => {
   await pool.query(text, values);
 };
 
+const getRemainingFeedPosts = async (offset: number): Promise<number> => {
+  const text = `
+  WITH "subset" AS (
+    SELECT "id"
+    FROM "post"
+    LIMIT 20 OFFSET $1
+  )
+  SELECT COUNT(*)
+  FROM "subset";`;
+  const values = [offset];
+  const result = await pool.query(text, values);
+  return result.rows[0].count;
+};
+
 const exporter = {
   createPost,
   getFeedPosts,
@@ -286,6 +304,7 @@ const exporter = {
   getTotalSearchResults,
   updatePostById,
   deletePostById,
+  getRemainingFeedPosts,
 };
 
 export default exporter;
