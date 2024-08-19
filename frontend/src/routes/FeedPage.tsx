@@ -12,17 +12,18 @@ import {
 } from "@/components/ui/select";
 import { useFetchMyFeed } from "@/api/PostApi";
 import CreatePostDialog from "@/components/post/CreatePostDialog";
+import { useState } from "react";
+import React from "react";
+import { Button } from "@/components/ui/button";
 
 export default function FeedPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useAppSelector((state) => state.location);
-  const sortBy = searchParams.get("sort") || "trending";
+  const sortByInitialValue = searchParams.get("sort") || "trending";
+  const [sortBy, setSortBy] = useState<string>(sortByInitialValue);
 
-  const { posts, isLoading } = useFetchMyFeed(sortBy, location);
-
-  if (isLoading) {
-    return <h1>Loading...</h1>;
-  }
+  const { data, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage } =
+    useFetchMyFeed(sortBy, location);
 
   return (
     <div className="w-full flex flex-col md:flex-row">
@@ -32,7 +33,10 @@ export default function FeedPage() {
         </div>
         <div className="w-full flex justify-end my-1 items-center">
           <Select
-            onValueChange={(value) => setSearchParams({ sort: value })}
+            onValueChange={(value) => {
+              setSearchParams({ sort: value });
+              setSortBy(value);
+            }}
             value={searchParams.get("sort") || "trending"}
           >
             <SelectTrigger className="w-[180px]">
@@ -44,22 +48,32 @@ export default function FeedPage() {
             </SelectContent>
           </Select>
         </div>
-        {isLoading && (
-          <>
-            <div className="bg-white w-full h-fit px-6 py-3 mt-3 border rounded-md border-slate-200">
-              <PostLoader />
-            </div>
-            <div className="bg-white w-full h-fit px-6 py-3 mt-3 border rounded-md border-slate-200">
-              <PostLoader />
-            </div>
-          </>
-        )}
         <div className="w-full flex flex-col items-center">
           <div className="w-full md:w-[70%]">
-            {posts && posts.map((post) => <Post key={post.id} post={post} />)}
+            {data &&
+              data.pages.map((group, i) => (
+                <React.Fragment key={i}>
+                  {group.posts.map((post) => (
+                    <Post key={post.id} post={post} />
+                  ))}
+                </React.Fragment>
+              ))}
           </div>
         </div>
-        {posts && posts.length == 0 && (
+        <div className="flex flex-col items-center mb-5">
+          <Button
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage || !hasNextPage}
+            style={{ overflowAnchor: "none" }}
+          >
+            {isFetchingNextPage
+              ? "Fetching more..."
+              : hasNextPage
+              ? "Load More"
+              : "Nothing to load"}
+          </Button>
+        </div>
+        {data && data.pages.length == 0 && (
           <div className="card lg:card-side bg-base-100 shadow-xl">
             <div className="h-[10rem] w-full flex justify-center items-center">
               <p className="text-xl font-bold">
@@ -69,9 +83,9 @@ export default function FeedPage() {
           </div>
         )}
       </div>
-      <div className="bg-white rounded-md mt-3 h-fit px-4 py-3 top-4 mr-2 shadow-lg">
+      <div className="bg-white rounded-md h-fit px-4 py-3 top-4 mr-2 shadow">
         <p className="font-medium text-gray-700">
-          Made by <a href="https://github.com/raspacee">raspace</a> with{" "}
+          Made by <a href="https://bijaykhapung.com.np/">raspace</a> with{" "}
           <FavoriteIcon style={{ color: "red" }} />
         </p>
         <p className="text-sm font-medium text-gray-700">

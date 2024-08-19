@@ -396,6 +396,11 @@ export type CreatePlaceResponse = {
   id: string;
 };
 
+export type FetchFeedResponse = {
+  posts: FeedPost[];
+  nextPage: number | null;
+};
+
 export type {
   UserInterface,
   LocationType,

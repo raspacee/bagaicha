@@ -3,11 +3,17 @@ import type {
   CommentForm,
   EditPostForm,
   FeedPost,
+  FetchFeedResponse,
   LocationType,
   Post,
   PostWithComments,
 } from "@/lib/types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import Cookies from "universal-cookie";
@@ -17,11 +23,12 @@ const cookies = new Cookies(null, { path: "/" });
 const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 const useFetchMyFeed = (sortBy: string, location: LocationType) => {
-  const fetchFeedRequest = async (
-    sortBy: string,
-    location: LocationType
-  ): Promise<FeedPost[]> => {
-    const url = `${BASE_API_URL}/post?lat=${location.lat}&long=${location.long}&sort=${sortBy}`;
+  const fetchFeedRequest = async ({
+    pageParam,
+  }: {
+    pageParam: number;
+  }): Promise<FetchFeedResponse> => {
+    const url = `${BASE_API_URL}/post?lat=${location.lat}&long=${location.long}&sort=${sortBy}&page=${pageParam}`;
     const response = await fetch(url, {
       mode: "cors",
       headers: {
@@ -35,19 +42,24 @@ const useFetchMyFeed = (sortBy: string, location: LocationType) => {
   };
 
   const {
-    data: posts,
-    isLoading,
+    data,
+    isFetching,
+    isFetchingNextPage,
     error,
-  } = useQuery({
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
     queryKey: ["posts", sortBy],
-    queryFn: () => fetchFeedRequest(sortBy, location),
+    queryFn: fetchFeedRequest,
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
   });
 
   if (error) {
     toast.error(error.message);
   }
 
-  return { posts, isLoading };
+  return { data, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage };
 };
 
 const useFetchPostById = (postId: string) => {

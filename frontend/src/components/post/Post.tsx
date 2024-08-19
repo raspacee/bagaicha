@@ -34,7 +34,6 @@ import {
 import { useState } from "react";
 import DeletePostDialog from "./DeletePostDialog";
 import { useGetMyUserData } from "@/api/UserApi";
-import { AspectRatio } from "../ui/aspect-ratio";
 import { Separator } from "../ui/separator";
 
 type Props = {
@@ -147,21 +146,19 @@ export default function Post({ post }: Props) {
         )}
       </div>
       <div className="mt-2 md:w-[500px]">
-        <AspectRatio ratio={img.width / img.height}>
-          <img
-            src={`${img.src}`}
-            alt="Food picture"
-            onClick={() =>
-              dispatch(
-                setImgModal({
-                  value: true,
-                  src: post.imageUrl,
-                })
-              )
-            }
-            className="rounded-md cursor-pointer w-full h-full"
-          />
-        </AspectRatio>
+        <img
+          src={`${img.src}`}
+          alt="Food picture"
+          onClick={() =>
+            dispatch(
+              setImgModal({
+                value: true,
+                src: post.imageUrl,
+              })
+            )
+          }
+          className="rounded-md cursor-pointer w-full aspect-video object-cover"
+        />
       </div>
       <div className="my-3">
         <p>{post.body}</p>
