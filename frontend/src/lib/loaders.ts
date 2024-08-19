@@ -1,4 +1,4 @@
-import { redirect } from "react-router-dom";
+import { LoaderFunctionArgs, redirect } from "react-router-dom";
 import { UserInterface } from "./types";
 import Cookies from "universal-cookie";
 import { AUTH_TOKEN_NAME } from "./config";

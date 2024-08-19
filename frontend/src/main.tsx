@@ -30,6 +30,7 @@ import AdminRoute from "./auth/AdminRoute";
 import EditPlacePage from "./routes/EditPlacePage";
 import FindPlacesPage from "./routes/FindPlacesPage";
 import ManagePlaces from "./routes/ManagePlaces";
+import CanEditPlace from "./auth/CanEditPlace";
 
 const router = createBrowserRouter([
   {
@@ -79,9 +80,11 @@ const router = createBrowserRouter([
       {
         path: "place/:placeId/edit",
         element: (
-          <MainLayout>
-            <EditPlacePage />
-          </MainLayout>
+          <CanEditPlace>
+            <MainLayout>
+              <EditPlacePage />
+            </MainLayout>
+          </CanEditPlace>
         ),
       },
       {

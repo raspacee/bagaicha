@@ -55,7 +55,7 @@ export default function FeedPage() {
           </>
         )}
         <div className="w-full flex flex-col items-center">
-          <div className="w-full md:w-[80%]">
+          <div className="w-full md:w-[70%]">
             {posts && posts.map((post) => <Post key={post.id} post={post} />)}
           </div>
         </div>

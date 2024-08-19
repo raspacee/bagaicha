@@ -122,7 +122,7 @@ const UpdateUserProfileForm = ({ user }: Props) => {
           name="bio"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>First Name</FormLabel>
+              <FormLabel>Bio</FormLabel>
               <FormControl>
                 <Textarea {...field} placeholder="Bio" />
               </FormControl>

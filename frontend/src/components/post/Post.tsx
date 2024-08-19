@@ -58,6 +58,9 @@ export default function Post({ post }: Props) {
 
   const date = DateTime.fromISO(post.createdAt);
 
+  const img = new Image();
+  img.src = post.imageUrl;
+
   return (
     <div className="bg-white w-full h-fit px-1 md:px-6 py-3 mb-3">
       <div className="flex flex-col md:flex-row justify-between md:items-center">
@@ -143,10 +146,10 @@ export default function Post({ post }: Props) {
           </div>
         )}
       </div>
-      <div className="mt-2 md:w-[40rem]">
-        <AspectRatio ratio={16 / 9}>
+      <div className="mt-2 md:w-[500px]">
+        <AspectRatio ratio={img.width / img.height}>
           <img
-            src={`${post.imageUrl}`}
+            src={`${img.src}`}
             alt="Food picture"
             onClick={() =>
               dispatch(
@@ -156,7 +159,7 @@ export default function Post({ post }: Props) {
                 })
               )
             }
-            className="w-full h-full object-cover cursor-pointer"
+            className="rounded-md cursor-pointer w-full h-full"
           />
         </AspectRatio>
       </div>

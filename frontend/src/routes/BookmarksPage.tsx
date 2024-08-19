@@ -13,7 +13,7 @@ const BookmarksPage = () => {
   }
 
   return (
-    <div className="px-2 py-3 flex flex-col gap-3 w-full md:w-[45rem]">
+    <div className="px-2 py-3 flex flex-col gap-3 w-full md:w-[35rem]">
       <h1 className="text-3xl font-extrabold">Bookmarked Posts</h1>
       {bookmarks.length == 0 && (
         <h1 className="text-lg">You have no bookmarks</h1>

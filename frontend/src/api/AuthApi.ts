@@ -152,3 +152,29 @@ export const useAuthenticateAdmin = () => {
     isLoading,
   };
 };
+
+export const useAuthenticateOwner = (placeId: string) => {
+  const authOwnerRequest = async () => {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/place/${placeId}/checkPermission`,
+      {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error();
+    }
+    return true;
+  };
+
+  const { isLoading, isError, isSuccess } = useQuery({
+    queryKey: ["isPlaceOwner"],
+    queryFn: authOwnerRequest,
+    retry: false,
+  });
+
+  return { isError, isLoading, isSuccess };
+};
