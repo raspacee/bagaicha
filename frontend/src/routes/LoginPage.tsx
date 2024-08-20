@@ -89,7 +89,10 @@ export default function LoginPage() {
           <Button className="mt-4" type="submit" disabled={isPending}>
             Login
           </Button>
-          <Link to="/signup">Want to signup?</Link>
+          <Link to="/signup">Want to signup</Link>
+          <Link to="/forgot-password" className="font-medium text-red-600">
+            Forgot Your Password?
+          </Link>
         </form>
       </Form>
     </div>

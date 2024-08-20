@@ -7,6 +7,7 @@ import {
   JwtUserData,
   LoginForm,
   LoginResponse,
+  ResetPasswordForm,
   SignupForm,
 } from "@/lib/types";
 import { toast } from "sonner";
@@ -156,7 +157,7 @@ export const useAuthenticateAdmin = () => {
 export const useAuthenticateOwner = (placeId: string) => {
   const authOwnerRequest = async () => {
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/place/${placeId}/checkPermission`,
+      `${BASE_API_URL}/place/${placeId}/checkPermission`,
       {
         method: "GET",
         headers: {
@@ -177,4 +178,74 @@ export const useAuthenticateOwner = (placeId: string) => {
   });
 
   return { isError, isLoading, isSuccess };
+};
+
+export const useForgotPassword = () => {
+  const forgotPasswordRequest = async (email: string) => {
+    const response = await fetch(`${BASE_API_URL}/auth/forgot-password`, {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+  };
+
+  const {
+    mutateAsync: forgotPassword,
+    isPending,
+    error,
+    isSuccess,
+  } = useMutation({
+    mutationFn: forgotPasswordRequest,
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { forgotPassword, isPending, isSuccess };
+};
+
+export const useResetPassword = (resetToken: string) => {
+  const navigate = useNavigate();
+
+  const resetPasswordRequest = async (form: ResetPasswordForm) => {
+    const response = await fetch(
+      `${BASE_API_URL}/auth/reset-password/${resetToken}`,
+      {
+        method: "post",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(form),
+      }
+    );
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+  };
+
+  const {
+    mutateAsync: resetPassword,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: resetPasswordRequest,
+    onSuccess: () => {
+      toast.success("Password change successful, please login now");
+      navigate("/login");
+    },
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { resetPassword, isPending };
 };

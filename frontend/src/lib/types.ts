@@ -401,6 +401,26 @@ export type FetchFeedResponse = {
   nextPage: number | null;
 };
 
+export const forgotPasswordFormSchema = z.object({
+  email: z.string().email(),
+});
+
+export type ForgotPasswordForm = z.infer<typeof forgotPasswordFormSchema>;
+
+export const resetPasswordFormSchema = z
+  .object({
+    password: z.string().min(6, {
+      message: "Password needs to be atleast 6 characters long",
+    }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Password and Confirm Password needs to be same",
+    path: ["confirmPassword"],
+  });
+
+export type ResetPasswordForm = z.infer<typeof resetPasswordFormSchema>;
+
 export type {
   UserInterface,
   LocationType,

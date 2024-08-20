@@ -31,6 +31,9 @@ import EditPlacePage from "./routes/EditPlacePage";
 import FindPlacesPage from "./routes/FindPlacesPage";
 import ManagePlaces from "./routes/ManagePlaces";
 import CanEditPlace from "./auth/CanEditPlace";
+import ForgotPasswordPage from "./routes/ForgotPasswordPage";
+import ResetPasswordPage from "./routes/ResetPasswordPage";
+import GenericLayout from "./layouts/GenericLayout";
 
 const router = createBrowserRouter([
   {
@@ -164,6 +167,22 @@ const router = createBrowserRouter([
     path: "/signup",
     element: <SignupPage />,
     loader: notAuthenticated,
+  },
+  {
+    path: "/forgot-password",
+    element: (
+      <GenericLayout>
+        <ForgotPasswordPage />
+      </GenericLayout>
+    ),
+  },
+  {
+    path: "/reset-password/:resetToken",
+    element: (
+      <GenericLayout>
+        <ResetPasswordPage />
+      </GenericLayout>
+    ),
   },
 ]);
 
