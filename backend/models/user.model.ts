@@ -134,6 +134,16 @@ const getPasswordByEmail = async (email: string): Promise<User | null> => {
   return result.rows[0] as User;
 };
 
+const changePassword = async (userId: string, newPassword: string) => {
+  const text = `
+  UPDATE "user_"
+  SET "password" = $1
+  WHERE "id" = $2
+  `;
+  const values = [newPassword, userId];
+  await pool.query(text, values);
+};
+
 const exporter = {
   createUser,
   change_profile_pic_url,
@@ -142,6 +152,7 @@ const exporter = {
   getDataById,
   getDataByEmail,
   getPasswordByEmail,
+  changePassword,
 };
 
 export default exporter;
