@@ -24,7 +24,9 @@ const logger = winston.createLogger({
 });
 
 const winstonMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  logger.info(`${req.method} ${req.url} - ${req.ip}`);
+  logger.info(
+    `Origin: ${req.headers.origin}, Method: ${req.method}, URL: ${req.url} - IP: ${req.ip}`
+  );
   next();
 };
 
@@ -32,7 +34,14 @@ app.use(winstonMiddleware);
 app.use(compression());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: function (origin, callback) {
+      if (
+        origin == process.env.FRONTEND_URL ||
+        origin == process.env.FRONTEND_DOMAIN
+      )
+        callback(null, origin);
+      else callback(new Error("Invalidate Origin"), origin);
+    },
     optionsSuccessStatus: 200,
   })
 );
