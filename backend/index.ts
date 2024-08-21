@@ -8,12 +8,27 @@ import postRouter from "./routes/post.router";
 import userRouter from "./routes/user.router";
 import placeRouter from "./routes/place.router";
 import notificationRouter from "./routes/notification.router";
-import cookieParser from "cookie-parser";
 import { v2 as cloudinary } from "cloudinary";
 import compression from "compression";
+import winston from "winston";
 
 const app = express();
 
+const logger = winston.createLogger({
+  level: "http",
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [new winston.transports.Console()],
+});
+
+const winstonMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  logger.info(`${req.method} ${req.url} - ${req.ip}`);
+  next();
+};
+
+app.use(winstonMiddleware);
 app.use(compression());
 app.use(
   cors({
@@ -21,7 +36,6 @@ app.use(
     optionsSuccessStatus: 200,
   })
 );
-app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
