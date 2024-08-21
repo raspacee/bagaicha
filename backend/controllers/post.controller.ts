@@ -76,14 +76,6 @@ function haversine(
   return parseFloat((rad * c).toFixed(1));
 }
 
-export const place_features = [
-  { key: "delivery", value: 0 },
-  { key: "takeout", value: 1 },
-  { key: "pet_friendly", value: 2 },
-  { key: "very_clean", value: 3 },
-  { key: "affordable", value: 4 },
-];
-
 const getFeed = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const sort = req.query.sort;

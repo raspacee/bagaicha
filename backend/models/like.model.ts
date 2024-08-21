@@ -23,6 +23,8 @@ const createPostLike = async (postId: string, userId: string) => {
     console.log(err);
     await client.query("ROLLBACK");
     throw new Error();
+  } finally {
+    client.release();
   }
 };
 
@@ -51,6 +53,8 @@ const deletePostLike = async (postId: string, userId: string) => {
     console.log(err);
     await client.query("ROLLBACK");
     throw new Error();
+  } finally {
+    client.release();
   }
 };
 

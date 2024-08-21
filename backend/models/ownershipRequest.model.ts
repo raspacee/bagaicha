@@ -70,6 +70,8 @@ const grantRequestOwnership = async (requestId: string) => {
     console.error(err);
     await client.query("ROLLBACK");
     throw new Error("SQL Error while granting request ownership");
+  } finally {
+    client.release();
   }
 };
 

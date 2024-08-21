@@ -61,6 +61,7 @@ const main = async () => {
     })
     .on("error", async function (error) {
       await client.query("ROLLBACK");
+      client.release();
       console.error(error);
     });
 };
