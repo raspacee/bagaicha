@@ -123,7 +123,7 @@ const getFeed = async (req: Request, res: Response, next: NextFunction) => {
 
     /* For infinite scrolling */
     const remainingFeedPosts = await PostModel.getRemainingFeedPosts(
-      (page - 1) * posts.length
+      page * posts.length
     );
     let nextPage: number | null = null;
     if (remainingFeedPosts > 0) nextPage = page + 1;
