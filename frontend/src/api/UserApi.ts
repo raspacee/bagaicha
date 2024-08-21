@@ -95,7 +95,7 @@ export const useGetUserPosts = (userId: string) => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["posts", userId],
+    queryKey: ["posts", "bookmarks", userId],
     queryFn: getUserPostsRequest,
     enabled: enabled,
   });

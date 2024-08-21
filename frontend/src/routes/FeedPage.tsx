@@ -54,7 +54,7 @@ export default function FeedPage() {
               data.pages.map((group, i) => (
                 <React.Fragment key={i}>
                   {group.posts.map((post) => (
-                    <Post key={post.id} post={post} />
+                    <Post key={post.id} post={post} renderedFromFeed={true} />
                   ))}
                 </React.Fragment>
               ))}

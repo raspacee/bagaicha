@@ -76,7 +76,11 @@ export default function UserProfilePage() {
         {posts?.length == 0 ? (
           <h1>No posts</h1>
         ) : (
-          posts?.map((post) => <Post key={post.id} post={post} />)
+          <div className="w-full md:w-[80%]">
+            {posts?.map((post) => (
+              <Post key={post.id} post={post} renderedFromFeed={false} />
+            ))}
+          </div>
         )}
       </div>
     </div>

@@ -38,19 +38,20 @@ import { Separator } from "../ui/separator";
 
 type Props = {
   post: FeedPost;
+  renderedFromFeed?: boolean;
 };
 
-export default function Post({ post }: Props) {
+export default function Post({ post, renderedFromFeed }: Props) {
   const location = useAppSelector((state) => state.location);
   const dispatch = useAppDispatch();
   const isLocationGranted = location.lat != -1 && location.long != -1;
 
   const { myUser } = useGetMyUserData();
 
-  const { likePost } = useLikePost();
-  const { unlikePost } = useUnlikePost();
-  const { bookmarkPost } = useBookmarkPost();
-  const { unbookmarkPost } = useUnbookmarkPost();
+  const { likePost } = useLikePost(renderedFromFeed);
+  const { unlikePost } = useUnlikePost(renderedFromFeed);
+  const { bookmarkPost } = useBookmarkPost(renderedFromFeed);
+  const { unbookmarkPost } = useUnbookmarkPost(renderedFromFeed);
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);

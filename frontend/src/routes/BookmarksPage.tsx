@@ -19,7 +19,7 @@ const BookmarksPage = () => {
         <h1 className="text-lg">You have no bookmarks</h1>
       )}
       {bookmarks.map((post) => (
-        <Post post={post} key={post.id} />
+        <Post post={post} key={post.id} renderedFromFeed={false} />
       ))}
     </div>
   );
