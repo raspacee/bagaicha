@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import UserModel from "../models/user.model";
-import bcrypt, { hash } from "bcryptjs";
+import bcrypt from "bcryptjs";
+import * as querystring from "querystring";
+import { google } from "googleapis";
 import jwt from "jsonwebtoken";
 import { createClient } from "redis";
 import {
@@ -10,6 +12,8 @@ import {
   ResetPasswordDecoded,
   ResetPasswordForm,
   SignupForm,
+  OAuth2AccessTokenResponse,
+  OAuth2UserData,
 } from "../types";
 import { hashPassword } from "../utils/password";
 import { createMailTransporter, getMailAccessToken } from "../utils/gmail";
@@ -27,7 +31,10 @@ const signupHandler = async (req: Request, res: Response) => {
 
     data.password = await hashPassword(data.password);
 
-    await UserModel.createUser(data);
+    const defaultPictureUrl =
+      "https://t3.ftcdn.net/jpg/02/10/49/86/360_F_210498655_ywivjjUe6cgyt52n4BxktRgDCfFg8lKx.jpg";
+
+    await UserModel.createUser(data, defaultPictureUrl);
 
     return res.status(201).json();
   } catch (err) {
@@ -194,6 +201,72 @@ const resetPassword = async (req: Request, res: Response) => {
   }
 };
 
+const verifyOAuth2Code = async (req: Request, res: Response) => {
+  try {
+    const { code } = req.body;
+    if (!code) {
+      return res
+        .status(400)
+        .json({ message: "OAuth2 Authorization Code Missing" });
+    }
+
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.OAUTH2_CLIENT_ID,
+      process.env.OAUTH2_CLIENT_SECRET,
+      process.env.OAUTH2_REDIRECT_URI
+    );
+
+    const { tokens } = await oauth2Client.getToken(code);
+
+    oauth2Client.setCredentials(tokens);
+
+    /* Access user data */
+    const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
+    const userInfo = await oauth2.userinfo.get();
+
+    const existingUser = await UserModel.getDataByEmail(userInfo.data.email!);
+
+    const payload: JwtUserData = { userId: "", email: "" };
+
+    if (!existingUser) {
+      const data: SignupForm = {
+        email: userInfo.data.email!,
+        firstName: userInfo.data.given_name!,
+        lastName: userInfo.data.family_name!,
+        password: "OAUTH2_NULL",
+      };
+      const newUser = await UserModel.createUser(
+        data,
+        userInfo.data.picture!,
+        true
+      );
+      payload.userId = newUser.id;
+      payload.email = newUser.email;
+    } else {
+      payload.userId = existingUser.id;
+      payload.email = existingUser.email;
+    }
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET!,
+      {
+        expiresIn: "30d",
+      },
+      function (err, token) {
+        if (err) throw err;
+
+        return res.json({ token });
+      }
+    );
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: err,
+    });
+  }
+};
+
 const exporter = {
   signupHandler,
   loginHandler,
@@ -202,6 +275,7 @@ const exporter = {
   adminHandler,
   getResetPasswordToken,
   resetPassword,
+  verifyOAuth2Code,
 };
 
 export default exporter;

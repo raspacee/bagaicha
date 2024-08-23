@@ -31,4 +31,6 @@ router.post("/forgot-password", authController.getResetPasswordToken);
 
 router.post("/reset-password/:resetToken", authController.resetPassword);
 
+router.post("/oauth2/verify", authController.verifyOAuth2Code);
+
 export default router;

@@ -13,11 +13,13 @@ const is_moderator = async (id: string) => {
   return false;
 };
 
-const createUser = async (data: SignupForm) => {
+const createUser = async (
+  data: SignupForm,
+  profilePictureUrl: string,
+  isOAuth2: boolean = false
+): Promise<User> => {
   const id = uuid();
   const createdAt = new Date().toISOString();
-  const defaultPictureUrl =
-    "https://t3.ftcdn.net/jpg/02/10/49/86/360_F_210498655_ywivjjUe6cgyt52n4BxktRgDCfFg8lKx.jpg";
 
   const text = `
   INSERT INTO "user_" (
@@ -27,8 +29,10 @@ const createUser = async (data: SignupForm) => {
     "lastName",
     "password",
     "createdAt",
-    "profilePictureUrl"
-  ) VALUES ($1, $2, $3, $4, $5, $6, $7);
+    "profilePictureUrl",
+    "isOAuth2Account"
+  ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+   RETURNING *;
 `;
 
   const values = [
@@ -38,9 +42,11 @@ const createUser = async (data: SignupForm) => {
     data.lastName,
     data.password,
     createdAt,
-    defaultPictureUrl,
+    profilePictureUrl,
+    isOAuth2,
   ];
-  await pool.query(text, values);
+  const result = await pool.query(text, values);
+  return result.rows[0];
 };
 
 const change_profile_pic_url = async (user_id: string, new_url: string) => {
