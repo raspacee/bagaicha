@@ -249,3 +249,36 @@ export const useResetPassword = (resetToken: string) => {
 
   return { resetPassword, isPending };
 };
+
+export const useAuthenticateOAuth2 = () => {
+  const navigate = useNavigate();
+
+  const oauth2Request = async (code: string): Promise<LoginResponse | null> => {
+    const response = await fetch(`${BASE_API_URL}/auth/oauth2/verify`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ code }),
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+    return response.json();
+  };
+
+  const { mutateAsync: sendOAuth2Code, isPending } = useMutation({
+    mutationFn: oauth2Request,
+    onError: (error) => {
+      toast.error(error.message);
+      navigate("/login");
+    },
+    onSuccess: (data) => {
+      cookies.set(AUTH_TOKEN_NAME, data!.token);
+      navigate("/feed");
+    },
+  });
+
+  return { sendOAuth2Code, isPending };
+};

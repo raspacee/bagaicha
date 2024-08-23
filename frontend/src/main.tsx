@@ -34,6 +34,7 @@ import CanEditPlace from "./auth/CanEditPlace";
 import ForgotPasswordPage from "./routes/ForgotPasswordPage";
 import ResetPasswordPage from "./routes/ResetPasswordPage";
 import GenericLayout from "./layouts/GenericLayout";
+import OAuth2CallbackPage from "./routes/OAuth2CallbackPage";
 
 const router = createBrowserRouter([
   {
@@ -157,6 +158,10 @@ const router = createBrowserRouter([
         ),
       },
     ],
+  },
+  {
+    path: "/oauth2/callback",
+    element: <OAuth2CallbackPage />,
   },
   {
     path: "/login",

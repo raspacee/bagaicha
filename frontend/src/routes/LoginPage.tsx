@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLoginUser } from "@/api/AuthApi";
@@ -12,7 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { AtSign, SquareAsterisk } from "lucide-react";
+import { AtSign, Mail, SquareAsterisk } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
@@ -20,6 +20,12 @@ export default function LoginPage() {
     resolver: zodResolver(loginFormSchema),
   });
   const { loginUser, isPending } = useLoginUser();
+
+  const oauth2ConsentScreenURL = `https://accounts.google.com/o/oauth2/auth?client_id=${
+    import.meta.env.VITE_OAUTH2_CLIENT_ID
+  }&redirect_uri=${
+    import.meta.env.VITE_OAUTH2_REDIRECT_URI
+  }&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email&response_type=code`;
 
   const onSubmit = async (data: LoginForm) => {
     loginUser(data);
@@ -88,6 +94,14 @@ export default function LoginPage() {
           <FormMessage>{form.formState.errors?.password?.message}</FormMessage>
           <Button className="mt-4" type="submit" disabled={isPending}>
             Login
+          </Button>
+          <p className="text-center">or</p>
+          <Button
+            type="button"
+            className="bg-orange-700 flex gap-2 items-center hover:bg-orange-500"
+            onClick={() => (window.location.href = oauth2ConsentScreenURL)}
+          >
+            <Mail /> Login With Gmail
           </Button>
           <Link to="/signup">Want to signup</Link>
           <Link to="/forgot-password" className="font-medium text-red-600">
