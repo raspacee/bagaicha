@@ -45,7 +45,7 @@ const getUserNotifications = async (
   INNER JOIN 
     "user_" AS u 
   ON 
-    n."recipientId" = u.id
+    n."senderId" = u.id
   WHERE 
     n."recipientId" = $1 
     AND n."isRead" = false
