@@ -40,7 +40,7 @@ app.use(
         origin == process.env.FRONTEND_DOMAIN
       )
         callback(null, origin);
-      else callback(new Error("Invalidate Origin"), origin);
+      else callback(new Error("Invalid Origin"), origin);
     },
     optionsSuccessStatus: 200,
   })

@@ -12,8 +12,6 @@ import {
   ResetPasswordDecoded,
   ResetPasswordForm,
   SignupForm,
-  OAuth2AccessTokenResponse,
-  OAuth2UserData,
 } from "../types";
 import { hashPassword } from "../utils/password";
 import { createMailTransporter, getMailAccessToken } from "../utils/gmail";
@@ -213,7 +211,9 @@ const verifyOAuth2Code = async (req: Request, res: Response) => {
     const oauth2Client = new google.auth.OAuth2(
       process.env.OAUTH2_CLIENT_ID,
       process.env.OAUTH2_CLIENT_SECRET,
-      process.env.OAUTH2_REDIRECT_URI
+      process.env.NODE_ENV == "production"
+        ? process.env.OAUTH2_REDIRECT_URI_PROD
+        : process.env.OAUTH2_REDIRECT_URI_DEV
     );
 
     const { tokens } = await oauth2Client.getToken(code);
