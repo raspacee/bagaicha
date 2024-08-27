@@ -24,7 +24,9 @@ export default function LoginPage() {
   const oauth2ConsentScreenURL = `https://accounts.google.com/o/oauth2/auth?client_id=${
     import.meta.env.VITE_OAUTH2_CLIENT_ID
   }&redirect_uri=${
-    import.meta.env.VITE_OAUTH2_REDIRECT_URI
+    import.meta.env.MODE == "production"
+      ? import.meta.env.VITE_OAUTH2_REDIRECT_URI_PROD
+      : import.meta.env.VITE_OAUTH2_REDIRECT_URI_DEV
   }&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email&response_type=code`;
 
   const onSubmit = async (data: LoginForm) => {
