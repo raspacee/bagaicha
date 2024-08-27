@@ -5,3 +5,4 @@
 **.pbf
 
 startServers.sh
+__tests__/

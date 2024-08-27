@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "export NODE_ENV=production && node build/index.js",
+    "start": "node build/index.js",
     "test": "jest",
     "dev": "export NODE_ENV=development && nodemon index.ts",
     "dev-win": "set NODE_ENV=development && nodemon index.ts",
