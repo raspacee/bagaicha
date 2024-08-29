@@ -69,7 +69,7 @@ const PostOpened = ({ postId }: Props) => {
       <DialogTrigger asChild>
         <MessageCircle size={25} />
       </DialogTrigger>
-      <DialogContent className="min-w-full md:min-w-[60vw] h-[99vh] md:h-screen px-1 md:px-4 py-3 flex flex-col gap-2">
+      <DialogContent className="min-w-full md:min-w-[60vw] h-[90vh] md:h-screen px-1 md:px-4 py-3 flex flex-col gap-2">
         {(enabled && isPostLoading) || !post ? (
           <h1>Loading...</h1>
         ) : (
