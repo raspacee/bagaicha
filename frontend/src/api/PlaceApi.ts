@@ -1,7 +1,12 @@
 import { AUTH_TOKEN_NAME } from "@/lib/config";
-import { CreatePlaceResponse, FindPlaceSearchState, Place } from "@/lib/types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import {
+  CreatePlaceResponse,
+  FindPlaceSearchState,
+  LocationType,
+  Place,
+} from "@/lib/types";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Cookies from "universal-cookie";
@@ -150,12 +155,18 @@ const getUserPosition = (): Promise<GeolocationPosition> => {
 
     navigator.geolocation.getCurrentPosition(
       (position) => resolve(position),
-      (error) => reject(error)
+      (error) => reject(error),
+      {
+        enableHighAccuracy: false,
+      }
     );
   });
 };
 
-const useGetTopPlaces = (searchState: FindPlaceSearchState) => {
+const useGetTopPlaces = (
+  searchState: FindPlaceSearchState,
+  userPosition: LocationType
+) => {
   const getTopPlacesRequest = async (): Promise<Place[]> => {
     const params = new URLSearchParams();
     params.set("selectedFoods", searchState.selectedFoods.join(","));
@@ -164,9 +175,8 @@ const useGetTopPlaces = (searchState: FindPlaceSearchState) => {
       "selectedDistance",
       JSON.stringify(searchState.selectedDistance)
     );
-    const userPosition = await getUserPosition();
-    params.set("lat", userPosition.coords.latitude.toString());
-    params.set("lon", userPosition.coords.longitude.toString());
+    params.set("lat", userPosition.lat.toString());
+    params.set("lon", userPosition.long.toString());
     const response = await fetch(
       `${BASE_API_URL}/place/top?${params.toString()}`,
       {

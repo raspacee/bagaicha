@@ -67,7 +67,6 @@ const PlaceSuggestionInput = () => {
         <Command>
           <CommandInput
             placeholder="Search Place"
-            // {...field}
             name="placeName"
             value={placeName}
             onValueChange={(value) => {
@@ -78,6 +77,10 @@ const PlaceSuggestionInput = () => {
             <CommandEmpty>No Place Found</CommandEmpty>
             <CommandGroup>
               {suggestions?.map((suggestion) => {
+                const value = suggestion.road
+                  ? `${suggestion.name}, ${suggestion.road}, ${suggestion.neighbourhood}`
+                  : `${suggestion.name}, ${suggestion.neighbourhood}`;
+
                 return (
                   <CommandItem
                     key={suggestion.id}
@@ -88,7 +91,7 @@ const PlaceSuggestionInput = () => {
                       setOpen(false);
                     }}
                   >
-                    {suggestion.name}
+                    {value}
                   </CommandItem>
                 );
               })}

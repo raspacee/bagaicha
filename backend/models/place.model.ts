@@ -84,7 +84,7 @@ const searchPlace = async (name: string, offset: number): Promise<Place[]> => {
 
 const getPlaceSuggestionsByQuery = async (query: string): Promise<Place[]> => {
   const text = `
-  SELECT id, name, lat, lon
+  SELECT id, name, lat, lon, road, neighbourhood, city
   FROM place
   WHERE name ILIKE $1
   LIMIT 5;

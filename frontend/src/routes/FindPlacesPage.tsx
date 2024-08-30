@@ -14,6 +14,7 @@ import {
 } from "@/lib/types";
 import { Check } from "lucide-react";
 import { ChangeEvent, useState } from "react";
+import { useAppSelector } from "@/hooks";
 
 const FindPlacesPage = () => {
   const [searchState, setSearchState] = useState<FindPlaceSearchState>({
@@ -22,7 +23,8 @@ const FindPlacesPage = () => {
     selectedFoods: [],
   });
 
-  const { places, isLoading } = useGetTopPlaces(searchState);
+  const userLocation = useAppSelector((state) => state.location);
+  const { places, isLoading } = useGetTopPlaces(searchState, userLocation);
 
   const handlePlaceFeatureChange = (event: ChangeEvent<HTMLInputElement>) => {
     const clickedFeature = event.target.value;
@@ -59,7 +61,7 @@ const FindPlacesPage = () => {
                 const isSelected =
                   searchState.selectedFeatures.includes(feature);
                 return (
-                  <div>
+                  <div key={feature}>
                     <Input
                       type="checkbox"
                       className="hidden"
@@ -107,7 +109,7 @@ const FindPlacesPage = () => {
               {Distances.map((distance) => {
                 const isSelected = searchState.selectedDistance == distance;
                 return (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2" key={distance}>
                     <RadioGroupItem
                       value={distance.toString()}
                       id={`distance_within_${distance}`}

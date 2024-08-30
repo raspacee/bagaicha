@@ -232,7 +232,7 @@ const verifyOAuth2Code = async (req: Request, res: Response) => {
       const data: SignupForm = {
         email: userInfo.data.email!,
         firstName: userInfo.data.given_name!,
-        lastName: userInfo.data.family_name!,
+        lastName: userInfo.data.family_name || "",
         password: "OAUTH2_NULL",
       };
       const newUser = await UserModel.createUser(

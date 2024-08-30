@@ -1,5 +1,4 @@
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { AspectRatio } from "../ui/aspect-ratio";
 import { MessageCircle, Send } from "lucide-react";
 import { useCreateComment, useFetchPostById } from "@/api/PostApi";
 import { Link } from "react-router-dom";
