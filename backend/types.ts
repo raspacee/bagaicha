@@ -361,6 +361,16 @@ export type OAuth2AccessTokenResponse = {
   refresh_token: string;
 };
 
+export type PlaceImage = {
+  id: string;
+  imageUrl: string;
+  placeId: string;
+  addedBy: string;
+  description: string;
+  createdAt: string;
+  cloudinaryId: string;
+};
+
 export type {
   JwtUserData,
   User,

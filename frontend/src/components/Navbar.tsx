@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetHeader,
   SheetTrigger,
@@ -120,8 +121,27 @@ export default function Navbar() {
               </span>
             </SheetHeader>
             <div className="mt-3 flex flex-col gap-4">
-              <Link to="">My Profile</Link>
-              <Link to="/user/edit-profile">My Setting</Link>
+              <SheetClose asChild>
+                <Link to={`/feed`}>Feed</Link>
+              </SheetClose>
+              <SheetClose asChild>
+                <Link to={`/user/${myUser?.id}`}>My Profile</Link>
+              </SheetClose>
+              <SheetClose asChild>
+                <Link to="/user/edit-profile">My Setting</Link>
+              </SheetClose>
+              <SheetClose asChild>
+                <Link to="/find-places">Find Places</Link>
+              </SheetClose>
+              <SheetClose asChild>
+                <Link to="/bookmarks">Bookmarks</Link>
+              </SheetClose>
+              <SheetClose asChild>
+                <Link to="/place/add">Add Place</Link>
+              </SheetClose>
+              <SheetClose asChild>
+                <Link to="/place/my">Manage Places</Link>
+              </SheetClose>
               <p onClick={() => logout()}>Logout</p>
             </div>
           </SheetContent>

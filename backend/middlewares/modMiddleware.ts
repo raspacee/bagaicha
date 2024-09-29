@@ -3,7 +3,7 @@ import User from "../models/user.model";
 
 export const USER_LEVELS = {
   NORMAL_USER: 0,
-  MODERATOR: 1,
+  MODERATOR: 2,
 };
 
 export const modMiddleware = async (
@@ -12,18 +12,17 @@ export const modMiddleware = async (
   next: NextFunction
 ) => {
   try {
-    const isMod = await User.is_moderator(res.locals.user.user_id);
+    const isMod = await User.is_moderator(req.jwtUserData!.userId);
     if (isMod) {
       next();
     } else {
-      return res.status(304).send({
-        status: "error",
+      return res.status(403).json({
         message: "You are not a moderator",
       });
     }
   } catch (err) {
     console.error(err);
-    return res.status(500).send({
+    return res.status(500).json({
       status: "error",
       message: "Something went wrong",
     });

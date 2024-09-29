@@ -4,10 +4,10 @@ import { SignupForm, UpdateProfileForm, User } from "../types";
 import { v4 as uuid } from "uuid";
 
 const is_moderator = async (id: string) => {
-  const text = `select moderation_lvl from user_ where id=$1`;
+  const text = `SELECT "moderationLvl" FROM user_ WHERE id=$1`;
   const values = [id];
   const data = await pool.query(text, values);
-  if (data.rows[0]?.moderation_lvl == USER_LEVELS.MODERATOR) {
+  if (data.rows[0]?.moderationLvl == USER_LEVELS.MODERATOR) {
     return true;
   }
   return false;

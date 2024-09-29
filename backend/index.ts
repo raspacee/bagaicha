@@ -37,7 +37,8 @@ app.use(
     origin: function (origin, callback) {
       if (
         origin == process.env.FRONTEND_URL ||
-        origin == process.env.FRONTEND_DOMAIN
+        origin == process.env.FRONTEND_DOMAIN ||
+        (!origin && process.env.NODE_ENV === "development")
       )
         callback(null, origin);
       else callback(new Error("Invalid Origin"), origin);

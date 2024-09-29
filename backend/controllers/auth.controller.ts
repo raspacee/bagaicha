@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import UserModel from "../models/user.model";
 import bcrypt from "bcryptjs";
-import * as querystring from "querystring";
 import { google } from "googleapis";
 import jwt from "jsonwebtoken";
 import { createClient } from "redis";
@@ -54,7 +53,7 @@ const loginHandler = async (
   try {
     const user = await UserModel.getPasswordByEmail(email);
     if (user == null) {
-      return res.status(404).json(null);
+      return res.status(401).json(null);
     }
     if (bcrypt.compareSync(password, user.password)) {
       const payload: JwtUserData = {

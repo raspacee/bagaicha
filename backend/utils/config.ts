@@ -1,0 +1,3 @@
+export const PLACE_CONFIG = {
+  MAXIMUM_IMAGES_UPLOAD_ALLOWED: 5,
+};

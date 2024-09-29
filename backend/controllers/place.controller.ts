@@ -3,6 +3,7 @@ import PlaceModel from "../models/place.model";
 import PlaceReview from "../models/placeReviewModel";
 import UserModel from "../models/user.model";
 import OwnershipRequestModel from "../models/ownershipRequest.model";
+import PlaceImageModel from "../models/placeImage.model";
 import { uploadImage } from "../utils/image";
 import {
   AddPlaceForm,
@@ -169,7 +170,7 @@ const requestPlaceOwnership = async (req: Request, res: Response) => {
       });
     }
 
-    const imageUrl = await uploadImage(req.file as Express.Multer.File);
+    const [imageUrl] = await uploadImage(req.file as Express.Multer.File);
     await OwnershipRequestModel.createOwnershipRequest(
       {
         placeId: placeId,
@@ -229,7 +230,7 @@ const updatePlaceData = async (req: Request, res: Response) => {
     }
 
     if (req.file as Express.Multer.File) {
-      const imageUrl = await uploadImage(req.file as Express.Multer.File);
+      const [imageUrl] = await uploadImage(req.file as Express.Multer.File);
       formData.coverImgUrl = imageUrl;
     }
 
@@ -247,7 +248,7 @@ const createPlace = async (req: Request, res: Response) => {
   try {
     const form: AddPlaceForm = req.body as AddPlaceForm;
 
-    const imageUrl = await uploadImage(req.file as Express.Multer.File);
+    const [imageUrl] = await uploadImage(req.file as Express.Multer.File);
 
     const createdPlace = await PlaceModel.createMyPlace(form, imageUrl);
 
@@ -292,6 +293,75 @@ const checkPermissionToEditPlace = async (req: Request, res: Response) => {
   }
 };
 
+/* Handle uploading a image or multiple images */
+const uploadImages = async (req: Request, res: Response) => {
+  try {
+    const files = req.files as Express.Multer.File[];
+
+    if (!files || files.length === 0) {
+      return res.status(400).json({ message: "No images were uploaded." });
+    }
+
+    const promises = files.map(async (file) => {
+      try {
+        const [imageUrl, imageId] = await uploadImage(file);
+        if (imageUrl) {
+          await PlaceImageModel.addImageToDB(
+            imageUrl,
+            req.params.placeId,
+            req.jwtUserData!.userId,
+            req.body.description || "",
+            imageId
+          );
+          return "Successfully uploaded";
+        } else {
+          throw new Error("Error while uploading: " + file.filename);
+        }
+      } catch (error) {
+        throw error;
+      }
+    });
+    await Promise.all(promises);
+
+    return res.status(201).json({
+      message: "Successfully uploaded the image(s)",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while uploading images",
+    });
+  }
+};
+
+/* Get images of a place */
+const getImages = async (req: Request, res: Response) => {
+  try {
+    const images = await PlaceImageModel.getImagesOfPlace(req.params.placeId);
+    return res.status(200).json(images);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while getting images",
+    });
+  }
+};
+
+/* Delete a image */
+const deleteImage = async (req: Request, res: Response) => {
+  try {
+    await PlaceImageModel.deleteImage(req.body.cloudinaryId);
+    return res.status(200).json({
+      message: "Image deleted",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while deleting image",
+    });
+  }
+};
+
 const exporter = {
   getPlace,
   get_review,
@@ -306,6 +376,9 @@ const exporter = {
   createPlace,
   getMyPlaces,
   checkPermissionToEditPlace,
+  uploadImages,
+  getImages,
+  deleteImage,
 };
 
 export default exporter;

@@ -2,7 +2,6 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import { useSearchParams } from "react-router-dom";
 import { useAppSelector } from "../hooks";
 import Post from "../components/post/Post";
-import PostLoader from "../components/loaders/PostLoader";
 import {
   Select,
   SelectContent,

@@ -33,7 +33,7 @@ const createMyPost = async (
     }
 
     /* Upload the image */
-    const imageUrl = await uploadImage(req.file as Express.Multer.File);
+    const [imageUrl] = await uploadImage(req.file as Express.Multer.File);
 
     /* create the post */
     const createdPost = await PostModel.createPost(

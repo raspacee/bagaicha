@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useAuthenticateUser } from "@/api/AuthApi";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 const PlacePage = () => {
   const { placeId } = useParams();
@@ -64,6 +66,22 @@ const PlacePage = () => {
           header="Foods Menu"
           description="Delicious foods served by this place"
         />
+      </div>
+      <div className="w-full">
+        <MapContainer
+          center={[place.lat, place.lon]}
+          zoom={14}
+          scrollWheelZoom={false}
+          className="w-full h-[20rem]"
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <Marker position={[place.lat, place.lon]}>
+            <Popup>Place Located Here!</Popup>
+          </Marker>
+        </MapContainer>
       </div>
       {place.ownedBy == null && (
         <Link to="request-ownership">

@@ -56,9 +56,8 @@ const updateUserProfile = async (req: Request, res: Response) => {
     }
 
     if (req.file) {
-      formData.profilePictureUrl = await uploadImage(
-        req.file as Express.Multer.File
-      );
+      const [url] = await uploadImage(req.file as Express.Multer.File);
+      formData.profilePictureUrl = url;
     }
 
     await UserModel.updateProfileInfo(userId, formData);

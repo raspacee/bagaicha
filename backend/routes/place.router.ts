@@ -8,14 +8,26 @@ import {
 } from "../middlewares/auth.middleware";
 import { modMiddleware } from "../middlewares/modMiddleware";
 import upload from "../multer";
+import { PLACE_CONFIG } from "../utils/config";
 
-/* Create a new place */
-router.post(
-  "/",
+/* Delete image of a place */
+router.delete(
+  "/image",
   authMiddleware,
-  upload.single("imageFile"),
-  placeController.createPlace
+  modMiddleware,
+  placeController.deleteImage
 );
+
+/* Upload image(s) for a place */
+router.post(
+  "/:placeId/image",
+  authMiddleware,
+  upload.array("images", PLACE_CONFIG.MAXIMUM_IMAGES_UPLOAD_ALLOWED),
+  placeController.uploadImages
+);
+
+/* Get image(s) of a place */
+router.get("/:placeId/image", placeController.getImages);
 
 router.get("/top", authMiddleware, placeController.getMyTopPlaces);
 
@@ -74,5 +86,13 @@ router.put(
 
 /* Get place data */
 router.get("/:placeId", placeController.getPlace);
+
+/* Create a new place */
+router.post(
+  "/",
+  authMiddleware,
+  upload.single("imageFile"),
+  placeController.createPlace
+);
 
 export default router;
