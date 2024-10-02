@@ -13,11 +13,14 @@ import { Button } from "@/components/ui/button";
 import { useAuthenticateUser } from "@/api/AuthApi";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import UploadImages from "@/components/post/UploadImages";
+import ImagesList from "@/components/place/ImagesList";
 
 const PlacePage = () => {
   const { placeId } = useParams();
   const { data, isLoading: isUserLoading } = useAuthenticateUser();
   const { place, isLoading } = useGetPlaceData(placeId as string);
+
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -30,24 +33,7 @@ const PlacePage = () => {
 
   return (
     <div className="w-full h-fit bg-white rounded-md shadow flex flex-col gap-4 items-center py-4 px-6">
-      <div className="flex gap-4 items-center">
-        <h1 className="text-3xl font-extrabold">{place.name}</h1>
-        {!isUserLoading && data?.user?.userId == place.ownedBy && (
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button variant="outline" className="w-24 rounded-full">
-                Edit
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => navigate("edit")}>
-                Edit Place
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-      </div>
-      <div className="w-full h-[28rem]">
+      <div className="w-full h-[28rem] relative">
         <AspectRatio ratio={16 / 9}>
           <img
             src={
@@ -58,6 +44,33 @@ const PlacePage = () => {
             alt="Place picture here"
           />
         </AspectRatio>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/50"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 gap-5">
+          <h1 className="text-white font-extrabold text-5xl  drop-shadow-md ">
+            {place.name}
+          </h1>
+
+          {!isUserLoading && data?.user?.userId == place.ownedBy && (
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button variant="outline" className="w-24 rounded-full">
+                  Edit
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => navigate("edit")}>
+                  Edit Place
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
+          <ImagesList placeId={placeId as string} />
+
+          <div className="flex mt-4 gap-2">
+            <UploadImages placeId={placeId as string} />
+          </div>
+        </div>
       </div>
       <div className="flex flex-col md:flex-row gap-2 w-full">
         <PlaceInformationCard place={place} />

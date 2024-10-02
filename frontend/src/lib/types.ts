@@ -425,6 +425,16 @@ export const resetPasswordFormSchema = z
 
 export type ResetPasswordForm = z.infer<typeof resetPasswordFormSchema>;
 
+export type PlaceImage = {
+  id: string;
+  imageUrl: string;
+  placeId: string;
+  addedBy: string;
+  description: string;
+  createdAt: string;
+  cloudinaryId: string;
+};
+
 export type {
   UserInterface,
   LocationType,

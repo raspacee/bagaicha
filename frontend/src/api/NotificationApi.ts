@@ -26,7 +26,7 @@ const useFetchNotification = () => {
   const { data: notifications, isLoading } = useQuery({
     queryKey: ["notifications"],
     queryFn: fetchNotificationRequest,
-    refetchInterval: 1000,
+    refetchInterval: 3000,
   });
 
   return { notifications, isLoading };

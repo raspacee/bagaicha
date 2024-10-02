@@ -4,8 +4,9 @@ import {
   FindPlaceSearchState,
   LocationType,
   Place,
+  PlaceImage,
 } from "@/lib/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -42,6 +43,7 @@ const useGetPlaceSuggestions = () => {
   return { suggestions, setQuery, setEnabled };
 };
 
+/* Fetch a single place's data */
 const useGetPlaceData = (placeId: string) => {
   const getPlaceRequest = async (): Promise<Place | null> => {
     const response = await fetch(`${BASE_API_URL}/place/${placeId}`, {
@@ -279,6 +281,109 @@ const useGetMyPlaces = () => {
   return { places, isLoading };
 };
 
+/* Fetch a single place's all images */
+const useGetPlaceImages = (placeId: string) => {
+  const getPlaceImages = async (): Promise<PlaceImage[] | null> => {
+    const response = await fetch(`${BASE_API_URL}/place/${placeId}/image`, {
+      method: "GET",
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+    return response.json();
+  };
+
+  const {
+    data: placeImages,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["places", placeId, "images"],
+    queryFn: getPlaceImages,
+    enabled: false,
+  });
+
+  const fetchImages = () => {
+    refetch();
+  };
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { placeImages, isLoading, fetchImages };
+};
+
+const useUploadPlaceImages = (placeId: string) => {
+  const uploadPlaceImages = async (formData: FormData) => {
+    const response = await fetch(`${BASE_API_URL}/place/${placeId}/image`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+    return response.json();
+  };
+
+  const {
+    error,
+    isPending,
+    mutateAsync: uploadImages,
+  } = useMutation({
+    mutationFn: uploadPlaceImages,
+    onSuccess: () => {
+      toast.success("Photos uploaded successfully");
+    },
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { isPending, uploadImages };
+};
+
+const useDeleteImage = (cloudinaryId: string, refetchCallback: () => void) => {
+  const deleteImageRequest = async () => {
+    const response = await fetch(`${BASE_API_URL}/place/image`, {
+      method: "DELETE",
+      headers: {
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ cloudinaryId }),
+    });
+    if (response.status !== 204) {
+      throw new Error("Error while deleting image");
+    }
+  };
+
+  const {
+    isPending,
+    mutateAsync: deleteImage,
+    error,
+  } = useMutation({
+    mutationFn: deleteImageRequest,
+    onSuccess: async () => {
+      toast.success("Photo deleted");
+      refetchCallback();
+    },
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { isPending, deleteImage };
+};
+
 export {
   useGetPlaceSuggestions,
   useGetPlaceData,
@@ -287,4 +392,7 @@ export {
   useGetTopPlaces,
   useCreatePlace,
   useGetMyPlaces,
+  useGetPlaceImages,
+  useUploadPlaceImages,
+  useDeleteImage,
 };
