@@ -46,8 +46,21 @@ const deleteImage = async (cloudinaryId: string) => {
   await cloudinary.uploader.destroy(cloudinaryId);
 };
 
+const getSingleImage = async (imageId: number): Promise<PlaceImage | null> => {
+  const text = `
+  SELECT *
+  FROM "placeImage"
+  WHERE id = $1
+  `;
+  const values = [imageId];
+  const result = await pool.query(text, values);
+  if (result.rowCount == 0) return null;
+  return result.rows[0];
+};
+
 export default {
   addImageToDB,
   getImagesOfPlace,
   deleteImage,
+  getSingleImage,
 };

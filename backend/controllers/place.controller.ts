@@ -351,13 +351,28 @@ const getImages = async (req: Request, res: Response) => {
 const deleteImage = async (req: Request, res: Response) => {
   try {
     await PlaceImageModel.deleteImage(req.body.cloudinaryId);
-    return res.status(200).json({
-      message: "Image deleted",
-    });
+    return res.status(204).json();
   } catch (err) {
     console.log(err);
     return res.status(500).json({
       message: "Error while deleting image",
+    });
+  }
+};
+
+const getImageInfo = async (req: Request, res: Response) => {
+  try {
+    const { imageId } = req.params;
+    const image = await PlaceImageModel.getSingleImage(parseInt(imageId));
+    if (image) return res.status(200).json(image);
+    else
+      return res.status(404).json({
+        message: "Image ID not found",
+      });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while getting image info",
     });
   }
 };
@@ -379,6 +394,7 @@ const exporter = {
   uploadImages,
   getImages,
   deleteImage,
+  getImageInfo,
 };
 
 export default exporter;

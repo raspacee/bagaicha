@@ -22,12 +22,15 @@ router.delete(
 router.post(
   "/:placeId/image",
   authMiddleware,
-  upload.array("images", PLACE_CONFIG.MAXIMUM_IMAGES_UPLOAD_ALLOWED),
+  upload.array("images[]", PLACE_CONFIG.MAXIMUM_IMAGES_UPLOAD_ALLOWED),
   placeController.uploadImages
 );
 
 /* Get image(s) of a place */
 router.get("/:placeId/image", placeController.getImages);
+
+/* Get information of a single image */
+router.get("/image/:imageId", placeController.getImageInfo);
 
 router.get("/top", authMiddleware, placeController.getMyTopPlaces);
 
