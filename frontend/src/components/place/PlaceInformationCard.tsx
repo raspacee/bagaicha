@@ -16,6 +16,7 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { DateTime } from "luxon";
+import { useGetOperatingHours } from "@/api/PlaceApi";
 
 type Props = {
   place: Place;
@@ -23,6 +24,8 @@ type Props = {
 
 const PlaceInformationCard = ({ place }: Props) => {
   const location = useAppSelector((state) => state.location);
+  const { isLoading: isOperatingHoursLoading, operatingHours } =
+    useGetOperatingHours(place.id);
 
   return (
     <Card className="flex-1">
@@ -49,34 +52,37 @@ const PlaceInformationCard = ({ place }: Props) => {
                 <Hourglass size={22} />
               </TooltipTrigger>
               <TooltipContent>
-                <p>Opening - Closing Time</p>
+                <p>Operating Hours</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
 
-          <p className="text-sm text-muted-foreground">
-            {place.openingTime && place.closingTime
-              ? `${DateTime.fromISO(place.openingTime).toFormat(
-                  "h a"
-                )} - ${DateTime.fromISO(place.closingTime).toFormat("h a")}`
-              : "Unspecified"}
-          </p>
-        </div>
-        <div className="flex flex-row items-center gap-2">
-          <TooltipProvider delayDuration={50}>
-            <Tooltip>
-              <TooltipTrigger>
-                <CalendarDays size={22} />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Open Days</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <p className="text-sm text-muted-foreground">
-            {place.openDays ? place.openDays.join(", ") : "Unspecified"}
-          </p>
+          <div className="flex flex-col gap-2">
+            {operatingHours?.map((operatingHour) => (
+              <div
+                key={operatingHour.id!}
+                className="flex flex-row gap-2 items-center"
+              >
+                <p className="min-w-20">{operatingHour.day}</p>
+                {operatingHour.openingTime && operatingHour.closingTime && (
+                  <p className="text-sm">
+                    {`${DateTime.fromFormat(
+                      operatingHour.openingTime,
+                      "hh:mm:ss"
+                    ).toFormat("hh:mm a")}
+        - ${DateTime.fromFormat(operatingHour.closingTime, "hh:mm:ss").toFormat(
+          "hh:mm a"
+        )}`}
+                  </p>
+                )}
+                {!operatingHour.openingTime && (
+                  <p className="text-muted-foreground text-sm">
+                    Time not specified
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="flex flex-row items-center gap-2">

@@ -1,20 +1,14 @@
-import { useGetPlaceData } from "@/api/PlaceApi";
+import { useGetOperatingHours, useGetPlaceData } from "@/api/PlaceApi";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import PlaceInformationCard from "@/components/place/PlaceInformationCard";
 import FoodsMenuCard from "@/components/place/FoodsMenuCard";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { useAuthenticateUser } from "@/api/AuthApi";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import UploadImages from "@/components/post/UploadImages";
 import ImagesList from "@/components/place/ImagesList";
+import { Settings } from "lucide-react";
 
 const PlacePage = () => {
   const { placeId } = useParams();
@@ -50,26 +44,20 @@ const PlacePage = () => {
             {place.name}
           </h1>
 
-          {!isUserLoading && data?.user?.userId == place.ownedBy && (
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Button variant="outline" className="w-24 rounded-full">
-                  Edit
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => navigate("edit")}>
-                  Edit Place
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-
           <ImagesList placeId={placeId as string} />
 
-          <div className="flex mt-4 gap-2">
+          <div className="flex my-4 gap-2">
             <UploadImages placeId={placeId as string} />
           </div>
+          {!isUserLoading && data?.user?.userId == place.ownedBy && (
+            <Link
+              to="edit"
+              className="my-4 border bg-transparent text-white font-semibold py-2 px-5 rounded-md bg-opacity-80 flex gap-2 w-fit"
+            >
+              <Settings />
+              Edit Information
+            </Link>
+          )}
         </div>
       </div>
       <div className="flex flex-col md:flex-row gap-2 w-full">

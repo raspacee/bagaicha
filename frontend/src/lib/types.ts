@@ -1,5 +1,6 @@
 import { foodItems } from "@/config/foods";
 import { z } from "zod";
+import { DAYS } from "./config";
 
 /* User type when logged in */
 type UserInterface = {
@@ -146,9 +147,6 @@ const placeSchema = z.object({
   neighbourhood: z.string().min(4),
   city: z.string().min(4),
   state: z.string().min(4),
-  openDays: z.array(daySchema).nullable().optional(),
-  openingTime: z.string().time().optional(),
-  closingTime: z.string().time().optional(),
   placeFeatures: z.array(placeFeatureSchema).nullable().optional(),
   coverImgUrl: z.string().url().optional(),
   foodsOffered: z.array(foodsOfferedSchema).nullable().optional(),
@@ -159,21 +157,10 @@ const placeSchema = z.object({
 export const editPlaceFormSchema = placeSchema
   .pick({
     name: true,
-    openDays: true,
     placeFeatures: true,
     foodsOffered: true,
   })
   .extend({
-    openingTime: z
-      .string()
-      .regex(/^\d{2}:\d{2}$/)
-      .nullable()
-      .optional(),
-    closingTime: z
-      .string()
-      .regex(/^\d{2}:\d{2}$/)
-      .nullable()
-      .optional(),
     coverImgUrl: z.string().url().nullable().optional(),
     newCoverImgFile: z
       .instanceof(File, { message: "Image is required" })
@@ -182,16 +169,7 @@ export const editPlaceFormSchema = placeSchema
   .refine((data) => data.coverImgUrl || data.newCoverImgFile, {
     message: "Atleast url or new image is required",
     path: ["newCoverImgFile"],
-  })
-  .refine(
-    (data) =>
-      (data.openingTime && data.closingTime) ||
-      (!data.openingTime && !data.closingTime),
-    {
-      message: "Both opening and closing time is required",
-      path: ["openingTime", "closingTime"],
-    }
-  );
+  });
 
 export type EditPlaceForm = z.infer<typeof editPlaceFormSchema>;
 
@@ -383,7 +361,6 @@ export type EditPostForm = z.infer<typeof editPostFormSchema>;
 export const addPlaceFormSchema = placeSchema
   .pick({
     name: true,
-    openDays: true,
     ownedBy: true,
     placeFeatures: true,
     foodsOffered: true,
@@ -434,6 +411,73 @@ export type PlaceImage = {
   createdAt: string;
   cloudinaryId: string;
 };
+
+export const operatingHourSchema = z
+  .object({
+    id: z.string().optional(),
+    openingTime: z.string().time().optional(),
+    closingTime: z.string().time().optional(),
+    day: z.string(),
+    placeId: z.string().uuid(),
+  })
+  .refine(
+    (data) =>
+      (data.openingTime && data.closingTime) ||
+      (!data.openingTime && !data.closingTime),
+    {
+      message: "Please provide both opening and closing time",
+      path: ["openingTime", "closingTime"],
+    }
+  )
+  .refine((data) => DAYS.includes(data.day), {
+    message: "Invalid Day",
+    path: ["day"],
+  });
+export type OperatingHourForm = z.infer<typeof operatingHourSchema>;
+export const fetchedOperatingHourSchema = operatingHourSchema.refine(
+  (data) => data.id !== undefined,
+  { message: "Operating hour ID is required", path: ["id"] }
+);
+export type FetchedOperatingHourForm = z.infer<
+  typeof fetchedOperatingHourSchema
+>;
+export const addOperatingHourSchema = z
+  .object({
+    id: z.string().optional(),
+    openingTime: z.date().optional(),
+    closingTime: z.date().optional(),
+    day: z.string({
+      required_error: "Please select the day",
+    }),
+    placeId: z.string().uuid(),
+  })
+  .refine(
+    (data) =>
+      (data.openingTime && data.closingTime) ||
+      (!data.openingTime && !data.closingTime),
+    {
+      message: "Please provide both opening and closing time",
+      path: ["openingTime"],
+    }
+  )
+  .refine((data) => DAYS.includes(data.day), {
+    message: "Invalid Day",
+    path: ["day"],
+  })
+  .refine(
+    (data) => {
+      if (data.openingTime && data.closingTime) {
+        return data.openingTime < data.closingTime;
+      } else {
+        return true;
+      }
+    },
+    {
+      message: "Please provide valid operating hours",
+      path: ["openingTime"],
+    }
+  );
+export type AddOperatingHourForm = z.infer<typeof addOperatingHourSchema>;
 
 export type {
   UserInterface,

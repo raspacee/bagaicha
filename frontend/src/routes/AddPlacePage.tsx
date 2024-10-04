@@ -4,7 +4,6 @@ import FilterByFoods from "@/components/forms/FilterByFoods";
 import SearchPlaceFeatureInput from "@/components/forms/SearchPlaceFeatureInput";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -33,7 +32,6 @@ const AddPlacePage = () => {
     formData.append("name", formDataJson.name);
     formData.append("lat", formDataJson.lat);
     formData.append("lon", formDataJson.lon);
-    formData.append("openDays", JSON.stringify(formDataJson.openDays));
     formData.append("foodsOffered", JSON.stringify(formDataJson.foodsOffered));
     formData.append(
       "placeFeatures",
@@ -134,46 +132,6 @@ const AddPlacePage = () => {
             control={form.control}
             name="placeFeatures"
             render={({ field }) => <SearchPlaceFeatureInput />}
-          />
-          <FormField
-            control={form.control}
-            name="openDays"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Select days when the place is open</FormLabel>
-                {daySchema.options.map((day) => (
-                  <FormField
-                    key={day}
-                    control={form.control}
-                    name="openDays"
-                    render={({ field }) => (
-                      <FormItem
-                        key={day.concat(day)}
-                        className="flex space-x-2 items-center"
-                      >
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value?.includes(day)}
-                            onCheckedChange={(checked) => {
-                              return checked
-                                ? field.onChange([...(field.value || []), day])
-                                : field.onChange(
-                                    field.value?.filter(
-                                      (value) => value !== day
-                                    )
-                                  );
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal !mb-1">
-                          {day}
-                        </FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                ))}
-              </FormItem>
-            )}
           />
           <FormField
             control={form.control}

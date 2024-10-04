@@ -27,4 +27,18 @@ export const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text);
 };
 
+export const extractTimeFromDate = (date: Date): string => {
+  let hours = date.getHours().toString();
+  let minutes = date.getMinutes().toString();
+  let seconds = date.getSeconds().toString();
+
+  // Pad single-digit numbers with a leading zero
+  hours = parseInt(hours) < 10 ? "0" + hours : hours;
+  minutes = parseInt(minutes) < 10 ? "0" + minutes : minutes;
+  seconds = parseInt(seconds) < 10 ? "0" + seconds : seconds;
+
+  // Return formatted time string
+  return `${hours}:${minutes}:${seconds}`;
+};
+
 export { haversine };

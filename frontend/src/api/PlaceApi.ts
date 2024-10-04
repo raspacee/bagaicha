@@ -1,8 +1,11 @@
 import { AUTH_TOKEN_NAME } from "@/lib/config";
 import {
+  AddOperatingHourForm,
   CreatePlaceResponse,
+  FetchedOperatingHourForm,
   FindPlaceSearchState,
   LocationType,
+  OperatingHourForm,
   Place,
   PlaceImage,
 } from "@/lib/types";
@@ -27,7 +30,6 @@ const useGetPlaceSuggestions = () => {
         authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
       },
     });
-    console.log(response);
     if (!response.ok) {
       throw new Error("Error getting place suggestion");
     }
@@ -384,6 +386,127 @@ const useDeleteImage = (cloudinaryId: string, refetchCallback: () => void) => {
   return { isPending, deleteImage };
 };
 
+const useGetOperatingHours = (placeId: string) => {
+  const getRequest = async (): Promise<FetchedOperatingHourForm[] | null> => {
+    const response = await fetch(
+      `${BASE_API_URL}/place/${placeId}/operatinghour`,
+      {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Error getting operating hours");
+    }
+    return response.json();
+  };
+
+  const {
+    isLoading,
+    data: operatingHours,
+    error,
+  } = useQuery({
+    queryKey: ["places", placeId, "operatingHours"],
+    queryFn: getRequest,
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { operatingHours, isLoading };
+};
+
+const useCreateOperatingHour = (
+  placeId: string,
+  closeFormCallback: () => void
+) => {
+  const queryClient = useQueryClient();
+
+  const createRequest = async (form: OperatingHourForm) => {
+    const response = await fetch(
+      `${BASE_API_URL}/place/${placeId}/operatinghour`,
+      {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(form),
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Error while adding operating hour");
+    }
+  };
+
+  const {
+    mutateAsync: createOperatingHour,
+    error,
+    isPending,
+  } = useMutation({
+    mutationFn: createRequest,
+    onSuccess: () => {
+      closeFormCallback();
+      toast.success("Operating hour added");
+      queryClient.invalidateQueries({
+        queryKey: ["places", placeId],
+      });
+    },
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { createOperatingHour, isPending };
+};
+
+const useDeleteOperatingHour = (placeId: string) => {
+  const queryClient = useQueryClient();
+
+  const deleteRequest = async (operatingHourId: string) => {
+    const response = await fetch(
+      `${BASE_API_URL}/place/${placeId}/operatinghour`,
+      {
+        method: "DELETE",
+        headers: {
+          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          operatingHourId,
+        }),
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Error while deleting operating hour");
+    }
+  };
+
+  const {
+    mutateAsync: deleteOperatingHour,
+    error,
+    isPending,
+  } = useMutation({
+    mutationFn: deleteRequest,
+    onSuccess: () => {
+      toast.success("Operating hour deleted");
+      queryClient.invalidateQueries({
+        queryKey: ["places", placeId],
+      });
+    },
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { deleteOperatingHour, isPending };
+};
+
 export {
   useGetPlaceSuggestions,
   useGetPlaceData,
@@ -395,4 +518,7 @@ export {
   useGetPlaceImages,
   useUploadPlaceImages,
   useDeleteImage,
+  useGetOperatingHours,
+  useCreateOperatingHour,
+  useDeleteOperatingHour,
 };
