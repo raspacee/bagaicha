@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { foodItems } from "./config/foods";
+import { DAYS } from "./utils/config";
 
 type JwtUserData = {
   userId: string;
@@ -370,6 +371,28 @@ export type PlaceImage = {
   createdAt: string;
   cloudinaryId: string;
 };
+
+export const operatingHourSchema = z
+  .object({
+    openingTime: z.string().time().optional(),
+    closingTime: z.string().time().optional(),
+    day: z.string(),
+    placeId: z.string().uuid(),
+  })
+  .refine(
+    (data) =>
+      (data.openingTime && data.closingTime) ||
+      (!data.openingTime && !data.closingTime),
+    {
+      message: "Please provide both opening and closing time",
+      path: ["openingTime", "closingTime"],
+    }
+  )
+  .refine((data) => DAYS.includes(data.day), {
+    message: "Invalid Day",
+    path: ["day"],
+  });
+export type OperatingHourForm = z.infer<typeof operatingHourSchema>;
 
 export type {
   JwtUserData,

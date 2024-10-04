@@ -79,6 +79,29 @@ router.get(
   placeController.checkPermissionToEditPlace
 );
 
+/* Get operating hours of a place */
+router.get(
+  "/:placeId/operatinghour",
+  authMiddleware,
+  placeController.getOperatingHour
+);
+
+/* Add a new operating hour */
+router.post(
+  "/:placeId/operatinghour",
+  authMiddleware,
+  modMiddleware,
+  placeController.addOperatingHour
+);
+
+/* Delete a operating hour */
+router.delete(
+  "/:placeId/operatinghour",
+  authMiddleware,
+  modMiddleware,
+  placeController.deleteOperatingHour
+);
+
 /* Update place information */
 router.put(
   "/:placeId",

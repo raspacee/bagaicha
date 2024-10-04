@@ -46,8 +46,8 @@ app.use(
     optionsSuccessStatus: 200,
   })
 );
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,

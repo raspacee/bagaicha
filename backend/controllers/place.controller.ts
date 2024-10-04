@@ -4,16 +4,20 @@ import PlaceReview from "../models/placeReviewModel";
 import UserModel from "../models/user.model";
 import OwnershipRequestModel from "../models/ownershipRequest.model";
 import PlaceImageModel from "../models/placeImage.model";
+import OperatingHourModel from "../models/operatingHour.model";
 import { uploadImage } from "../utils/image";
 import {
   AddPlaceForm,
   Distance,
   EditPlaceForm,
   FoodsOffered,
+  OperatingHourForm,
+  operatingHourSchema,
   OwnershipRequestForm,
   PlaceFeature,
   UserLocation,
 } from "../types";
+import { DAYS, DB_CODES } from "../utils/config";
 
 const getPlace = async (req: Request, res: Response, next: NextFunction) => {
   const placeId = req.params.placeId as string;
@@ -26,7 +30,9 @@ const getPlace = async (req: Request, res: Response, next: NextFunction) => {
     }
     return res.status(200).json(place);
   } catch (err) {
-    return next(err);
+    return res.status(500).send({
+      message: "Error while getting place data",
+    });
   }
 };
 
@@ -377,6 +383,65 @@ const getImageInfo = async (req: Request, res: Response) => {
   }
 };
 
+const addOperatingHour = async (req: Request, res: Response) => {
+  try {
+    const { placeId } = req.params;
+    const form = req.body as OperatingHourForm;
+    form.placeId = placeId;
+
+    const result = operatingHourSchema.safeParse(form);
+    if (!result.success) {
+      console.log(result.error);
+      return res.status(400).json(result.error.errors);
+    }
+
+    await OperatingHourModel.createOperatingHour(form);
+    return res.status(201).json();
+  } catch (err) {
+    console.log(err);
+    if ((err as any).code == DB_CODES.UNIQUE_VIOLATION) {
+      return res.status(400).json({
+        message: "Cannot add same day twice",
+      });
+    }
+    return res.status(500).json({
+      message: "Error while adding operating hour",
+    });
+  }
+};
+
+const deleteOperatingHour = async (req: Request, res: Response) => {
+  try {
+    const { operatingHourId } = req.body;
+
+    await OperatingHourModel.removeOperatingHour(operatingHourId);
+    return res.status(204).json();
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while deleting operating hour",
+    });
+  }
+};
+
+const getOperatingHour = async (req: Request, res: Response) => {
+  try {
+    const { placeId } = req.params;
+    const operatingHours = await OperatingHourModel.getOperatingHours(
+      placeId as string
+    );
+    if (operatingHours) {
+      operatingHours.sort((a, b) => DAYS.indexOf(a.day) - DAYS.indexOf(b.day));
+    }
+    return res.status(200).json(operatingHours);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while getting operating hours",
+    });
+  }
+};
+
 const exporter = {
   getPlace,
   get_review,
@@ -395,6 +460,9 @@ const exporter = {
   getImages,
   deleteImage,
   getImageInfo,
+  addOperatingHour,
+  deleteOperatingHour,
+  getOperatingHour,
 };
 
 export default exporter;
