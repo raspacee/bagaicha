@@ -110,26 +110,6 @@ router.put(
   placeController.updatePlaceData
 );
 
-/* Add a menu image */
-router.post(
-  "/:placeId/menu",
-  authMiddleware,
-  verifyAdminMiddleware,
-  upload.array("images[]", 10),
-  placeController.addMenuImages
-);
-
-/* Delete a menu image */
-router.delete(
-  "/:placeId/menu",
-  authMiddleware,
-  verifyAdminMiddleware,
-  placeController.deleteImage
-);
-
-/* Get menu images of a place */
-router.get("/:placeId/menu", placeController.getMenuImages);
-
 /* Get place data */
 router.get("/:placeId", placeController.getPlace);
 

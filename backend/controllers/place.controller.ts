@@ -442,58 +442,7 @@ const getOperatingHour = async (req: Request, res: Response) => {
   }
 };
 
-const addMenuImages = async (req: Request, res: Response) => {
-  try {
-    const files = req.files as Express.Multer.File[];
-
-    if (!files || files.length === 0) {
-      return res.status(400).json({ message: "No images were uploaded." });
-    }
-
-    const promises = files.map(async (file) => {
-      try {
-        const [imageUrl, imageId] = await uploadImage(file);
-        if (imageUrl) {
-          await PlaceImageModel.addImageToDB(
-            imageUrl,
-            req.params.placeId,
-            req.jwtUserData!.userId,
-            "MENU",
-            imageId,
-            true
-          );
-          return "Successfully uploaded";
-        } else {
-          throw new Error("Error while uploading: " + file.filename);
-        }
-      } catch (error) {
-        throw error;
-      }
-    });
-    await Promise.all(promises);
-
-    return res.status(201).json();
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({
-      message: "Error while uploading images",
-    });
-  }
-};
-
-const getMenuImages = async (req: Request, res: Response) => {
-  try {
-    const images = await PlaceImageModel.getMenusOfPlace(req.params.placeId);
-    return res.status(200).json(images);
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({
-      message: "Error while getting images",
-    });
-  }
-};
-
-export default {
+const exporter = {
   getPlace,
   get_review,
   create_place_review,
@@ -514,6 +463,6 @@ export default {
   addOperatingHour,
   deleteOperatingHour,
   getOperatingHour,
-  addMenuImages,
-  getMenuImages,
 };
+
+export default exporter;
