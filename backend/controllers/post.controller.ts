@@ -88,38 +88,40 @@ const getFeed = async (req: Request, res: Response, next: NextFunction) => {
       req.jwtUserData!.userId,
       (page - 1) * pageSize
     );
-    if (posts.length == 0 || sort == "recent") {
+    if (posts.length == 0) {
       return res.json(posts);
     }
 
     /* Feed algorithm */
-    for (let i = 0; i < posts.length; i++) {
-      let geo_point: number;
-      if (req.query.lat && req.query.long) {
-        /* Calculating distance between the points and converting it to meters */
-        const diff_dist =
-          haversine(
-            parseFloat(lat),
-            parseFloat(long),
-            posts[i].lat,
-            posts[i].lon
-          ) * 1000;
-        geo_point = 10000 - diff_dist;
-      } else {
-        /* If user does not provide location, random geo point is calculated */
-        geo_point = Math.floor(Math.random() * 4001 + 2000);
+    if (sort == "trending") {
+      for (let i = 0; i < posts.length; i++) {
+        let geo_point: number;
+        if (req.query.lat && req.query.long) {
+          /* Calculating distance between the points and converting it to meters */
+          const diff_dist =
+            haversine(
+              parseFloat(lat),
+              parseFloat(long),
+              posts[i].lat,
+              posts[i].lon
+            ) * 1000;
+          geo_point = 10000 - diff_dist;
+        } else {
+          /* If user does not provide location, random geo point is calculated */
+          geo_point = Math.floor(Math.random() * 4001 + 2000);
+        }
+        const review_datetime = DateTime.fromISO(posts[i].createdAt);
+        const curr_datetime = DateTime.fromISO(DateTime.local().toISO());
+        const diff = curr_datetime.diff(review_datetime);
+        const time_passed_mins = diff.toObject().milliseconds! / 1000 / 60;
+        const score = (posts[i].likeCount * geo_point) / time_passed_mins;
+        posts[i].score = score;
       }
-      const review_datetime = DateTime.fromISO(posts[i].createdAt);
-      const curr_datetime = DateTime.fromISO(DateTime.local().toISO());
-      const diff = curr_datetime.diff(review_datetime);
-      const time_passed_mins = diff.toObject().milliseconds! / 1000 / 60;
-      const score = (posts[i].likeCount * geo_point) / time_passed_mins;
-      posts[i].score = score;
+      posts.sort((a, b) => {
+        if (a.score > b.score) return -1;
+        else return 1;
+      });
     }
-    posts.sort((a, b) => {
-      if (a.score > b.score) return -1;
-      else return 1;
-    });
 
     /* For infinite scrolling */
     const remainingFeedPosts = await PostModel.getRemainingFeedPosts(
