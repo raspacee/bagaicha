@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { MessageCircle, Send } from "lucide-react";
+import { MapPinHouse, MessageCircle, Navigation, Send } from "lucide-react";
 import { useCreateComment, useFetchPostById } from "@/api/PostApi";
 import { Link } from "react-router-dom";
 import { Rating } from "@mui/material";
@@ -68,54 +68,67 @@ const PostOpened = ({ postId }: Props) => {
       <DialogTrigger asChild>
         <MessageCircle size={25} />
       </DialogTrigger>
-      <DialogContent className="min-w-full md:min-w-[60vw] h-[90vh] md:h-screen px-1 md:px-4 py-3 flex flex-col gap-2">
+      <DialogContent className="min-w-full md:min-w-[60vw] h-[90vh] md:h-screen p-0 border-none flex flex-col gap-2">
         {(enabled && isPostLoading) || !post ? (
           <h1>Loading...</h1>
         ) : (
           <ScrollArea className="w-full min-h-[90%]">
-            <div className="hidden md:block">
-              <div className="w-full roudned-md">
-                <img
-                  className="object-cover shadow-md aspect-video w-full rounded-md mt-5"
-                  src={post.imageUrl}
-                />
-              </div>
+            <div className="hidden md:block w-full">
+              <img
+                className="object-contain w-full aspect-video rounded-md my-2"
+                src={post.imageUrl}
+              />
             </div>
-            <div className="hidden md:flex md:flex-col md:gap-4 mt-2">
+            <div className="md:flex md:flex-col gap-[0.5rem] my-2 px-3">
               <div className="flex items-center gap-2">
                 <img
                   src={post.authorPictureUrl}
-                  style={{ width: "40px", height: "40px" }}
+                  style={{ width: "45px", height: "45px" }}
                   className="rounded-full object-cover"
                 />
-                <Link to={`/user/${post.authorEmail}`}>
-                  {post.authorFirstName + " " + post.authorLastName}
+                <div>
+                  <Link
+                    to={`/user/${post.authorEmail}`}
+                    className="font-semibold flex flex-col md:flex-row items-center md:gap-3"
+                  >
+                    {post.authorFirstName + " " + post.authorLastName}
+                    <span className="font-thin hidden md:block">|</span>
+                    <Rating
+                      name="half-rating-read"
+                      value={post.rating}
+                      precision={0.5}
+                      readOnly
+                    />
+                  </Link>
+                  <p className="text-sm text-muted-foreground">
+                    {DateTime.fromISO(post.createdAt).toRelative()}
+                  </p>
+                </div>
+              </div>
+              <span className="flex gap-2 items-center">
+                <MapPinHouse size={26} className="text-blue-600" />
+                <Link to={`/place/${post.placeId}`} className="font-bold">
+                  {post.placeName}
                 </Link>
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="text-sm">
-                  {DateTime.fromISO(post.createdAt).toRelative()}
+              </span>
+              <span className="flex gap-2 items-center">
+                <Navigation size={26} className="text-green-700" />
+                <p className="font-medium">
+                  {`${haversine(
+                    location.lat,
+                    location.long,
+                    post.lat,
+                    post.lon
+                  )} km away from you`}
                 </p>
-                <Rating
-                  name="half-rating-read"
-                  value={post.rating}
-                  precision={0.5}
-                  readOnly
-                />
-              </div>
-              <p>{post.placeName}</p>
-              <p className="font-medium text-gray-600">
-                {`${haversine(
-                  location.lat,
-                  location.long,
-                  post.lat,
-                  post.lon
-                )} km away from you`}
-              </p>
-              <Separator />
+              </span>
             </div>
-            <h1 className="block font-bold text-2xl">Comments</h1>
-            <div className="h-fit bg-white w-full my-3">
+            <div className="px-3 my-5">
+              <p>{post.body}</p>
+            </div>
+            <Separator />
+            <h1 className="block font-bold text-2xl px-3">Comments</h1>
+            <div className="h-fit bg-white w-full my-3 px-3">
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
@@ -162,9 +175,19 @@ const PostOpened = ({ postId }: Props) => {
                         src={comment.authorPictureUrl}
                         className="w-10 h-10 rounded-full object-cover"
                       />
-                      <p>
-                        {comment.authorFirstName + " " + comment.authorLastName}
-                      </p>
+                      <div className="flex flex-col">
+                        <Link
+                          to={`/user/${comment.authorId}`}
+                          className="font-medium"
+                        >
+                          {comment.authorFirstName +
+                            " " +
+                            comment.authorLastName}
+                        </Link>
+                        <p className="text-xs font-medium text-muted-foreground">
+                          {DateTime.fromISO(post.createdAt).toRelative()}
+                        </p>
+                      </div>
                     </div>
                     <div className="">{comment.body}</div>
                     <Separator />

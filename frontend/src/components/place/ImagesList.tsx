@@ -96,7 +96,7 @@ const ImagesList = ({ placeId }: Props) => {
     <Dialog>
       <DialogTrigger
         onClick={() => fetchImages()}
-        className="mt-4 border bg-transparent text-white font-semibold py-2 px-5 rounded-md bg-opacity-80"
+        className="mt-4 border bg-transparent text-white font-semibold py-2 px-5 rounded-md bg-opacity-80 w-fit"
       >
         Show All Photos
       </DialogTrigger>

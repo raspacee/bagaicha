@@ -507,6 +507,115 @@ const useDeleteOperatingHour = (placeId: string) => {
   return { deleteOperatingHour, isPending };
 };
 
+const useGetPlaceMenus = (placeId: string) => {
+  const getMenusRequest = async (): Promise<PlaceImage[] | null> => {
+    const response = await fetch(`${BASE_API_URL}/place/${placeId}/menu`, {
+      method: "GET",
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+    return response.json();
+  };
+
+  const {
+    data: menuImages,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["places", placeId, "menus"],
+    queryFn: getMenusRequest,
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { menuImages, isLoading };
+};
+
+const useUploadPlaceMenuImages = (
+  placeId: string,
+  cleanupCallbackFn: () => void
+) => {
+  const queryClient = useQueryClient();
+
+  const uploadRequest = async (formData: FormData) => {
+    const response = await fetch(`${BASE_API_URL}/place/${placeId}/menu`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+  };
+
+  const {
+    isPending,
+    error,
+    mutateAsync: uploadMenuImages,
+  } = useMutation({
+    mutationFn: uploadRequest,
+    onSuccess: () => {
+      toast.success("Menu uploaded");
+      queryClient.invalidateQueries({
+        queryKey: ["places", placeId, "menus"],
+      });
+      cleanupCallbackFn();
+    },
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { isPending, uploadMenuImages };
+};
+
+const useDeletePlaceMenuImage = (placeId: string) => {
+  const queryClient = useQueryClient();
+
+  const deleteRequest = async (imageCloudinaryId: string) => {
+    const response = await fetch(`${BASE_API_URL}/place/${placeId}/menu`, {
+      method: "DELETE",
+      headers: {
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ cloudinaryId: imageCloudinaryId }),
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message);
+    }
+  };
+
+  const {
+    isPending,
+    error,
+    mutateAsync: deleteMenuImage,
+  } = useMutation({
+    mutationFn: deleteRequest,
+    onSuccess: () => {
+      toast.success("Photo deleted");
+      queryClient.invalidateQueries({
+        queryKey: ["places", placeId, "menus"],
+      });
+    },
+  });
+
+  if (error) {
+    toast.error(error.message);
+  }
+
+  return { isPending, deleteMenuImage };
+};
+
 export {
   useGetPlaceSuggestions,
   useGetPlaceData,
@@ -521,4 +630,7 @@ export {
   useGetOperatingHours,
   useCreateOperatingHour,
   useDeleteOperatingHour,
+  useGetPlaceMenus,
+  useUploadPlaceMenuImages,
+  useDeletePlaceMenuImage,
 };

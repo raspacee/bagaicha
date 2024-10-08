@@ -1,6 +1,6 @@
-import { useGetOperatingHours, useGetPlaceData } from "@/api/PlaceApi";
+import { useGetPlaceData } from "@/api/PlaceApi";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import PlaceInformationCard from "@/components/place/PlaceInformationCard";
 import FoodsMenuCard from "@/components/place/FoodsMenuCard";
 import { useAuthenticateUser } from "@/api/AuthApi";
@@ -9,13 +9,12 @@ import "leaflet/dist/leaflet.css";
 import UploadImages from "@/components/post/UploadImages";
 import ImagesList from "@/components/place/ImagesList";
 import { Settings } from "lucide-react";
+import PlaceMenu from "@/components/place/PlaceMenu";
 
 const PlacePage = () => {
   const { placeId } = useParams();
   const { data, isLoading: isUserLoading } = useAuthenticateUser();
   const { place, isLoading } = useGetPlaceData(placeId as string);
-
-  const navigate = useNavigate();
 
   if (isLoading) {
     return <h1>Loading...</h1>;
@@ -44,11 +43,14 @@ const PlacePage = () => {
             {place.name}
           </h1>
 
-          <ImagesList placeId={placeId as string} />
+          <div className="flex flex-col gap-2 items-start">
+            <ImagesList placeId={placeId as string} />
 
-          <div className="flex my-4 gap-2">
+            <PlaceMenu placeId={placeId as string} />
+
             <UploadImages placeId={placeId as string} />
           </div>
+
           {!isUserLoading && data?.user?.userId == place.ownedBy && (
             <Link
               to="edit"
@@ -68,21 +70,25 @@ const PlacePage = () => {
           description="Delicious foods served by this place"
         />
       </div>
-      <div className="w-full">
-        <MapContainer
-          center={[place.lat, place.lon]}
-          zoom={14}
-          scrollWheelZoom={false}
-          className="w-full h-[20rem]"
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <Marker position={[place.lat, place.lon]}>
-            <Popup>Place Located Here!</Popup>
-          </Marker>
-        </MapContainer>
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="flex flex-col md:flex-row gap-2 items-center">
+          <MapContainer
+            center={[place.lat, place.lon]}
+            zoom={14}
+            scrollWheelZoom={false}
+            className="w-full md:w-[50%] h-[15rem]"
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={[place.lat, place.lon]}>
+              <Popup>Place Located Here!</Popup>
+            </Marker>
+          </MapContainer>
+          <p className="font-medium text-lg">Get Directions!</p>
+        </div>
+        <div></div>
       </div>
       {place.ownedBy == null && (
         <Link to="request-ownership">

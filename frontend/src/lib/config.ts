@@ -9,3 +9,7 @@ export const DAYS = [
   "Friday",
   "Saturday",
 ];
+
+export const USER_LEVELS = {
+  MODERATOR: 2,
+};

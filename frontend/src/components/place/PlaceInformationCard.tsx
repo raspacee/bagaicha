@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Cake, CalendarDays, Castle, Hourglass } from "lucide-react";
+import { Cake, Castle, Hourglass } from "lucide-react";
 import { haversine } from "@/lib/helpers";
 import { Place } from "@/lib/types";
 import { useAppSelector } from "@/hooks";
@@ -57,32 +57,38 @@ const PlaceInformationCard = ({ place }: Props) => {
             </Tooltip>
           </TooltipProvider>
 
-          <div className="flex flex-col gap-2">
-            {operatingHours?.map((operatingHour) => (
-              <div
-                key={operatingHour.id!}
-                className="flex flex-row gap-2 items-center"
-              >
-                <p className="min-w-20">{operatingHour.day}</p>
-                {operatingHour.openingTime && operatingHour.closingTime && (
-                  <p className="text-sm">
-                    {`${DateTime.fromFormat(
-                      operatingHour.openingTime,
-                      "hh:mm:ss"
-                    ).toFormat("hh:mm a")}
+          {operatingHours ? (
+            <div className="flex flex-col gap-2">
+              {operatingHours?.map((operatingHour) => (
+                <div
+                  key={operatingHour.id!}
+                  className="flex flex-row gap-2 items-center"
+                >
+                  <p className="min-w-20">{operatingHour.day}</p>
+                  {operatingHour.openingTime && operatingHour.closingTime && (
+                    <p className="text-sm">
+                      {`${DateTime.fromFormat(
+                        operatingHour.openingTime,
+                        "hh:mm:ss"
+                      ).toFormat("hh:mm a")}
         - ${DateTime.fromFormat(operatingHour.closingTime, "hh:mm:ss").toFormat(
           "hh:mm a"
         )}`}
-                  </p>
-                )}
-                {!operatingHour.openingTime && (
-                  <p className="text-muted-foreground text-sm">
-                    Time not specified
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
+                    </p>
+                  )}
+                  {!operatingHour.openingTime && (
+                    <p className="text-muted-foreground text-sm">
+                      Time not specified
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Operating Hours Not Specified
+            </p>
+          )}
         </div>
 
         <div className="flex flex-row items-center gap-2">
