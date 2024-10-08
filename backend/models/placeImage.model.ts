@@ -7,13 +7,14 @@ const addImageToDB = async (
   placeId: string,
   addedBy: string,
   description: string,
-  imageId: string
+  imageId: string,
+  isMenu: boolean = false
 ) => {
   const text = `
   INSERT INTO "placeImage" 
-    ("imageUrl", "placeId", "addedBy", "description", "createdAt", "cloudinaryId")
+    ("imageUrl", "placeId", "addedBy", "description", "createdAt", "cloudinaryId", "isMenu")
   VALUES 
-    ($1, $2, $3, $4, $5, $6)`;
+    ($1, $2, $3, $4, $5, $6, $7)`;
   const values = [
     imageUrl,
     placeId,
@@ -21,6 +22,7 @@ const addImageToDB = async (
     description,
     new Date().toISOString(),
     imageId,
+    isMenu,
   ];
   await pool.query(text, values);
 };
@@ -32,6 +34,21 @@ const getImagesOfPlace = async (
   SELECT * 
   FROM "placeImage"
   WHERE "placeId" = $1`;
+  const values = [placeId];
+
+  const result = await pool.query(text, values);
+  if (result.rowCount == 0) return null;
+  return result.rows as PlaceImage[];
+};
+
+const getMenusOfPlace = async (
+  placeId: string
+): Promise<PlaceImage[] | null> => {
+  const text = `
+  SELECT * 
+  FROM "placeImage"
+  WHERE "placeId" = $1
+  AND "isMenu" = true`;
   const values = [placeId];
 
   const result = await pool.query(text, values);
@@ -63,4 +80,5 @@ export default {
   getImagesOfPlace,
   deleteImage,
   getSingleImage,
+  getMenusOfPlace,
 };

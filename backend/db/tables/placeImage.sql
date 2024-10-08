@@ -6,6 +6,7 @@ CREATE TABLE
         "addedBy" UUID NOT NULL,
         "description" TEXT,
         "createdAt" TIMESTAMPTZ NOT NULL,
+        "isMenu" BOOLEAN DEFAULT FALSE,
         CONSTRAINT "fkPlace" FOREIGN KEY ("placeId") REFERENCES "place" ("id"),
         CONSTRAINT "fkAddedBy" FOREIGN KEY ("addedBy") REFERENCES "user_" ("id")
     );
