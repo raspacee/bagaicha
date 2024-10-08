@@ -8,6 +8,8 @@ import OperatingHourModel from "../models/operatingHour.model";
 import { uploadImage } from "../utils/image";
 import {
   AddPlaceForm,
+  CreatePlaceReviewForm,
+  createPlaceReviewSchema,
   Distance,
   EditPlaceForm,
   FoodsOffered,
@@ -17,7 +19,9 @@ import {
   PlaceFeature,
   UserLocation,
 } from "../types";
-import { DAYS, DB_CODES } from "../utils/config";
+import { DAYS, DB_CODES, USER_LEVELS } from "../utils/config";
+import { z } from "zod";
+import PlaceReviewModel from "../models/placeReview.model";
 
 const getPlace = async (req: Request, res: Response, next: NextFunction) => {
   const placeId = req.params.placeId as string;
@@ -493,6 +497,81 @@ const getMenuImages = async (req: Request, res: Response) => {
   }
 };
 
+const createPlaceReview = async (req: Request, res: Response) => {
+  try {
+    const form: CreatePlaceReviewForm = req.body as CreatePlaceReviewForm;
+    form.rating = parseInt(req.body.rating);
+    form.placeId = req.params.placeId;
+    form.userId = req.jwtUserData!.userId;
+    form.createdAt = new Date().toISOString();
+
+    createPlaceReviewSchema.parse(form);
+
+    if (req.file as Express.Multer.File) {
+      const [url] = await uploadImage(req.file as Express.Multer.File);
+      form.imageUrl = url;
+    }
+
+    await PlaceReviewModel.createReview(form);
+    return res.status(201).json();
+  } catch (err) {
+    console.error(err);
+
+    if (err instanceof z.ZodError) {
+      return res.status(400).json(err.formErrors);
+    }
+    return res.status(500).json({
+      message: "Error while creating review",
+    });
+  }
+};
+
+const deletePlaceReview = async (req: Request, res: Response) => {
+  try {
+    const { reviewId } = req.body;
+    if (!reviewId)
+      return res.status(400).json({
+        message: "Review ID required",
+      });
+
+    const user = await UserModel.getDataById(req.jwtUserData!.userId);
+    if (!user) return res.status(400).json({ message: "User ID not found" });
+    const review = await PlaceReviewModel.getReviewById(reviewId);
+    if (!review)
+      return res.status(400).json({ message: "Review ID not found" });
+
+    if (
+      review.userId === user.id ||
+      user.moderationLvl == USER_LEVELS.MODERATOR
+    ) {
+      await PlaceReviewModel.deleteReview(reviewId);
+      return res.status(204).json();
+    } else {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to delete this review" });
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Error while deleting review",
+    });
+  }
+};
+
+const getAllReviews = async (req: Request, res: Response) => {
+  try {
+    const { placeId } = req.params;
+    const reviews = await PlaceReviewModel.getReviews(placeId);
+    return res.status(200).json(reviews);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Error while getting reviews",
+    });
+  }
+};
+
 export default {
   getPlace,
   get_review,
@@ -516,4 +595,7 @@ export default {
   getOperatingHour,
   addMenuImages,
   getMenuImages,
+  createPlaceReview,
+  deletePlaceReview,
+  getAllReviews,
 };

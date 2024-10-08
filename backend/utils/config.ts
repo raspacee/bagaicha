@@ -15,3 +15,7 @@ export const DAYS = [
 export const DB_CODES = {
   UNIQUE_VIOLATION: "23505",
 };
+
+export const USER_LEVELS = {
+  MODERATOR: 2,
+};

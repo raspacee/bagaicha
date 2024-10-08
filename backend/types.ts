@@ -394,6 +394,24 @@ export const operatingHourSchema = z
   });
 export type OperatingHourForm = z.infer<typeof operatingHourSchema>;
 
+export const createPlaceReviewSchema = z.object({
+  placeId: z.string().uuid(),
+  userId: z.string().uuid(),
+  body: z.string().min(3, { message: "Body should be atleast 3 characters" }),
+  rating: z.number().refine((val) => [1, 2, 3, 4, 5].includes(val), {
+    message: "Provide a valid rating",
+  }),
+  imageUrl: z.string().url().optional(),
+  createdAt: z.string().datetime(),
+});
+export type CreatePlaceReviewForm = z.infer<typeof createPlaceReviewSchema>;
+
+export const fetchedPlaceReviewSchema = createPlaceReviewSchema.extend({
+  id: z.string().uuid(),
+  helpfulnessCount: z.number(),
+});
+export type FetchedPlaceReview = z.infer<typeof fetchedPlaceReviewSchema>;
+
 export type {
   JwtUserData,
   User,

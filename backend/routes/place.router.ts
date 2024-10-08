@@ -130,6 +130,24 @@ router.delete(
 /* Get menu images of a place */
 router.get("/:placeId/menu", placeController.getMenuImages);
 
+/* Create a place's review */
+router.post(
+  "/:placeId/review",
+  authMiddleware,
+  upload.single("image"),
+  placeController.createPlaceReview
+);
+
+/* Get all reviews of a place */
+router.get("/:placeId/review", placeController.getAllReviews);
+
+/* Delete a review */
+router.delete(
+  "/:placeId/review",
+  authMiddleware,
+  placeController.deletePlaceReview
+);
+
 /* Get place data */
 router.get("/:placeId", placeController.getPlace);
 
