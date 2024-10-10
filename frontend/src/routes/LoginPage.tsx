@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLoginUser } from "@/api/AuthApi";
@@ -18,8 +18,21 @@ import { Button } from "@/components/ui/button";
 export default function LoginPage() {
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
-  const { loginUser, isPending } = useLoginUser();
+  const navigate = useNavigate();
+
+  const redirectCallbackFn = () => {
+    const redirectTo = searchParams.get("redirectTo") || "/feed";
+    navigate(redirectTo);
+    navigate(0);
+  };
+
+  const { loginUser, isPending } = useLoginUser(redirectCallbackFn);
+  const [searchParams] = useSearchParams();
 
   const oauth2ConsentScreenURL = `https://accounts.google.com/o/oauth2/auth?client_id=${
     import.meta.env.VITE_OAUTH2_CLIENT_ID

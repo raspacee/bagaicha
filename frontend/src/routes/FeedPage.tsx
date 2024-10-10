@@ -24,8 +24,6 @@ export default function FeedPage() {
   const { data, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage } =
     useFetchMyFeed(sortBy, location);
 
-  console.log(data);
-
   return (
     <div className="w-full flex flex-col md:flex-row">
       <div className="px-1 md:px-4 flex-1">

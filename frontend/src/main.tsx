@@ -42,10 +42,6 @@ const router = createBrowserRouter([
     element: <AuthenticatedRoute />,
     children: [
       {
-        path: "/",
-        element: <Navigate to="/feed" replace />,
-      },
-      {
         path: "/not-authorized",
         element: <NotAuthorized />,
       },
@@ -156,6 +152,10 @@ const router = createBrowserRouter([
             </MainLayout>
           </AdminRoute>
         ),
+      },
+      {
+        path: "/",
+        element: <Navigate to="/feed" replace />,
       },
     ],
   },

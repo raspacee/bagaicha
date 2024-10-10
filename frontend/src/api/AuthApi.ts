@@ -52,9 +52,7 @@ export const useAuthenticateUser = () => {
   return { data, isLoading };
 };
 
-export const useLoginUser = () => {
-  const navigate = useNavigate();
-
+export const useLoginUser = (callbackFn: () => void) => {
   const loginUserRequest = async (
     data: LoginForm
   ): Promise<LoginResponse | null> => {
@@ -77,7 +75,7 @@ export const useLoginUser = () => {
     mutationFn: loginUserRequest,
     onSuccess: (data) => {
       cookies.set(AUTH_TOKEN_NAME, data!.token);
-      navigate("/feed");
+      callbackFn();
     },
     onError: (error) => {
       toast.error(error.message);
