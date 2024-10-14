@@ -1,6 +1,6 @@
 import { pool } from "../db/index";
 import { USER_LEVELS } from "../middlewares/modMiddleware";
-import { SignupForm, UpdateProfileForm, User } from "../types";
+import { FetchedUser, SignupForm, UpdateProfileForm } from "../types";
 import { v4 as uuid } from "uuid";
 
 const is_moderator = async (id: string) => {
@@ -17,7 +17,7 @@ const createUser = async (
   data: SignupForm,
   profilePictureUrl: string,
   isOAuth2: boolean = false
-): Promise<User> => {
+): Promise<FetchedUser> => {
   const id = uuid();
   const createdAt = new Date().toISOString();
 
@@ -80,7 +80,7 @@ const updateProfileInfo = async (
   await pool.query(text, values);
 };
 
-const getDataById = async (userId: string): Promise<User | null> => {
+const getDataById = async (userId: string): Promise<FetchedUser | null> => {
   const text = `
   SELECT 
     "id",
@@ -99,10 +99,10 @@ const getDataById = async (userId: string): Promise<User | null> => {
   if (result.rowCount == 0) {
     return null;
   }
-  return result.rows[0] as User;
+  return result.rows[0];
 };
 
-const getDataByEmail = async (email: string): Promise<User | null> => {
+const getDataByEmail = async (email: string): Promise<FetchedUser | null> => {
   const text = `
   SELECT 
     "id",
@@ -120,14 +120,12 @@ const getDataByEmail = async (email: string): Promise<User | null> => {
   if (result.rowCount == 0) {
     return null;
   }
-  return result.rows[0] as User;
+  return result.rows[0];
 };
 
-const getPasswordByEmail = async (email: string): Promise<User | null> => {
+const getPasswordByEmail = async (email: string): Promise<string | null> => {
   const text = `
   SELECT 
-    "id",
-    "email",
     "password"
   FROM "user_"
   WHERE "email" = $1;
@@ -137,7 +135,7 @@ const getPasswordByEmail = async (email: string): Promise<User | null> => {
   if (result.rowCount == 0) {
     return null;
   }
-  return result.rows[0] as User;
+  return result.rows[0].password;
 };
 
 const changePassword = async (userId: string, newPassword: string) => {

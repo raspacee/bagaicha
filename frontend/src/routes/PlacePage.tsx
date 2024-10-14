@@ -10,6 +10,8 @@ import UploadImages from "@/components/post/UploadImages";
 import ImagesList from "@/components/place/ImagesList";
 import { Settings } from "lucide-react";
 import PlaceMenu from "@/components/place/PlaceMenu";
+import Reviews from "@/components/review/Reviews";
+import { Separator } from "@/components/ui/separator";
 
 const PlacePage = () => {
   const { placeId } = useParams();
@@ -89,6 +91,10 @@ const PlacePage = () => {
           <p className="font-medium text-lg">Get Directions!</p>
         </div>
         <div></div>
+      </div>
+      <Separator />
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-2">
+        <Reviews placeId={placeId as string} />
       </div>
       {place.ownedBy == null && (
         <Link to="request-ownership">

@@ -119,8 +119,7 @@ const placeSchema = z.object({
 
 type Place = z.infer<typeof placeSchema>;
 
-export const userSchema = z.object({
-  id: z.string().uuid(),
+export const createUserSchema = z.object({
   firstName: z
     .string()
     .min(2, {
@@ -144,7 +143,15 @@ export const userSchema = z.object({
   bio: z.string().max(500),
 });
 
-type User = z.infer<typeof userSchema>;
+export type CreateUserForm = z.infer<typeof createUserSchema>;
+export const fetchedUserSchema = createUserSchema
+  .omit({
+    password: true,
+  })
+  .extend({
+    id: z.string().uuid(),
+  });
+export type FetchedUser = z.infer<typeof fetchedUserSchema>;
 
 const notificationTypesSchema = z.enum([
   "UserLikesPost",
@@ -173,14 +180,14 @@ type NotificationWhole = Notification & {
   authorPictureUrl: string;
 };
 
-export const loginFormSchema = userSchema.pick({
+export const loginFormSchema = createUserSchema.pick({
   email: true,
   password: true,
 });
 
 export type LoginForm = z.infer<typeof loginFormSchema>;
 
-export const signupFormSchema = userSchema.pick({
+export const signupFormSchema = createUserSchema.pick({
   firstName: true,
   lastName: true,
   email: true,
@@ -189,7 +196,7 @@ export const signupFormSchema = userSchema.pick({
 
 export type SignupForm = z.infer<typeof signupFormSchema>;
 
-export const updateProfileFormSchema = userSchema
+export const updateProfileFormSchema = createUserSchema
   .pick({
     firstName: true,
     lastName: true,
@@ -396,9 +403,8 @@ export type OperatingHourForm = z.infer<typeof operatingHourSchema>;
 
 export const createPlaceReviewSchema = z.object({
   placeId: z.string().uuid(),
-  userId: z.string().uuid(),
   body: z.string().min(3, { message: "Body should be atleast 3 characters" }),
-  rating: z.number().refine((val) => [1, 2, 3, 4, 5].includes(val), {
+  rating: z.number().refine((val: number) => [1, 2, 3, 4, 5].includes(val), {
     message: "Provide a valid rating",
   }),
   imageUrl: z.string().url().optional(),
@@ -408,13 +414,19 @@ export type CreatePlaceReviewForm = z.infer<typeof createPlaceReviewSchema>;
 
 export const fetchedPlaceReviewSchema = createPlaceReviewSchema.extend({
   id: z.string().uuid(),
+  userId: z.string().uuid(),
   helpfulnessCount: z.number(),
 });
 export type FetchedPlaceReview = z.infer<typeof fetchedPlaceReviewSchema>;
+export type FetchedPlaceReviewWithAuthor = FetchedPlaceReview & {
+  author: FetchedUser;
+};
+
+export type ReviewSortBy = "newest" | "oldest";
+export type ReviewFilterBy = "1" | "2" | "3" | "4" | "5" | "all";
 
 export type {
   JwtUserData,
-  User,
   Comment,
   CommentWhole,
   Post,

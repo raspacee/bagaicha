@@ -12,7 +12,6 @@ import {
   EditPostForm,
   FetchFeedResponse,
   Notification,
-  Post,
 } from "../types";
 import { uploadImage } from "../utils/image";
 

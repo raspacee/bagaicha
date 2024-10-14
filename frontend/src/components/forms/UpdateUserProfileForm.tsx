@@ -9,13 +9,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
-import { UpdateProfileForm, updateProfileFormSchema, User } from "@/lib/types";
+import {
+  FetchedUser,
+  UpdateProfileForm,
+  updateProfileFormSchema,
+} from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/button";
 import { useUpdateUserProfile } from "@/api/UserApi";
 
 type Props = {
-  user: User;
+  user: FetchedUser;
 };
 
 const UpdateUserProfileForm = ({ user }: Props) => {

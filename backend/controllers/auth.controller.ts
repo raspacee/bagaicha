@@ -51,11 +51,12 @@ const loginHandler = async (
   const { email, password } = req.body as LoginForm;
 
   try {
-    const user = await UserModel.getPasswordByEmail(email);
-    if (user == null) {
-      return res.status(401).json(null);
+    const userPassword = await UserModel.getPasswordByEmail(email);
+    const user = await UserModel.getDataByEmail(email);
+    if (userPassword == null || user == null) {
+      return res.status(404).json(null);
     }
-    if (bcrypt.compareSync(password, user.password)) {
+    if (bcrypt.compareSync(password, userPassword)) {
       const payload: JwtUserData = {
         userId: user.id,
         email: user.email,

@@ -2,6 +2,7 @@ import express from "express";
 const router = express.Router();
 
 import placeController from "../controllers/place.controller";
+import placeReviewController from "../controllers/placeReview.controller";
 import {
   authMiddleware,
   verifyAdminMiddleware,
@@ -135,17 +136,17 @@ router.post(
   "/:placeId/review",
   authMiddleware,
   upload.single("image"),
-  placeController.createPlaceReview
+  placeReviewController.createPlaceReview
 );
 
 /* Get all reviews of a place */
-router.get("/:placeId/review", placeController.getAllReviews);
+router.get("/:placeId/review", placeReviewController.getAllReviews);
 
 /* Delete a review */
 router.delete(
   "/:placeId/review",
   authMiddleware,
-  placeController.deletePlaceReview
+  placeReviewController.deletePlaceReview
 );
 
 /* Get place data */

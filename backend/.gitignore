@@ -5,5 +5,4 @@
 **.pbf
 
 startServers.sh
-__tests__/
 dump.sql

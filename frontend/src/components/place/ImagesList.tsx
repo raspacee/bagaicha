@@ -12,7 +12,7 @@ import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Link } from "react-router-dom";
 import { useGetMyUserData, useGetUserData } from "@/api/UserApi";
-import { PlaceImage, User } from "@/lib/types";
+import { PlaceImage, FetchedUser } from "@/lib/types";
 import { Loader2Icon } from "lucide-react";
 import { DateTime } from "luxon";
 import { Button } from "../ui/button";
@@ -23,7 +23,7 @@ type Props = {
 
 type ImageDescriptionProps = {
   image: PlaceImage;
-  myUser: User;
+  myUser: FetchedUser;
   fetchImages: () => void;
 };
 

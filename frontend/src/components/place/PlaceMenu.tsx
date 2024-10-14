@@ -121,7 +121,10 @@ const PlaceMenu = ({ placeId }: Props) => {
                         {menuImages
                           .slice(menuImages.indexOf(image))
                           .map((image) => (
-                            <CarouselItem className="w-[80%] h-[90vh]">
+                            <CarouselItem
+                              key={image.id}
+                              className="w-[80%] h-[90vh]"
+                            >
                               <img
                                 src={image.imageUrl}
                                 className="h-full w-full object-contain"
@@ -131,7 +134,10 @@ const PlaceMenu = ({ placeId }: Props) => {
                         {menuImages
                           .slice(0, menuImages.indexOf(image))
                           .map((image) => (
-                            <CarouselItem className="w-[80%] h-[90vh]">
+                            <CarouselItem
+                              key={image.id}
+                              className="w-[80%] h-[90vh]"
+                            >
                               <img
                                 src={image.imageUrl}
                                 className="h-full w-full object-contain"

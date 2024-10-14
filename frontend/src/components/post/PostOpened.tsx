@@ -16,6 +16,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ScrollArea } from "../ui/scroll-area";
 import { useEffect } from "react";
 import { CommentForm, commentFormSchema } from "@/lib/types";
+import { AspectRatio } from "../ui/aspect-ratio";
 
 type Props = { postId: string };
 
@@ -73,11 +74,13 @@ const PostOpened = ({ postId }: Props) => {
           <h1>Loading...</h1>
         ) : (
           <ScrollArea className="w-full min-h-[90%]">
-            <div className="hidden md:block w-full">
-              <img
-                className="object-contain w-full aspect-video rounded-md my-2"
-                src={post.imageUrl}
-              />
+            <div className="hidden md:block my-2">
+              <AspectRatio
+                ratio={16 / 9}
+                className="flex items-center justify-center"
+              >
+                <img className="object-contain" src={post.imageUrl} />
+              </AspectRatio>
             </div>
             <div className="md:flex md:flex-col gap-[0.5rem] my-2 px-3">
               <div className="flex items-center gap-2">

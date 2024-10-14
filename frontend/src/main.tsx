@@ -35,6 +35,7 @@ import ForgotPasswordPage from "./routes/ForgotPasswordPage";
 import ResetPasswordPage from "./routes/ResetPasswordPage";
 import GenericLayout from "./layouts/GenericLayout";
 import OAuth2CallbackPage from "./routes/OAuth2CallbackPage";
+import CreateReviewPage from "./routes/CreateReviewPage";
 
 const router = createBrowserRouter([
   {
@@ -66,6 +67,14 @@ const router = createBrowserRouter([
         element: (
           <MainLayout>
             <UserProfilePage />
+          </MainLayout>
+        ),
+      },
+      {
+        path: "/place/:placeId/review/add",
+        element: (
+          <MainLayout>
+            <CreateReviewPage />
           </MainLayout>
         ),
       },

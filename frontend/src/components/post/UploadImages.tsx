@@ -1,7 +1,9 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
@@ -11,6 +13,7 @@ import { useState } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { useUploadPlaceImages } from "@/api/PlaceApi";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 
 type Props = {
   placeId: string;
@@ -49,13 +52,19 @@ const UploadImages = ({ placeId }: Props) => {
 
   return (
     <Dialog>
-      <DialogTrigger>
-        <Button className="bg-transparent border text-white font-semibold gap-2 hover:bg-transparent">
-          <Camera />
-          Add Photo
-        </Button>
+      <DialogTrigger
+        type="button"
+        className="flex px-4 py-2 rounded-md bg-transparent border text-white font-semibold gap-2 hover:bg-transparent"
+      >
+        <Camera />
+        Add Photo
       </DialogTrigger>
       <DialogContent>
+        <DialogTitle className="hidden">
+          <VisuallyHidden.Root>
+            Upload image from this component
+          </VisuallyHidden.Root>
+        </DialogTitle>
         <DialogHeader>
           <h2 className="font-bold text-lg">Upload photo(s) of this place</h2>
         </DialogHeader>
@@ -83,6 +92,9 @@ const UploadImages = ({ placeId }: Props) => {
             <Upload /> Upload
           </Button>
         </div>
+        <DialogDescription className="hidden">
+          <VisuallyHidden.Root>Description goes here</VisuallyHidden.Root>
+        </DialogDescription>
       </DialogContent>
     </Dialog>
   );

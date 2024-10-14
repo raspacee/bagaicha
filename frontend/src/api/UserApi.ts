@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Cookies from "universal-cookie";
 import { AUTH_TOKEN_NAME } from "../lib/config";
-import { FeedPost, User } from "@/lib/types";
+import { FeedPost, FetchedUser } from "@/lib/types";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -10,7 +10,7 @@ const cookies = new Cookies(null, { path: "/" });
 const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 export const useGetMyUserData = () => {
-  const fetchMyUserDataRequest = async (): Promise<User | null> => {
+  const fetchMyUserDataRequest = async (): Promise<FetchedUser | null> => {
     const response = await fetch(`${BASE_API_URL}/user/my`, {
       method: "GET",
       headers: {
@@ -43,7 +43,7 @@ export const useGetMyUserData = () => {
 };
 
 export const useGetUserData = (userId: string) => {
-  const fetchUserDataRequest = async (): Promise<User | null> => {
+  const fetchUserDataRequest = async (): Promise<FetchedUser | null> => {
     const response = await fetch(`${BASE_API_URL}/user/${userId}`, {
       method: "GET",
     });

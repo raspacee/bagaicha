@@ -1,8 +1,13 @@
-import { CreatePlaceReviewForm, FetchedPlaceReview } from "../types";
+import {
+  CreatePlaceReviewForm,
+  FetchedPlaceReviewWithAuthor,
+  ReviewFilterBy,
+  ReviewSortBy,
+} from "../types";
 import { v4 as uuid } from "uuid";
 import { pool } from "../db";
 
-const createReview = async (form: CreatePlaceReviewForm) => {
+const createReview = async (form: CreatePlaceReviewForm, userId: string) => {
   const text = `
   INSERT INTO "placeReview" (
     id,
@@ -19,7 +24,7 @@ const createReview = async (form: CreatePlaceReviewForm) => {
   const values = [
     uuid(),
     form.placeId,
-    form.userId,
+    userId,
     form.body,
     form.rating,
     form.imageUrl || null,
@@ -39,14 +44,34 @@ const deleteReview = async (reviewId: string) => {
 };
 
 const getReviews = async (
-  placeId: string
-): Promise<FetchedPlaceReview[] | null> => {
+  placeId: string,
+  sortBy: ReviewSortBy,
+  filterByStar: ReviewFilterBy
+): Promise<FetchedPlaceReviewWithAuthor[] | null> => {
   const text = `
-  SELECT *
-  FROM "placeReview"
-  WHERE "placeId" = $1;
+  SELECT 
+    r.*, 
+    json_build_object(
+        'id', u.id,
+        'firstName', u."firstName",
+        'lastName', u."lastName",
+        'email', u.email,
+        'createdAt', u."createdAt",
+        'profilePictureUrl', u."profilePictureUrl",
+        'moderationLvl', u."moderationLvl",
+        'bio', u.bio
+    ) AS author 
+  FROM 
+      "placeReview" AS r
+  INNER JOIN 
+      "user_" AS u ON r."userId" = u.id
+  WHERE 
+      r."placeId" = $1
+      ${filterByStar == "all" ? "" : "AND r.rating = $2"}
+  ORDER BY r."createdAt" ${sortBy == "newest" ? "DESC" : "ASC"}
 `;
   const values = [placeId];
+  if (filterByStar != "all") values.push(filterByStar);
   const result = await pool.query(text, values);
   if (!result.rowCount) return null;
   return result.rows;
@@ -54,7 +79,7 @@ const getReviews = async (
 
 const getReviewById = async (
   id: string
-): Promise<FetchedPlaceReview | null> => {
+): Promise<FetchedPlaceReviewWithAuthor | null> => {
   const text = `
   SELECT *
   FROM "placeReview"
