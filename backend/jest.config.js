@@ -1,8 +1,15 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} **/
 module.exports = {
-  testEnvironment: "node",
+  roots: ["./"], // Point to your TypeScript source directory
+  testMatch: ["**/__tests__/**/*.test.ts"], // Match only test files in your source code
   transform: {
-    "^.+.tsx?$": ["ts-jest", {}],
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        isolatedModules: true,
+      },
+    ], // Use ts-jest to handle TypeScript
   },
-  extensionsToTreatAsEsm: [".ts"],
+  moduleFileExtensions: ["ts", "js"],
+  testPathIgnorePatterns: ["./node_modules/", "./build/"], // Ignore the build directory
 };
