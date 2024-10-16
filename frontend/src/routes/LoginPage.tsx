@@ -108,7 +108,7 @@ export default function LoginPage() {
           </div>
           <FormMessage>{form.formState.errors?.password?.message}</FormMessage>
           <Button className="mt-4" type="submit" disabled={isPending}>
-            Login
+            {isPending ? "Logging In" : "Login"}
           </Button>
           <p className="text-center">or</p>
           <Button

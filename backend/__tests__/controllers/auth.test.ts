@@ -13,7 +13,7 @@ jest.mock("../../utils/password", () => ({
 
 jest.mock("bcryptjs");
 
-const mockRequest = (partial: Partial<Request>): Request =>
+export const mockRequest = (partial: Partial<Request>): Request =>
   ({
     body: {},
     params: {},
@@ -21,7 +21,7 @@ const mockRequest = (partial: Partial<Request>): Request =>
     headers: {},
     ...partial,
   } as Request);
-const mockResponse = (): Response => {
+export const mockResponse = (): Response => {
   const res: Partial<Response> = {
     status: jest.fn(),
     json: jest.fn(),

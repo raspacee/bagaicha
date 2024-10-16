@@ -79,13 +79,20 @@ const getAllReviews = async (req: Request, res: Response) => {
     const filterByStar: ReviewFilterBy =
       (req.query.filterByStar as ReviewFilterBy) || "all";
     req.query.filterBy || "all";
+    const page = req.query.page || "1";
+
+    const totalReviews = await PlaceReviewModel.countAllRows(placeId);
+    const REVIEWS_PER_PAGE = 10;
+    const totalPages = Math.ceil(totalReviews / REVIEWS_PER_PAGE);
 
     const reviews = await PlaceReviewModel.getReviews(
       placeId,
       sortBy,
-      filterByStar
+      filterByStar,
+      (parseInt(page as string) - 1) * REVIEWS_PER_PAGE,
+      REVIEWS_PER_PAGE
     );
-    return res.status(200).json(reviews);
+    return res.status(200).json({ reviews, currentPage: page, totalPages });
   } catch (err) {
     console.error(err);
     return res.status(500).json({

@@ -13,6 +13,15 @@ import {
 } from "@/components/ui/select";
 import { ReviewFilterBy, ReviewSortBy } from "@/lib/types";
 import { useState } from "react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 type Props = {
   placeId: string;
@@ -23,7 +32,55 @@ const Reviews = ({ placeId }: Props) => {
   const [filterBy, setFilterBy] = useState<ReviewFilterBy | undefined>(
     undefined
   );
-  const { isPending, reviews } = useGetAllReviews(placeId, sortBy, filterBy);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const { isPending, reviewsResponse } = useGetAllReviews(
+    placeId,
+    sortBy,
+    filterBy,
+    currentPage
+  );
+
+  if (!isPending && !reviewsResponse) {
+    return <h1>Error while getting reviews</h1>;
+  }
+
+  const renderPages = () => {
+    const OFFSET = 4;
+    const left = currentPage - OFFSET >= 1 ? currentPage - OFFSET : 1;
+    const right =
+      currentPage + OFFSET <= reviewsResponse!.totalPages
+        ? currentPage + OFFSET
+        : reviewsResponse!.totalPages;
+    const pageNos = Array.from(
+      { length: right - left + 1 },
+      (_, index) => left + index
+    );
+    return (
+      <div className="flex flex-row">
+        {left > 1 && (
+          <PaginationItem>
+            <PaginationEllipsis />
+          </PaginationItem>
+        )}
+        {pageNos.map((pageNo) => (
+          <PaginationItem key={pageNo}>
+            <PaginationLink
+              isActive={currentPage == pageNo}
+              className="cursor-pointer"
+              onClick={() => setCurrentPage(pageNo)}
+            >
+              {pageNo}
+            </PaginationLink>
+          </PaginationItem>
+        ))}
+        {right < reviewsResponse!.totalPages && (
+          <PaginationItem>
+            <PaginationEllipsis />
+          </PaginationItem>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="p-0">
@@ -65,15 +122,56 @@ const Reviews = ({ placeId }: Props) => {
         <Loader2 className="animate-spin my-2" size={64} />
       ) : (
         <div className="flex flex-col gap-5">
-          {reviews ? (
-            reviews.map((review) => (
-              <>
-                <Review review={review} />
-                <Separator />
-              </>
+          {reviewsResponse!.reviews ? (
+            reviewsResponse!.reviews.map((review) => (
+              <div key={review.id + review.userId}>
+                <Review review={review} key={review.id} />
+                <Separator key={review.createdAt} className="mt-2" />
+              </div>
             ))
           ) : (
             <h2 className="text-lg">No reviews found</h2>
+          )}
+          {reviewsResponse!.reviews && (
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    aria-disabled={currentPage <= 1}
+                    tabIndex={currentPage <= 1 ? -1 : undefined}
+                    className={
+                      currentPage <= 1
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }
+                    onClick={() =>
+                      currentPage > 1 ? setCurrentPage(currentPage - 1) : ""
+                    }
+                  />
+                </PaginationItem>
+                {renderPages()}
+                <PaginationItem>
+                  <PaginationNext
+                    aria-disabled={currentPage >= reviewsResponse!.totalPages}
+                    tabIndex={
+                      currentPage >= reviewsResponse!.totalPages
+                        ? -1
+                        : undefined
+                    }
+                    className={
+                      currentPage >= reviewsResponse!.totalPages
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }
+                    onClick={() =>
+                      currentPage < reviewsResponse!.totalPages
+                        ? setCurrentPage(currentPage + 1)
+                        : ""
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           )}
         </div>
       )}

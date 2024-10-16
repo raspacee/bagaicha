@@ -513,6 +513,12 @@ export type FetchedPlaceReviewWithAuthor = FetchedPlaceReview & {
 export type ReviewSortBy = "newest" | "oldest";
 export type ReviewFilterBy = "1" | "2" | "3" | "4" | "5" | "all";
 
+export type GetReviewsResponse = {
+  reviews: FetchedPlaceReviewWithAuthor[] | null;
+  totalPages: number;
+  currentPage: number;
+};
+
 export type {
   UserInterface,
   LocationType,

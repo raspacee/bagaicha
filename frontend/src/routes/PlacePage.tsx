@@ -90,7 +90,6 @@ const PlacePage = () => {
           </MapContainer>
           <p className="font-medium text-lg">Get Directions!</p>
         </div>
-        <div></div>
       </div>
       <Separator />
       <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -103,6 +102,7 @@ const PlacePage = () => {
           </p>
         </Link>
       )}
+      <div className="min-h-[10rem]"></div>
     </div>
   );
 };

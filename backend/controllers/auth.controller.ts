@@ -129,6 +129,8 @@ const getResetPasswordToken = async (req: Request, res: Response) => {
         };
         await transporter.sendMail(mailOptions);
 
+        /* Store the password reset token in redis database
+           so it can be deleted/expired after using */
         const client = createClient({
           password: process.env.REDIS_PASS,
           socket: {

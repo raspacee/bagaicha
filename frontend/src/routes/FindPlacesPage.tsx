@@ -114,6 +114,17 @@ const FindPlacesPage = () => {
                       value={distance.toString()}
                       id={`distance_within_${distance}`}
                       className="hidden"
+                      onClick={(e) => {
+                        if (
+                          parseInt(e.currentTarget.value) ==
+                          searchState.selectedDistance
+                        ) {
+                          setSearchState((prevState) => ({
+                            ...prevState,
+                            selectedDistance: null,
+                          }));
+                        }
+                      }}
                     />
                     <Label
                       htmlFor={`distance_within_${distance}`}

@@ -79,7 +79,7 @@ const UploadImages = ({ placeId }: Props) => {
           </Label>
           <div className="grid grid-cols-3 md:grid-cols-5 gap-2 bg-red-50 my-2">
             {previews.map((previewURL) => (
-              <div className="overflow-hidden aspect-square">
+              <div className="overflow-hidden aspect-square" key={previewURL}>
                 <img src={previewURL} className="w-full h-full object-cover" />
               </div>
             ))}

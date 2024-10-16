@@ -284,11 +284,14 @@ const useGetMyPlaces = () => {
 };
 
 /* Fetch a single place's all images */
-const useGetPlaceImages = (placeId: string) => {
+const useGetPlaceImages = (placeId: string, filterQuery: string) => {
   const getPlaceImages = async (): Promise<PlaceImage[] | null> => {
-    const response = await fetch(`${BASE_API_URL}/place/${placeId}/image`, {
-      method: "GET",
-    });
+    const response = await fetch(
+      `${BASE_API_URL}/place/${placeId}/image?filterQuery=${filterQuery}`,
+      {
+        method: "GET",
+      }
+    );
     if (!response.ok) {
       const data = await response.json();
       throw new Error(data.message);
@@ -302,9 +305,8 @@ const useGetPlaceImages = (placeId: string) => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["places", placeId, "images"],
+    queryKey: ["places", placeId, "images", filterQuery],
     queryFn: getPlaceImages,
-    enabled: false,
   });
 
   const fetchImages = () => {

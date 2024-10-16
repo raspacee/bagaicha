@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
-const cookies = new Cookies(null, { path: "/" });
+const cookies = new Cookies(null, { path: "/", sameSite: "lax" });
 
 const BASE_API_URL = import.meta.env.VITE_API_URL;
 

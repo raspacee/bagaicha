@@ -1,6 +1,7 @@
 import { AUTH_TOKEN_NAME } from "@/lib/config";
 import {
   FetchedPlaceReviewWithAuthor,
+  GetReviewsResponse,
   ReviewFilterBy,
   ReviewSortBy,
 } from "@/lib/types";
@@ -16,15 +17,14 @@ const BASE_API_URL = import.meta.env.VITE_API_URL;
 const useGetAllReviews = (
   placeId: string,
   sortBy: ReviewSortBy | undefined,
-  filterByStar: ReviewFilterBy | undefined
+  filterByStar: ReviewFilterBy | undefined,
+  currentPage: number
 ) => {
-  const getRequest = async (): Promise<
-    FetchedPlaceReviewWithAuthor[] | null
-  > => {
+  const getRequest = async (): Promise<GetReviewsResponse> => {
     const response = await fetch(
       `${BASE_API_URL}/place/${placeId}/review?sortBy=${
         sortBy || "newest"
-      }&filterByStar=${filterByStar || "all"}`,
+      }&filterByStar=${filterByStar || "all"}&page=${currentPage}`,
       {
         method: "GET",
       }
@@ -39,10 +39,10 @@ const useGetAllReviews = (
 
   const {
     isPending,
-    data: reviews,
+    data: reviewsResponse,
     error,
   } = useQuery({
-    queryKey: ["placeReview", placeId, sortBy, filterByStar],
+    queryKey: ["placeReview", placeId, sortBy, filterByStar, currentPage],
     queryFn: getRequest,
   });
 
@@ -50,7 +50,7 @@ const useGetAllReviews = (
     toast.error(error.message);
   }
 
-  return { isPending, reviews };
+  return { isPending, reviewsResponse };
 };
 
 const useCreatePlaceReview = (placeId: string) => {

@@ -1,4 +1,10 @@
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { MapPinHouse, MessageCircle, Navigation, Send } from "lucide-react";
 import { useCreateComment, useFetchPostById } from "@/api/PostApi";
 import { Link } from "react-router-dom";
@@ -17,6 +23,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { useEffect } from "react";
 import { CommentForm, commentFormSchema } from "@/lib/types";
 import { AspectRatio } from "../ui/aspect-ratio";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 
 type Props = { postId: string };
 
@@ -70,6 +77,9 @@ const PostOpened = ({ postId }: Props) => {
         <MessageCircle size={25} />
       </DialogTrigger>
       <DialogContent className="min-w-full md:min-w-[60vw] h-[90vh] md:h-screen p-0 border-none flex flex-col gap-2">
+        <DialogTitle className="hidden">
+          <VisuallyHidden.Root>Image Information</VisuallyHidden.Root>
+        </DialogTitle>
         {(enabled && isPostLoading) || !post ? (
           <h1>Loading...</h1>
         ) : (
@@ -108,23 +118,28 @@ const PostOpened = ({ postId }: Props) => {
                   </p>
                 </div>
               </div>
-              <span className="flex gap-2 items-center">
-                <MapPinHouse size={26} className="text-blue-600" />
-                <Link to={`/place/${post.placeId}`} className="font-bold">
-                  {post.placeName}
-                </Link>
-              </span>
-              <span className="flex gap-2 items-center">
-                <Navigation size={26} className="text-green-700" />
-                <p className="font-medium">
-                  {`${haversine(
-                    location.lat,
-                    location.long,
-                    post.lat,
-                    post.lon
-                  )} km away from you`}
-                </p>
-              </span>
+              <div className="flex gap-2 flex-col">
+                <span className="flex gap-2 items-center">
+                  <MapPinHouse size={26} className="text-blue-600" />
+                  <Link
+                    to={`/place/${post.placeId}`}
+                    className="font-bold mt-2"
+                  >
+                    {`at ${post.placeName}`}
+                  </Link>
+                </span>
+                <span className="flex gap-2 items-center">
+                  <Navigation size={26} className="text-green-700" />
+                  <p className="font-normal text-muted-foreground">
+                    {`${haversine(
+                      location.lat,
+                      location.long,
+                      post.lat,
+                      post.lon
+                    )} km away from you`}
+                  </p>
+                </span>
+              </div>
             </div>
             <div className="px-3 my-5">
               <p>{post.body}</p>
@@ -172,7 +187,10 @@ const PostOpened = ({ postId }: Props) => {
                 </div>
               ) : (
                 post.comments.map((comment) => (
-                  <div className="flex flex-col gap-2 px-1 md:px-4 mt-2">
+                  <div
+                    className="flex flex-col gap-2 px-1 md:px-4 mt-2"
+                    key={comment.id}
+                  >
                     <div className="flex items-center gap-2">
                       <img
                         src={comment.authorPictureUrl}
@@ -200,6 +218,9 @@ const PostOpened = ({ postId }: Props) => {
             </div>
           </ScrollArea>
         )}
+        <DialogDescription className="hidden">
+          <VisuallyHidden.Root>Description goes here</VisuallyHidden.Root>
+        </DialogDescription>
       </DialogContent>
     </Dialog>
   );

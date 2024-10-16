@@ -16,6 +16,9 @@ import { useForm } from "react-hook-form";
 const ForgotPasswordPage = () => {
   const form = useForm<ForgotPasswordForm>({
     resolver: zodResolver(forgotPasswordFormSchema),
+    defaultValues: {
+      email: "",
+    },
   });
   const { forgotPassword, isPending, isSuccess } = useForgotPassword();
 

@@ -343,7 +343,11 @@ const uploadImages = async (req: Request, res: Response) => {
 /* Get images of a place */
 const getImages = async (req: Request, res: Response) => {
   try {
-    const images = await PlaceImageModel.getImagesOfPlace(req.params.placeId);
+    const filterQuery = req.query.filterQuery || "";
+    const images = await PlaceImageModel.getImagesOfPlace(
+      req.params.placeId,
+      filterQuery as string
+    );
     return res.status(200).json(images);
   } catch (err) {
     console.log(err);

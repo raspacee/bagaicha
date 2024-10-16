@@ -28,13 +28,15 @@ const addImageToDB = async (
 };
 
 const getImagesOfPlace = async (
-  placeId: string
+  placeId: string,
+  filterQuery: string
 ): Promise<PlaceImage[] | null> => {
   const text = `
   SELECT * 
   FROM "placeImage"
-  WHERE "placeId" = $1`;
-  const values = [placeId];
+  WHERE "placeId" = $1
+  AND description ILIKE $2`;
+  const values = [placeId, `%${filterQuery}%`];
 
   const result = await pool.query(text, values);
   if (result.rowCount == 0) return null;

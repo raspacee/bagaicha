@@ -46,7 +46,9 @@ const deleteReview = async (reviewId: string) => {
 const getReviews = async (
   placeId: string,
   sortBy: ReviewSortBy,
-  filterByStar: ReviewFilterBy
+  filterByStar: ReviewFilterBy,
+  offset: number,
+  limit: number
 ): Promise<FetchedPlaceReviewWithAuthor[] | null> => {
   const text = `
   SELECT 
@@ -67,10 +69,12 @@ const getReviews = async (
       "user_" AS u ON r."userId" = u.id
   WHERE 
       r."placeId" = $1
-      ${filterByStar == "all" ? "" : "AND r.rating = $2"}
+      ${filterByStar == "all" ? "" : "AND r.rating = $4"}
   ORDER BY r."createdAt" ${sortBy == "newest" ? "DESC" : "ASC"}
+  LIMIT $2
+  OFFSET $3
 `;
-  const values = [placeId];
+  const values = [placeId, limit, offset];
   if (filterByStar != "all") values.push(filterByStar);
   const result = await pool.query(text, values);
   if (!result.rowCount) return null;
@@ -92,9 +96,17 @@ const getReviewById = async (
   return result.rows[0];
 };
 
+const countAllRows = async (placeId: string): Promise<number> => {
+  const text = `SELECT count(*) FROM "placeReview" WHERE "placeId" = $1;`;
+  const values = [placeId];
+  const result = await pool.query(text, values);
+  return result.rows[0].count;
+};
+
 export default {
   createReview,
   deleteReview,
   getReviews,
   getReviewById,
+  countAllRows,
 };
