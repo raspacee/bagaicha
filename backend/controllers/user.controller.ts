@@ -35,7 +35,10 @@ const getUserPosts = async (req: Request, res: Response) => {
   // TODO ADD PAGINATION
   try {
     const userId = req.params.userId;
-    const posts = await PostModel.getUserPosts(userId, req.jwtUserData!.userId);
+    const posts = await PostModel.getUserPosts(
+      userId,
+      req.jwtUserData?.userId || null
+    );
     return res.json(posts);
   } catch (err) {
     console.error(err);

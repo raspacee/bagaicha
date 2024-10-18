@@ -56,7 +56,7 @@ const SearchPage = () => {
             {searchResults && searchResults.place.places.length > 0 ? (
               <div className="flex flex-col gap-3">
                 {searchResults.place.places.map((place) => (
-                  <PlaceListItem place={place} />
+                  <PlaceListItem place={place} key={place.id} />
                 ))}
                 <PaginationSelector
                   currentPage={searchState.placePage}
@@ -72,7 +72,7 @@ const SearchPage = () => {
             {searchResults && searchResults.post.posts.length > 0 ? (
               <div className="flex flex-col gap-3">
                 {searchResults.post.posts.map((post) => (
-                  <Post post={post} />
+                  <Post post={post} key={post.id} />
                 ))}
                 <PaginationSelector
                   currentPage={searchState.postPage}

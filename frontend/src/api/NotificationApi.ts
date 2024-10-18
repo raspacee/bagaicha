@@ -11,6 +11,8 @@ const useFetchNotification = () => {
   const fetchNotificationRequest = async (): Promise<
     NotificationWhole[] | null
   > => {
+    if (!cookies.get(AUTH_TOKEN_NAME)) return null;
+
     const response = await fetch(`${BASE_API_URL}/notifications/my`, {
       method: "get",
       headers: {

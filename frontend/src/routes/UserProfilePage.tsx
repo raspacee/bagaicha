@@ -4,11 +4,16 @@ import { DateTime } from "luxon";
 import "react-loading-skeleton/dist/skeleton.css";
 
 import Post from "../components/post/Post";
-import { useGetUserData, useGetUserPosts } from "@/api/UserApi";
+import {
+  useGetMyUserData,
+  useGetUserData,
+  useGetUserPosts,
+} from "@/api/UserApi";
 import { Button } from "@/components/ui/button";
 
 export default function UserProfilePage() {
   const navigate = useNavigate();
+  const { myUser } = useGetMyUserData();
   const { userId } = useParams();
   const {
     user,
@@ -56,7 +61,7 @@ export default function UserProfilePage() {
             <p className="text-sm text-gray-600 font-medium">
               Joined on {DateTime.fromISO(user.createdAt).toFormat("DDD")}
             </p>
-            {user.id == userId && (
+            {myUser && user.id == myUser.id && (
               <Button
                 variant="outline"
                 onClick={() => navigate("/user/edit-profile")}

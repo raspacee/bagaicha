@@ -4,7 +4,10 @@ import upload from "../multer";
 
 import postController from "../controllers/post.controller";
 import commentController from "../controllers/comment.controller";
-import { authMiddleware } from "../middlewares/auth.middleware";
+import {
+  authMiddleware,
+  optionalAuthMiddleware,
+} from "../middlewares/auth.middleware";
 
 router.post(
   "/",
@@ -16,7 +19,7 @@ router.post(
 router.post("/:postId/likes", authMiddleware, postController.likePost);
 router.delete("/:postId/likes", authMiddleware, postController.unlikePost);
 
-router.get("/", authMiddleware, postController.getFeed);
+router.get("/", optionalAuthMiddleware, postController.getFeed);
 
 /* Bookmark a review */
 router.post("/:postId/bookmarks", authMiddleware, postController.bookmarkPost);
@@ -51,7 +54,7 @@ router.post(
   commentController.like_comment
 );
 
-router.get("/:postId", authMiddleware, postController.getSinglePost);
+router.get("/:postId", optionalAuthMiddleware, postController.getSinglePost);
 
 router.put("/:postId", authMiddleware, postController.updateMyPost);
 

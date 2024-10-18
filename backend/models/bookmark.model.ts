@@ -65,7 +65,7 @@ const getBoomarksOfUser = async (userId: string): Promise<FeedPost[]> => {
     ) AS "hasLiked",
     true AS "hasBookmarked" 
   FROM "postBookmark" AS b
-  INNER JOIN "post" AS p ON p."authorId" = b."userId" AND p."id" = b."postId"
+  INNER JOIN "post" AS p ON p."id" = b."postId"
   INNER JOIN "user_" AS u ON u."id" = p."authorId"
   INNER JOIN "place" AS pl ON pl."id" = p."placeId"
   WHERE b."userId" = $1

@@ -60,7 +60,7 @@ const createPost = async (
 };
 
 const getFeedPosts = async (
-  userId: string,
+  userId: string | null,
   skip: number
 ): Promise<FeedPost[]> => {
   const text = `
@@ -73,6 +73,7 @@ const getFeedPosts = async (
     pl."lat", 
     pl."lon", 
     pl."name" AS "placeName", 
+    COALESCE(
     (
       SELECT EXISTS (
         SELECT 1 
@@ -81,7 +82,9 @@ const getFeedPosts = async (
           AND l."postId" = p."id" 
         LIMIT 1
       )
+    ), false
     ) AS "hasLiked",
+    COALESCE(
     (
       SELECT EXISTS (
         SELECT 1 
@@ -90,6 +93,7 @@ const getFeedPosts = async (
           AND b."postId" = p."id" 
         LIMIT 1
       )
+    ), false
     ) AS "hasBookmarked"
   FROM 
     "post" AS p
@@ -107,7 +111,7 @@ const getFeedPosts = async (
 };
 
 const searchPosts = async (
-  userId: string,
+  userId: string | null,
   query: string,
   offset: number
 ): Promise<FeedPost[]> => {
@@ -156,7 +160,7 @@ const searchPosts = async (
 
 const getUserPosts = async (
   userId: string,
-  requestingUserId: string
+  requestingUserId: string | null
 ): Promise<FeedPost[]> => {
   const text = `
   SELECT 

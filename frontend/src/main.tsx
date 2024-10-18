@@ -39,20 +39,56 @@ import CreateReviewPage from "./routes/CreateReviewPage";
 
 const router = createBrowserRouter([
   {
+    path: "/feed",
+    element: (
+      <MainLayout>
+        <FeedPage />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/",
+    element: <Navigate to="/feed" replace />,
+  },
+  {
+    path: "place/:placeId",
+    element: (
+      <MainLayout>
+        <PlacePage />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "find-places",
+    element: (
+      <MainLayout>
+        <FindPlacesPage />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "user/:userId",
+    element: (
+      <MainLayout>
+        <UserProfilePage />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "search/",
+    element: (
+      <MainLayout>
+        <SearchPage />
+      </MainLayout>
+    ),
+  },
+  {
     path: "/",
     element: <AuthenticatedRoute />,
     children: [
       {
         path: "/not-authorized",
         element: <NotAuthorized />,
-      },
-      {
-        path: "feed",
-        element: (
-          <MainLayout>
-            <FeedPage />
-          </MainLayout>
-        ),
       },
       {
         path: "user/edit-profile",
@@ -63,26 +99,10 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "user/:userId",
-        element: (
-          <MainLayout>
-            <UserProfilePage />
-          </MainLayout>
-        ),
-      },
-      {
         path: "/place/:placeId/review/add",
         element: (
           <MainLayout>
             <CreateReviewPage />
-          </MainLayout>
-        ),
-      },
-      {
-        path: "place/:placeId",
-        element: (
-          <MainLayout>
-            <PlacePage />
           </MainLayout>
         ),
       },
@@ -129,22 +149,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "find-places",
-        element: (
-          <MainLayout>
-            <FindPlacesPage />
-          </MainLayout>
-        ),
-      },
-      {
-        path: "search/",
-        element: (
-          <MainLayout>
-            <SearchPage />
-          </MainLayout>
-        ),
-      },
-      {
         path: "suggestions/",
         element: (
           <MainLayout>
@@ -161,10 +165,6 @@ const router = createBrowserRouter([
             </MainLayout>
           </AdminRoute>
         ),
-      },
-      {
-        path: "/",
-        element: <Navigate to="/feed" replace />,
       },
     ],
   },

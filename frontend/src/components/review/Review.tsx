@@ -45,7 +45,6 @@ const Review = ({ review }: Props) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem>Report</DropdownMenuItem>
-              <DropdownMenuItem>Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

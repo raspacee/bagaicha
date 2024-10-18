@@ -10,7 +10,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 import { FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { Input } from "../ui/input";
-import { MapPinHouse } from "lucide-react";
+import { CircleUserRound, LogIn, MapPinHouse } from "lucide-react";
 import { Rating } from "@mui/material";
 import { Button } from "../ui/button";
 import { useCreatePost } from "@/api/PostApi";
@@ -21,6 +21,7 @@ import PlaceSuggestionInput from "./PlaceSuggestionInput";
 import { Textarea } from "../ui/textarea";
 import { useEffect, useState } from "react";
 import { useGetMyUserData } from "@/api/UserApi";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 const createPostSchema = z.object({
   placeName: z.string().min(1).max(300),
@@ -75,13 +76,27 @@ const CreatePostDialog = () => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="w-full">
+      <DialogTrigger
+        className="w-full"
+        onClick={(e) => {
+          if (!myUser) {
+            e.preventDefault();
+            toast.error("Please login to create a post");
+          }
+        }}
+      >
         <div className="flex flex-row gap-5 items-center">
-          <img
-            src={myUser?.profilePictureUrl}
-            className="h-[2rem] w-[2rem] object-cover rounded-full"
-          />
-          <h1 className="text-lg text-muted-foreground hover:bg-slate-200 hover:rounded-full">{`Want to share something, ${myUser?.firstName}?`}</h1>
+          <Avatar>
+            <AvatarImage src={myUser?.profilePictureUrl} />
+            <AvatarFallback>
+              <CircleUserRound />
+            </AvatarFallback>
+          </Avatar>
+          <h1 className="text-lg text-muted-foreground hover:bg-slate-200 hover:rounded-full">
+            {myUser
+              ? `Want to share something, ${myUser.firstName}?`
+              : "Log in to start sharing posts"}
+          </h1>
         </div>
       </DialogTrigger>
       <DialogContent className="h-screen md:h-[90vh] flex flex-col gap-6">

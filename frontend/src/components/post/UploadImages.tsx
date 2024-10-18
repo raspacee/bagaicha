@@ -14,6 +14,8 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { useUploadPlaceImages } from "@/api/PlaceApi";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
+import { useGetMyUserData } from "@/api/UserApi";
+import { toast } from "sonner";
 
 type Props = {
   placeId: string;
@@ -21,6 +23,7 @@ type Props = {
 
 const UploadImages = ({ placeId }: Props) => {
   const { isPending, uploadImages } = useUploadPlaceImages(placeId);
+  const { myUser } = useGetMyUserData();
 
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -55,6 +58,12 @@ const UploadImages = ({ placeId }: Props) => {
       <DialogTrigger
         type="button"
         className="flex px-4 py-2 rounded-md bg-transparent border text-white font-semibold gap-2 hover:bg-transparent"
+        onClick={(e) => {
+          if (!myUser) {
+            e.preventDefault();
+            toast.error("Please login to upload photos");
+          }
+        }}
       >
         <Camera />
         Add Photo

@@ -7,6 +7,7 @@ import type {
   LocationType,
   Post,
   PostWithComments,
+  SearchResultsResponse,
 } from "@/lib/types";
 import {
   InfiniteData,
@@ -18,6 +19,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import Cookies from "universal-cookie";
+import _ from "lodash";
 
 const cookies = new Cookies(null, { path: "/" });
 
@@ -33,7 +35,7 @@ const useFetchMyFeed = (sortBy: string, location: LocationType) => {
     const response = await fetch(url, {
       mode: "cors",
       headers: {
-        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME) || ""}`,
       },
     });
     if (!response.ok) {
@@ -69,7 +71,7 @@ const useFetchPostById = (postId: string) => {
     const response = await fetch(`${BASE_API_URL}/post/${postId}`, {
       method: "get",
       headers: {
-        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME) || ""}`,
       },
     });
     if (!response.ok) {
@@ -97,6 +99,10 @@ const useFetchPostById = (postId: string) => {
 
 const useCreateComment = () => {
   const createCommentRequest = async (commentForm: CommentForm) => {
+    if (!cookies.get(AUTH_TOKEN_NAME)) {
+      toast.error("Please login to comment on this post");
+      return;
+    }
     const response = await fetch(`${BASE_API_URL}/post/comments`, {
       method: "POST",
       headers: {
@@ -168,6 +174,10 @@ const useLikePost = (calledFromFeed: boolean = false) => {
   const queryClient = useQueryClient();
 
   const likePostRequest = async (postId: string) => {
+    if (!cookies.get(AUTH_TOKEN_NAME)) {
+      toast.error("Please login to perform this action");
+      return;
+    }
     const response = await fetch(`${BASE_API_URL}/post/${postId}/likes`, {
       method: "POST",
       headers: {
@@ -182,44 +192,29 @@ const useLikePost = (calledFromFeed: boolean = false) => {
   const { mutateAsync: likePost } = useMutation({
     mutationFn: likePostRequest,
     onMutate: async (postId: string) => {
+      if (!cookies.get(AUTH_TOKEN_NAME)) return;
+
       await queryClient.cancelQueries({ queryKey: ["posts"] });
 
-      let previousData:
-        | InfiniteData<FetchFeedResponse, unknown>
-        | undefined
-        | FeedPost[];
+      const previousBookmarkPosts = queryClient.getQueryData<FeedPost[]>([
+        "posts",
+        "bookmarks",
+      ]);
+      const previousInfiniteData = queryClient.getQueryData<
+        InfiniteData<FetchFeedResponse>
+      >(["posts", "feed"]);
+      const previousSearchData =
+        queryClient.getQueryData<SearchResultsResponse>(["posts", "search"]);
 
-      if (!calledFromFeed) {
-        const result = queryClient.getQueriesData<FeedPost[]>({
-          queryKey: ["posts", "bookmarks"],
-        })[1];
-        previousData = result && result.length > 0 ? result[1] : [];
+      const queries = queryClient.getQueriesData({ queryKey: ["posts"] });
 
-        queryClient.setQueriesData(
-          { queryKey: ["posts", "bookmarks"] },
-          (oldPosts: FeedPost[] | undefined) =>
-            oldPosts?.map((post) =>
-              post.id == postId
-                ? { ...post, hasLiked: true, likeCount: post.likeCount + 1 }
-                : post
-            )
-        );
-      } else {
-        previousData = queryClient.getQueriesData<
-          InfiniteData<FetchFeedResponse>
-        >({
-          queryKey: ["posts", "feed"],
-        })[0][1];
-
-        queryClient.setQueriesData<InfiniteData<FetchFeedResponse>>(
-          { queryKey: ["posts", "feed"] },
-          (data) => {
-            if (!data) return data;
-
-            /* Create a deep copy of the data */
+      queries.forEach(([queryKey, oldData]) => {
+        queryClient.setQueryData(queryKey, (oldData: any) => {
+          if (_.isEmpty(_.difference(["posts", "feed"], queryKey))) {
             let tmp = JSON.parse(
-              JSON.stringify(data)
+              JSON.stringify(oldData)
             ) as InfiniteData<FetchFeedResponse>;
+
             for (let i = 0; i < tmp.pages.length; i++) {
               const page = tmp.pages[i];
               tmp.pages[i].posts = page.posts.map((post) =>
@@ -230,14 +225,58 @@ const useLikePost = (calledFromFeed: boolean = false) => {
             }
 
             return tmp;
-          }
-        );
-      }
+          } else if (_.isEmpty(_.difference(["posts", "search"], queryKey))) {
+            const copy = oldData as SearchResultsResponse;
+            return {
+              ...copy,
+              post: {
+                ...copy.post,
+                posts: copy.post.posts.map((post) =>
+                  post.id == postId
+                    ? { ...post, hasLiked: true, likeCount: post.likeCount + 1 }
+                    : post
+                ),
+              },
+            };
+          } else if (
+            _.isEmpty(_.difference(["posts", "bookmarks"], queryKey))
+          ) {
+            const copy = oldData as FeedPost[];
 
-      return { previousData };
+            return copy.map((post) =>
+              post.id == postId
+                ? { ...post, hasLiked: true, likeCount: post.likeCount + 1 }
+                : post
+            );
+          }
+        });
+      });
+
+      return {
+        previousBookmarkPosts,
+        previousInfiniteData,
+        previousSearchData,
+      };
     },
     onError: (err, postId, context) => {
-      queryClient.setQueryData(["posts"], context?.previousData);
+      if (context?.previousBookmarkPosts) {
+        queryClient.setQueryData(
+          ["posts", "bookmarks"],
+          context.previousInfiniteData
+        );
+      }
+      if (context?.previousSearchData) {
+        queryClient.setQueryData(
+          ["posts", "search"],
+          context.previousSearchData
+        );
+      }
+      if (context?.previousInfiniteData) {
+        queryClient.setQueryData(
+          ["posts", "feed"],
+          context.previousInfiniteData
+        );
+      }
     },
   });
 
@@ -248,6 +287,10 @@ const useUnlikePost = (calledFromFeed: boolean = false) => {
   const queryClient = useQueryClient();
 
   const unlikePostRequest = async (postId: string) => {
+    if (!cookies.get(AUTH_TOKEN_NAME)) {
+      toast.error("Please login to perform this action");
+      return;
+    }
     const response = await fetch(`${BASE_API_URL}/post/${postId}/likes`, {
       method: "DELETE",
       headers: {
@@ -262,44 +305,32 @@ const useUnlikePost = (calledFromFeed: boolean = false) => {
   const { mutateAsync: unlikePost } = useMutation({
     mutationFn: unlikePostRequest,
     onMutate: async (postId: string) => {
+      if (!cookies.get(AUTH_TOKEN_NAME)) {
+        toast.error("Please login to perform this action");
+        return;
+      }
+
       await queryClient.cancelQueries({ queryKey: ["posts"] });
 
-      let previousData:
-        | InfiniteData<FetchFeedResponse, unknown>
-        | undefined
-        | FeedPost[];
+      const previousBookmarkPosts = queryClient.getQueryData<FeedPost[]>([
+        "posts",
+        "bookmarks",
+      ]);
+      const previousInfiniteData = queryClient.getQueryData<
+        InfiniteData<FetchFeedResponse>
+      >(["posts", "feed"]);
+      const previousSearchData =
+        queryClient.getQueryData<SearchResultsResponse>(["posts", "search"]);
 
-      if (!calledFromFeed) {
-        const result = queryClient.getQueriesData<FeedPost[]>({
-          queryKey: ["posts", "bookmarks"],
-        })[1];
-        previousData = result && result.length > 0 ? result[1] : [];
+      const queries = queryClient.getQueriesData({ queryKey: ["posts"] });
 
-        queryClient.setQueriesData(
-          { queryKey: ["posts", "bookmarks"] },
-          (oldPosts: FeedPost[] | undefined) =>
-            oldPosts?.map((post) =>
-              post.id == postId
-                ? { ...post, hasLiked: false, likeCount: post.likeCount - 1 }
-                : post
-            )
-        );
-      } else {
-        previousData = queryClient.getQueriesData<
-          InfiniteData<FetchFeedResponse>
-        >({
-          queryKey: ["posts", "feed"],
-        })[0][1];
-
-        queryClient.setQueriesData<InfiniteData<FetchFeedResponse>>(
-          { queryKey: ["posts", "feed"] },
-          (data) => {
-            if (!data) return data;
-
-            /* Create a deep copy of the data */
+      queries.forEach(([queryKey, oldData]) => {
+        queryClient.setQueryData(queryKey, (oldData: any) => {
+          if (_.isEmpty(_.difference(["posts", "feed"], queryKey))) {
             let tmp = JSON.parse(
-              JSON.stringify(data)
+              JSON.stringify(oldData)
             ) as InfiniteData<FetchFeedResponse>;
+
             for (let i = 0; i < tmp.pages.length; i++) {
               const page = tmp.pages[i];
               tmp.pages[i].posts = page.posts.map((post) =>
@@ -310,14 +341,62 @@ const useUnlikePost = (calledFromFeed: boolean = false) => {
             }
 
             return tmp;
-          }
-        );
-      }
+          } else if (_.isEmpty(_.difference(["posts", "search"], queryKey))) {
+            const copy = oldData as SearchResultsResponse;
+            return {
+              ...copy,
+              post: {
+                ...copy.post,
+                posts: copy.post.posts.map((post) =>
+                  post.id == postId
+                    ? {
+                        ...post,
+                        hasLiked: false,
+                        likeCount: post.likeCount - 1,
+                      }
+                    : post
+                ),
+              },
+            };
+          } else if (
+            _.isEmpty(_.difference(["posts", "bookmarks"], queryKey))
+          ) {
+            const copy = oldData as FeedPost[];
 
-      return { previousData };
+            return copy.map((post) =>
+              post.id == postId
+                ? { ...post, hasLiked: false, likeCount: post.likeCount - 1 }
+                : post
+            );
+          }
+        });
+      });
+
+      return {
+        previousBookmarkPosts,
+        previousInfiniteData,
+        previousSearchData,
+      };
     },
     onError: (err, postId, context) => {
-      queryClient.setQueryData(["posts"], context?.previousData);
+      if (context?.previousBookmarkPosts) {
+        queryClient.setQueryData(
+          ["posts", "bookmarks"],
+          context.previousInfiniteData
+        );
+      }
+      if (context?.previousSearchData) {
+        queryClient.setQueryData(
+          ["posts", "search"],
+          context.previousSearchData
+        );
+      }
+      if (context?.previousInfiniteData) {
+        queryClient.setQueryData(
+          ["posts", "feed"],
+          context.previousInfiniteData
+        );
+      }
     },
   });
 
@@ -328,6 +407,11 @@ const useBookmarkPost = (calledFromFeed: boolean = false) => {
   const queryClient = useQueryClient();
 
   const bookmarkPostRequest = async (postId: string) => {
+    if (!cookies.get(AUTH_TOKEN_NAME)) {
+      toast.error("Please login to perform this action");
+      return;
+    }
+
     const response = await fetch(`${BASE_API_URL}/post/${postId}/bookmarks`, {
       method: "POST",
       headers: {
@@ -343,42 +427,31 @@ const useBookmarkPost = (calledFromFeed: boolean = false) => {
   const { mutateAsync: bookmarkPost } = useMutation({
     mutationFn: bookmarkPostRequest,
     onMutate: async (postId: string) => {
+      if (!cookies.get(AUTH_TOKEN_NAME)) {
+        toast.error("Please login to perform this action");
+        return;
+      }
       await queryClient.cancelQueries({ queryKey: ["posts"] });
 
-      let previousData:
-        | InfiniteData<FetchFeedResponse, unknown>
-        | undefined
-        | FeedPost[];
+      const previousBookmarkPosts = queryClient.getQueryData<FeedPost[]>([
+        "posts",
+        "bookmarks",
+      ]);
+      const previousInfiniteData = queryClient.getQueryData<
+        InfiniteData<FetchFeedResponse>
+      >(["posts", "feed"]);
+      const previousSearchData =
+        queryClient.getQueryData<SearchResultsResponse>(["posts", "search"]);
 
-      if (!calledFromFeed) {
-        const result = queryClient.getQueriesData<FeedPost[]>({
-          queryKey: ["posts", "bookmarks"],
-        })[1];
-        previousData = result && result.length > 0 ? result[1] : [];
+      const queries = queryClient.getQueriesData({ queryKey: ["posts"] });
 
-        queryClient.setQueriesData(
-          { queryKey: ["posts", "bookmarks"] },
-          (oldPosts: FeedPost[] | undefined) =>
-            oldPosts?.map((post) =>
-              post.id == postId ? { ...post, hasBookmarked: true } : post
-            )
-        );
-      } else {
-        previousData = queryClient.getQueriesData<
-          InfiniteData<FetchFeedResponse>
-        >({
-          queryKey: ["posts", "feed"],
-        })[0][1];
-
-        queryClient.setQueriesData<InfiniteData<FetchFeedResponse>>(
-          { queryKey: ["posts", "feed"] },
-          (data) => {
-            if (!data) return data;
-
-            /* Create a deep copy of the data */
+      queries.forEach(([queryKey, oldData]) => {
+        queryClient.setQueryData(queryKey, (oldData: any) => {
+          if (_.isEmpty(_.difference(["posts", "feed"], queryKey))) {
             let tmp = JSON.parse(
-              JSON.stringify(data)
+              JSON.stringify(oldData)
             ) as InfiniteData<FetchFeedResponse>;
+
             for (let i = 0; i < tmp.pages.length; i++) {
               const page = tmp.pages[i];
               tmp.pages[i].posts = page.posts.map((post) =>
@@ -387,17 +460,59 @@ const useBookmarkPost = (calledFromFeed: boolean = false) => {
             }
 
             return tmp;
-          }
-        );
-      }
+          } else if (_.isEmpty(_.difference(["posts", "search"], queryKey))) {
+            const copy = oldData as SearchResultsResponse;
+            return {
+              ...copy,
+              post: {
+                ...copy.post,
+                posts: copy.post.posts.map((post) =>
+                  post.id == postId
+                    ? {
+                        ...post,
+                        hasBookmarked: true,
+                      }
+                    : post
+                ),
+              },
+            };
+          } else if (
+            _.isEmpty(_.difference(["posts", "bookmarks"], queryKey))
+          ) {
+            const copy = oldData as FeedPost[];
 
-      return { previousData };
+            return copy.map((post) =>
+              post.id == postId ? { ...post, hasBookmarked: true } : post
+            );
+          }
+        });
+      });
+
+      return {
+        previousBookmarkPosts,
+        previousInfiniteData,
+        previousSearchData,
+      };
     },
     onError: (err, postId, context) => {
-      queryClient.setQueryData(["posts"], context?.previousData);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      if (context?.previousBookmarkPosts) {
+        queryClient.setQueryData(
+          ["posts", "bookmarks"],
+          context.previousInfiniteData
+        );
+      }
+      if (context?.previousSearchData) {
+        queryClient.setQueryData(
+          ["posts", "search"],
+          context.previousSearchData
+        );
+      }
+      if (context?.previousInfiniteData) {
+        queryClient.setQueryData(
+          ["posts", "feed"],
+          context.previousInfiniteData
+        );
+      }
     },
   });
 
@@ -425,59 +540,85 @@ const useUnbookmarkPost = (calledFromFeed: boolean = false) => {
     onMutate: async (postId: string) => {
       await queryClient.cancelQueries({ queryKey: ["posts"] });
 
-      let previousData:
-        | InfiniteData<FetchFeedResponse, unknown>
-        | undefined
-        | FeedPost[];
+      const previousBookmarkPosts = queryClient.getQueryData<FeedPost[]>([
+        "posts",
+        "bookmarks",
+      ]);
+      const previousInfiniteData = queryClient.getQueryData<
+        InfiniteData<FetchFeedResponse>
+      >(["posts", "feed"]);
+      const previousSearchData =
+        queryClient.getQueryData<SearchResultsResponse>(["posts", "search"]);
 
-      if (!calledFromFeed) {
-        const result = queryClient.getQueriesData<FeedPost[]>({
-          queryKey: ["posts", "bookmarks"],
-        })[1];
-        previousData = result && result.length > 0 ? result[1] : [];
+      const queries = queryClient.getQueriesData({ queryKey: ["posts"] });
 
-        queryClient.setQueriesData(
-          { queryKey: ["posts", "bookmarks"] },
-          (oldPosts: FeedPost[] | undefined) =>
-            oldPosts?.map((post) =>
-              post.id == postId ? { ...post, hasBookmarked: false } : post
-            )
-        );
-      } else {
-        previousData = queryClient.getQueriesData<
-          InfiniteData<FetchFeedResponse>
-        >({
-          queryKey: ["posts", "feed"],
-        })[0][1];
-
-        queryClient.setQueriesData<InfiniteData<FetchFeedResponse>>(
-          { queryKey: ["posts", "feed"] },
-          (data) => {
-            if (!data) return data;
-
-            /* Create a deep copy of the data */
+      queries.forEach(([queryKey, oldData]) => {
+        queryClient.setQueryData(queryKey, (oldData: any) => {
+          if (_.isEmpty(_.difference(["posts", "feed"], queryKey))) {
             let tmp = JSON.parse(
-              JSON.stringify(data)
+              JSON.stringify(oldData)
             ) as InfiniteData<FetchFeedResponse>;
+
             for (let i = 0; i < tmp.pages.length; i++) {
               const page = tmp.pages[i];
               tmp.pages[i].posts = page.posts.map((post) =>
-                post.id === postId ? { ...post, hasBookmarked: false } : post
+                post.id === postId ? { ...post, hasBookmarked: true } : post
               );
             }
 
             return tmp;
-          }
-        );
-      }
+          } else if (_.isEmpty(_.difference(["posts", "search"], queryKey))) {
+            const copy = oldData as SearchResultsResponse;
+            return {
+              ...copy,
+              post: {
+                ...copy.post,
+                posts: copy.post.posts.map((post) =>
+                  post.id == postId
+                    ? {
+                        ...post,
+                        hasBookmarked: false,
+                      }
+                    : post
+                ),
+              },
+            };
+          } else if (
+            _.isEmpty(_.difference(["posts", "bookmarks"], queryKey))
+          ) {
+            const copy = oldData as FeedPost[];
 
-      return { previousData };
+            return copy.map((post) =>
+              post.id == postId ? { ...post, hasBookmarked: false } : post
+            );
+          }
+        });
+      });
+      return {
+        previousBookmarkPosts,
+        previousInfiniteData,
+        previousSearchData,
+      };
     },
     onError: (err, postId, context) => {
-      queryClient.setQueryData(["posts"], context?.previousData);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      if (context?.previousBookmarkPosts) {
+        queryClient.setQueryData(
+          ["posts", "bookmarks"],
+          context.previousBookmarkPosts
+        );
+      }
+      if (context?.previousSearchData) {
+        queryClient.setQueryData(
+          ["posts", "search"],
+          context.previousSearchData
+        );
+      }
+      if (context?.previousInfiniteData) {
+        queryClient.setQueryData(
+          ["posts", "feed"],
+          context.previousInfiniteData
+        );
+      }
     },
   });
 

@@ -36,7 +36,7 @@ const useGetSearchResults = (searchState: SearchState) => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["search", searchState, query],
+    queryKey: ["posts", "search", searchState, query],
     queryFn: getSearchResultsRequest,
   });
 

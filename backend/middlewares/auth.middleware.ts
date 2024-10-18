@@ -38,6 +38,29 @@ export const authMiddleware = (
   });
 };
 
+export const optionalAuthMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return next();
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET!, function (err, decoded) {
+    if (err) {
+      console.error(err);
+      return res.status(400).send({
+        message: "Invalid authentication token, try logging in again",
+        authenticated: false,
+      });
+    }
+    req.jwtUserData = decoded as JwtUserData;
+    return next();
+  });
+};
+
 export const verifyAdminMiddleware = async (
   req: Request,
   res: Response,

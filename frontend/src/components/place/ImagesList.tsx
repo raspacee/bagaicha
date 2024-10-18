@@ -56,7 +56,7 @@ const ImagesList = ({ placeId }: Props) => {
       >
         Show All Photos
       </DialogTrigger>
-      <DialogContent className="max-w-full md:max-w-[80%] max-h-screen overflow-y-scroll min-h-screen flex flex-col">
+      <DialogContent className="max-w-full md:max-w-[80%] max-h-screen lg:max-w-screen-lg overflow-y-scroll min-h-screen flex flex-col">
         <DialogTitle className="hidden">
           <VisuallyHidden.Root>Image Information</VisuallyHidden.Root>
         </DialogTitle>
@@ -66,6 +66,7 @@ const ImagesList = ({ placeId }: Props) => {
             className="w-[80%] md:w-[35%]"
             defaultValue=""
             onChange={(e) => debounced(e.target.value)}
+            autoFocus={false}
           />
         </DialogHeader>
         <div className="">
@@ -95,7 +96,7 @@ const ImagesList = ({ placeId }: Props) => {
                     </DialogTitle>
                     <div className="relative h-[90vh] w-full grid md:grid-cols-12">
                       <Button
-                        className="absolute -translate-x-1 translate-y-1 top-0 right-0 bg-gray-400 bg-opacity-50 text-white font-semibold drop-shadow-md"
+                        className="absolute -translate-x-1 translate-y-1 top-0 right-0 bg-gray-400 bg-opacity-60 text-white font-semibold drop-shadow-md cursor-pointer"
                         variant="ghost"
                         onClick={() => setOpenImgDialog(false)}
                       >

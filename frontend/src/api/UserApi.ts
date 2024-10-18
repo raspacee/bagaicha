@@ -11,6 +11,8 @@ const BASE_API_URL = import.meta.env.VITE_API_URL;
 
 export const useGetMyUserData = () => {
   const fetchMyUserDataRequest = async (): Promise<FetchedUser | null> => {
+    if (!cookies.get(AUTH_TOKEN_NAME)) return null;
+
     const response = await fetch(`${BASE_API_URL}/user/my`, {
       method: "GET",
       headers: {
@@ -79,7 +81,7 @@ export const useGetUserPosts = (userId: string) => {
     const response = await fetch(`${BASE_API_URL}/user/${userId}/posts`, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
+        Authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME) || ""}`,
       },
     });
 
@@ -145,4 +147,22 @@ export const useUpdateUserProfile = () => {
   }
 
   return { updateUser, isPending };
+};
+
+export const getUserLocation = (): Promise<GeolocationPosition | null> => {
+  return new Promise((resolve, reject) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve(position);
+        },
+        (err) => {
+          toast.error("Error while getting location");
+          reject(null);
+        }
+      );
+    } else {
+      reject(null);
+    }
+  });
 };

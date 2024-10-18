@@ -84,7 +84,7 @@ const getFeed = async (req: Request, res: Response, next: NextFunction) => {
     const pageSize = 20;
 
     const posts = await PostModel.getFeedPosts(
-      req.jwtUserData!.userId,
+      req.jwtUserData?.userId || null,
       (page - 1) * pageSize
     );
     if (posts.length == 0) {
@@ -303,6 +303,7 @@ const getMyBookmarks = async (req: Request, res: Response) => {
     const posts = await BookmarkModel.getBoomarksOfUser(
       req.jwtUserData!.userId
     );
+    console.log(posts, req.jwtUserData!.userId);
     return res.json(posts);
   } catch (err) {
     console.error(err);

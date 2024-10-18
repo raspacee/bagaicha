@@ -83,7 +83,11 @@ export default function Navbar() {
                   <NotificationItem notification={notification} />
                 ))
               ) : (
-                <h1 className="font-medium">No notifications</h1>
+                <h1 className="font-medium self-center text-lg align-middle">
+                  {myUser
+                    ? "No notifications"
+                    : "Login to see your notifications"}
+                </h1>
               )}
             </div>
           </DropdownMenuContent>
@@ -93,16 +97,26 @@ export default function Navbar() {
           <DropdownMenu>
             <DropdownMenuTrigger>My Account</DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => navigate(`/user/${myUser?.id}`)}>
+              <DropdownMenuItem
+                onClick={() =>
+                  navigate(myUser ? `/user/${myUser.id}` : "/user/edit-profile")
+                }
+              >
                 Profile
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/user/edit-profile")}>
                 My Setting
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <p onClick={() => logout()}>Logout</p>
-              </DropdownMenuItem>
+              {myUser ? (
+                <DropdownMenuItem>
+                  <p onClick={() => logout()}>Logout</p>
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem>
+                  <Link to="/login">Login</Link>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

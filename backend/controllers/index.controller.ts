@@ -19,7 +19,7 @@ const getSearchResults = async (req: Request, res: Response) => {
 
     const places = await PlaceModel.searchPlace(q, placeOffset);
     const posts = await PostModel.searchPosts(
-      req.jwtUserData!.userId,
+      req.jwtUserData?.userId || null,
       q,
       postOffset
     );

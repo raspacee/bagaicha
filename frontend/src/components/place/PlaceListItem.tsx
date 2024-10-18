@@ -32,9 +32,9 @@ const PlaceListItem = ({ place }: Props) => {
           {place.placeFeatures &&
             place.placeFeatures.slice(0, 3).map((feature, index) =>
               index == place.placeFeatures!.slice(0, 3).length - 1 ? (
-                <span>{feature}</span>
+                <span key={feature}>{feature}</span>
               ) : (
-                <span className="flex gap-1 items-center">
+                <span key={feature} className="flex gap-1 items-center">
                   {feature} <Dot />
                 </span>
               )

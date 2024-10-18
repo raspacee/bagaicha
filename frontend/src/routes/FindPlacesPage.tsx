@@ -15,6 +15,7 @@ import {
 import { Check } from "lucide-react";
 import { ChangeEvent, useState } from "react";
 import { useAppSelector } from "@/hooks";
+import { getUserLocation } from "@/api/UserApi";
 
 const FindPlacesPage = () => {
   const [searchState, setSearchState] = useState<FindPlaceSearchState>({
@@ -23,8 +24,7 @@ const FindPlacesPage = () => {
     selectedFoods: [],
   });
 
-  const userLocation = useAppSelector((state) => state.location);
-  const { places, isLoading } = useGetTopPlaces(searchState, userLocation);
+  const { places, isLoading } = useGetTopPlaces(searchState);
 
   const handlePlaceFeatureChange = (event: ChangeEvent<HTMLInputElement>) => {
     const clickedFeature = event.target.value;

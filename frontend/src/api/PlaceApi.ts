@@ -50,9 +50,6 @@ const useGetPlaceData = (placeId: string) => {
   const getPlaceRequest = async (): Promise<Place | null> => {
     const response = await fetch(`${BASE_API_URL}/place/${placeId}`, {
       method: "GET",
-      headers: {
-        authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
-      },
     });
     if (!response.ok) {
       throw new Error("Error while fetching place data");
@@ -167,11 +164,10 @@ const getUserPosition = (): Promise<GeolocationPosition> => {
   });
 };
 
-const useGetTopPlaces = (
-  searchState: FindPlaceSearchState,
-  userPosition: LocationType
-) => {
+const useGetTopPlaces = (searchState: FindPlaceSearchState) => {
   const getTopPlacesRequest = async (): Promise<Place[]> => {
+    const userLocation = await getUserPosition();
+
     const params = new URLSearchParams();
     params.set("selectedFoods", searchState.selectedFoods.join(","));
     params.set("selectedFeatures", searchState.selectedFeatures.join(","));
@@ -179,15 +175,12 @@ const useGetTopPlaces = (
       "selectedDistance",
       JSON.stringify(searchState.selectedDistance)
     );
-    params.set("lat", userPosition.lat.toString());
-    params.set("lon", userPosition.long.toString());
+    params.set("lat", userLocation.coords.latitude.toString());
+    params.set("lon", userLocation.coords.longitude.toString());
     const response = await fetch(
       `${BASE_API_URL}/place/top?${params.toString()}`,
       {
         method: "GET",
-        headers: {
-          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
-        },
       }
     );
     if (!response.ok) {
@@ -394,9 +387,6 @@ const useGetOperatingHours = (placeId: string) => {
       `${BASE_API_URL}/place/${placeId}/operatinghour`,
       {
         method: "GET",
-        headers: {
-          authorization: `Bearer ${cookies.get(AUTH_TOKEN_NAME)}`,
-        },
       }
     );
     if (!response.ok) {

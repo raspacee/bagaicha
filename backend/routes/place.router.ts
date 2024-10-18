@@ -33,7 +33,7 @@ router.get("/:placeId/image", placeController.getImages);
 /* Get information of a single image */
 router.get("/image/:imageId", placeController.getImageInfo);
 
-router.get("/top", authMiddleware, placeController.getMyTopPlaces);
+router.get("/top", placeController.getMyTopPlaces);
 
 /* Get a place reviews */
 router.get("/review", authMiddleware, placeController.get_place_review);
@@ -81,11 +81,7 @@ router.get(
 );
 
 /* Get operating hours of a place */
-router.get(
-  "/:placeId/operatinghour",
-  authMiddleware,
-  placeController.getOperatingHour
-);
+router.get("/:placeId/operatinghour", placeController.getOperatingHour);
 
 /* Add a new operating hour */
 router.post(
