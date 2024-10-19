@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import PlaceModel from "../models/place.model";
-import PlaceReview from "../models/placeReviewModel";
 import UserModel from "../models/user.model";
 import OwnershipRequestModel from "../models/ownershipRequest.model";
 import PlaceImageModel from "../models/placeImage.model";
@@ -36,37 +35,6 @@ const getPlace = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const get_review = async (req: Request, res: Response, next: NextFunction) => {
-  const place_id = req.params.place_id;
-  const rating = req.params.rating;
-
-  try {
-    const reviews = await PlaceModel.get_review_by_rating(place_id, rating);
-    if (reviews == null) {
-      return res
-        .status(200)
-        .send({ status: "error", message: "Reviews not found" });
-    }
-    return res.status(200).send({
-      status: "ok",
-      reviews: reviews,
-    });
-  } catch (err) {
-    return res.status(500).send({
-      status: "error",
-      error: err,
-    });
-  }
-};
-
-export const place_features = [
-  { key: "delivery", value: 0 },
-  { key: "takeout", value: 1 },
-  { key: "pet_friendly", value: 2 },
-  { key: "very_clean", value: 3 },
-  { key: "affordable", value: 4 },
-];
-
 const getMyTopPlaces = async (req: Request, res: Response) => {
   try {
     const features = req.query.selectedFeatures as string;
@@ -94,49 +62,6 @@ const getMyTopPlaces = async (req: Request, res: Response) => {
     console.error(err);
     return res.status(500).json({
       message: "Error while getting top places",
-    });
-  }
-};
-
-const create_place_review = async (req: Request, res: Response) => {
-  try {
-    const { place_id, rating, textbody } = req.body;
-
-    const created_at = new Date().toISOString();
-    await PlaceReview.create_review(
-      place_id,
-      res.locals.user.user_id,
-      textbody,
-      rating,
-      created_at
-    );
-    return res.status(201).send({
-      status: "ok",
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send({
-      status: "error",
-      error: err,
-    });
-  }
-};
-
-const get_place_review = async (req: Request, res: Response) => {
-  try {
-    const rating = (req.query.rating as string) || "5";
-    const place_id = req.query.place_id as string;
-
-    const reviews = await PlaceReview.get_reviews(place_id, rating);
-    return res.status(200).send({
-      status: "ok",
-      reviews,
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send({
-      status: "error",
-      error: err,
     });
   }
 };
@@ -499,9 +424,6 @@ const getMenuImages = async (req: Request, res: Response) => {
 
 export default {
   getPlace,
-  get_review,
-  create_place_review,
-  get_place_review,
   getPlaceSuggestions,
   requestPlaceOwnership,
   getAllOwnershipRequests,

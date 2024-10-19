@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import {
   Distance,
   FindPlaceSearchState,
@@ -14,8 +15,6 @@ import {
 } from "@/lib/types";
 import { Check } from "lucide-react";
 import { ChangeEvent, useState } from "react";
-import { useAppSelector } from "@/hooks";
-import { getUserLocation } from "@/api/UserApi";
 
 const FindPlacesPage = () => {
   const [searchState, setSearchState] = useState<FindPlaceSearchState>({
@@ -146,11 +145,16 @@ const FindPlacesPage = () => {
           </div>
         </ScrollArea>
       </div>
-      <div className="flex flex-col gap-3 w-full">
+      <div className="w-full">
         {isLoading ? (
           "Loading.."
         ) : places && places.length > 0 ? (
-          places.map((place) => <PlaceListItem place={place} key={place.id} />)
+          places.map((place) => (
+            <>
+              <PlaceListItem place={place} key={place.id} />
+              <Separator key={place.name} />
+            </>
+          ))
         ) : (
           <h1>No Place Found</h1>
         )}

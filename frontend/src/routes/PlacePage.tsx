@@ -8,10 +8,11 @@ import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import UploadImages from "@/components/post/UploadImages";
 import ImagesList from "@/components/place/ImagesList";
-import { Settings } from "lucide-react";
+import { ExternalLink, Instagram, Phone, Settings } from "lucide-react";
 import PlaceMenu from "@/components/place/PlaceMenu";
 import Reviews from "@/components/review/Reviews";
 import { Separator } from "@/components/ui/separator";
+import { Rating } from "@mui/material";
 
 const PlacePage = () => {
   const { placeId } = useParams();
@@ -44,6 +45,22 @@ const PlacePage = () => {
           <h1 className="text-white font-extrabold text-5xl  drop-shadow-md ">
             {place.name}
           </h1>
+          <span className="flex flex-row gap-2 text-white font-semibold text-lg">
+            {place.rating && (
+              <Rating
+                value={place.rating}
+                size="large"
+                readOnly
+                precision={0.1}
+              />
+            )}
+            <p>
+              {place.rating
+                ? parseFloat(place.rating.toString()).toFixed(1)
+                : "Not Rated"}
+            </p>
+            <p>({place.totalReviews} reviews)</p>
+          </span>
 
           <div className="flex flex-col gap-2 items-start">
             <ImagesList placeId={placeId as string} />
@@ -72,8 +89,55 @@ const PlacePage = () => {
           description="Delicious foods served by this place"
         />
       </div>
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-2">
-        <div className="flex flex-col md:flex-row gap-2 items-center">
+      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-2">
+        <div className="border rounded-md flex flex-col gap-2 px-5 py-3 grid-cols-1">
+          {place.websiteLink && (
+            <>
+              <a
+                href={place.websiteLink}
+                className="flex justify-between w-full py-1"
+                target="_blank"
+              >
+                <span className="font-bold text-blue-600">
+                  {new URL(place.websiteLink).hostname}
+                </span>
+                <ExternalLink />
+              </a>
+              <Separator />
+            </>
+          )}
+          {place.instagramLink && (
+            <>
+              <a
+                href={place.instagramLink}
+                className="flex justify-between py-1"
+                target="_blank"
+              >
+                <span className="font-bold text-blue-600">
+                  {new URL(place.instagramLink).pathname.replace(
+                    new RegExp("/", "g"),
+                    ""
+                  )}
+                </span>
+                <Instagram />
+              </a>
+              <Separator />
+            </>
+          )}
+          {place.contactNumbers ? (
+            <span className="flex justify-between py-1">
+              <span className="flex flex-col gap-1">
+                {place.contactNumbers.map((number) => (
+                  <p className="font-normal cursor-pointer">{number}</p>
+                ))}
+              </span>
+              <Phone />
+            </span>
+          ) : (
+            <p>Contact number not specified</p>
+          )}
+        </div>
+        <div className="flex flex-col md:flex-row gap-2 items-center grid-cols-2">
           <MapContainer
             center={[place.lat, place.lon]}
             zoom={14}

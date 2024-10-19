@@ -107,7 +107,6 @@ const placeSchema = z.object({
   neighbourhood: z.string().min(4),
   city: z.string().min(4),
   state: z.string().min(4),
-  openDays: z.array(daySchema).optional(),
   openingTime: z.string().time().optional(),
   closingTime: z.string().time().optional(),
   placeFeatures: z.array(placeFeatureSchema).optional(),
@@ -115,6 +114,9 @@ const placeSchema = z.object({
   foodsOffered: z.array(foodsOfferedSchema).optional(),
   ownedBy: z.string().uuid().optional(),
   createdAt: z.string().datetime(),
+  websiteLink: z.string().optional(),
+  instagramLink: z.string().optional(),
+  contactNumbers: z.array(z.string()).optional(),
 });
 
 type Place = z.infer<typeof placeSchema>;
@@ -241,25 +243,16 @@ export enum UserModerationLevel {
   Moderator,
   Admin,
 }
-
 export const editPlaceFormSchema = placeSchema
   .pick({
     name: true,
-    openDays: true,
     placeFeatures: true,
     foodsOffered: true,
+    websiteLink: true,
+    instagramLink: true,
+    contactNumbers: true,
   })
   .extend({
-    openingTime: z
-      .string()
-      .regex(/^\d{2}:\d{2}$/)
-      .nullable()
-      .optional(),
-    closingTime: z
-      .string()
-      .regex(/^\d{2}:\d{2}$/)
-      .nullable()
-      .optional(),
     coverImgUrl: z.string().url().nullable().optional(),
     newCoverImgFile: z
       .instanceof(File, { message: "Image is required" })
@@ -268,16 +261,7 @@ export const editPlaceFormSchema = placeSchema
   .refine((data) => data.coverImgUrl || data.newCoverImgFile, {
     message: "Atleast url or new image is required",
     path: ["newCoverImgFile"],
-  })
-  .refine(
-    (data) =>
-      (data.openingTime && data.closingTime) ||
-      (!data.openingTime && !data.closingTime),
-    {
-      message: "Both opening and closing time is required",
-      path: ["openingTime", "closingTime"],
-    }
-  );
+  });
 
 export type EditPlaceForm = z.infer<typeof editPlaceFormSchema>;
 
@@ -315,7 +299,6 @@ export type EditPostForm = z.infer<typeof editPostFormSchema>;
 export const addPlaceFormSchema = placeSchema
   .pick({
     name: true,
-    openDays: true,
     ownedBy: true,
     placeFeatures: true,
     foodsOffered: true,
@@ -424,6 +407,11 @@ export type FetchedPlaceReviewWithAuthor = FetchedPlaceReview & {
 
 export type ReviewSortBy = "newest" | "oldest";
 export type ReviewFilterBy = "1" | "2" | "3" | "4" | "5" | "all";
+
+export type PlaceWithRating = Place & {
+  rating: number | null; // Rating is null when there is no reviews
+  totalReviews: number;
+};
 
 export type {
   JwtUserData,

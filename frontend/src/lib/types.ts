@@ -152,6 +152,9 @@ const placeSchema = z.object({
   foodsOffered: z.array(foodsOfferedSchema).nullable().optional(),
   ownedBy: z.string().uuid().optional(),
   createdAt: z.string().datetime(),
+  websiteLink: z.string().optional(),
+  instagramLink: z.string().optional(),
+  contactNumbers: z.array(z.string()).optional(),
 });
 
 export const editPlaceFormSchema = placeSchema
@@ -159,6 +162,9 @@ export const editPlaceFormSchema = placeSchema
     name: true,
     placeFeatures: true,
     foodsOffered: true,
+    websiteLink: true,
+    instagramLink: true,
+    contactNumbers: true,
   })
   .extend({
     coverImgUrl: z.string().url().nullable().optional(),
@@ -517,6 +523,11 @@ export type GetReviewsResponse = {
   reviews: FetchedPlaceReviewWithAuthor[] | null;
   totalPages: number;
   currentPage: number;
+};
+
+export type PlaceWithRating = Place & {
+  rating: number | null; // Rating is null when there is no reviews
+  totalReviews: number;
 };
 
 export type {

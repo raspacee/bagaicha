@@ -1,13 +1,12 @@
 import { AUTH_TOKEN_NAME } from "@/lib/config";
 import {
-  AddOperatingHourForm,
   CreatePlaceResponse,
   FetchedOperatingHourForm,
   FindPlaceSearchState,
-  LocationType,
   OperatingHourForm,
   Place,
   PlaceImage,
+  PlaceWithRating,
 } from "@/lib/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -47,7 +46,7 @@ const useGetPlaceSuggestions = () => {
 
 /* Fetch a single place's data */
 const useGetPlaceData = (placeId: string) => {
-  const getPlaceRequest = async (): Promise<Place | null> => {
+  const getPlaceRequest = async (): Promise<PlaceWithRating | null> => {
     const response = await fetch(`${BASE_API_URL}/place/${placeId}`, {
       method: "GET",
     });
@@ -165,7 +164,7 @@ const getUserPosition = (): Promise<GeolocationPosition> => {
 };
 
 const useGetTopPlaces = (searchState: FindPlaceSearchState) => {
-  const getTopPlacesRequest = async (): Promise<Place[]> => {
+  const getTopPlacesRequest = async (): Promise<PlaceWithRating[]> => {
     const userLocation = await getUserPosition();
 
     const params = new URLSearchParams();

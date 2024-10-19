@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Cake, Castle, Hourglass } from "lucide-react";
 import { haversine } from "@/lib/helpers";
-import { Place } from "@/lib/types";
+import { PlaceWithRating } from "@/lib/types";
 import { useAppSelector } from "@/hooks";
 import {
   Tooltip,
@@ -19,13 +19,16 @@ import { DateTime } from "luxon";
 import { useGetOperatingHours } from "@/api/PlaceApi";
 
 type Props = {
-  place: Place;
+  place: PlaceWithRating;
 };
 
 const PlaceInformationCard = ({ place }: Props) => {
   const location = useAppSelector((state) => state.location);
   const { isLoading: isOperatingHoursLoading, operatingHours } =
     useGetOperatingHours(place.id);
+
+  const currentDay = DateTime.now().toFormat("cccc");
+  const currentTime = DateTime.now();
 
   return (
     <Card className="flex-1">
@@ -70,10 +73,30 @@ const PlaceInformationCard = ({ place }: Props) => {
                       {`${DateTime.fromFormat(
                         operatingHour.openingTime,
                         "hh:mm:ss"
-                      ).toFormat("hh:mm a")}
-        - ${DateTime.fromFormat(operatingHour.closingTime, "hh:mm:ss").toFormat(
-          "hh:mm a"
-        )}`}
+                      ).toFormat("hh:mm a")} 
+                     - ${DateTime.fromFormat(
+                       operatingHour.closingTime,
+                       "hh:mm:ss"
+                     ).toFormat("hh:mm a")}`}
+
+                      {currentDay.toLowerCase() ===
+                        operatingHour.day.toLowerCase() &&
+                        (currentTime >=
+                          DateTime.fromFormat(
+                            operatingHour.openingTime,
+                            "hh:mm:ss"
+                          ) &&
+                        currentTime <=
+                          DateTime.fromFormat(
+                            operatingHour.closingTime,
+                            "hh:mm:ss"
+                          ) ? (
+                          <span className="text-green-600 ml-1 font-semibold">
+                            Open
+                          </span>
+                        ) : (
+                          <span className="text-red-600 ml-1">Closed</span>
+                        ))}
                     </p>
                   )}
                   {!operatingHour.openingTime && (

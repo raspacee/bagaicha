@@ -1,26 +1,24 @@
 import {
-  daySchema,
   EditPlaceForm,
   editPlaceFormSchema,
-  Place,
+  PlaceWithRating,
 } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 import { FormControl, FormField, FormItem, FormMessage } from "../ui/form";
-import { AspectRatio } from "../ui/aspect-ratio";
 import { FormLabel } from "@mui/material";
-import { Checkbox } from "../ui/checkbox";
 import { Separator } from "../ui/separator";
 import SearchFoodItemInput from "./SearchFoodItemInput";
 import SearchPlaceFeatureInput from "./SearchPlaceFeatureInput";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { Save } from "lucide-react";
+import { Save, Trash2 } from "lucide-react";
 import { useUpdatePlaceData } from "@/api/PlaceApi";
 import OperatingHourForm from "./OperatingHourForm";
+import { useState } from "react";
 
 type Props = {
-  place: Place;
+  place: PlaceWithRating;
 };
 
 const UpdatePlaceForm = ({ place }: Props) => {
@@ -31,9 +29,13 @@ const UpdatePlaceForm = ({ place }: Props) => {
       foodsOffered: place.foodsOffered,
       coverImgUrl: place.coverImgUrl,
       placeFeatures: place.placeFeatures,
+      contactNumbers: place.contactNumbers,
+      instagramLink: place.instagramLink,
+      websiteLink: place.websiteLink,
     },
   });
   const { updatePlace, isPending } = useUpdatePlaceData();
+  const [contactInput, setContactInput] = useState("");
 
   const existingImageUrl = form.watch("coverImgUrl");
 
@@ -51,6 +53,15 @@ const UpdatePlaceForm = ({ place }: Props) => {
       formData.append("coverImgUrl", formDataJson.coverImgUrl as string);
     }
     formData.append("placeId", place.id);
+    formData.append("websiteLink", JSON.stringify(formDataJson.websiteLink));
+    formData.append(
+      "instagramLink",
+      JSON.stringify(formDataJson.instagramLink)
+    );
+    formData.append(
+      "contactNumbers",
+      JSON.stringify(formDataJson.contactNumbers)
+    );
     updatePlace(formData);
   };
 
@@ -112,9 +123,99 @@ const UpdatePlaceForm = ({ place }: Props) => {
           <Separator />
           <FormField
             control={form.control}
+            name="websiteLink"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Website Link</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="text"
+                    placeholder="Website link here"
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <Separator />
+          <FormField
+            control={form.control}
+            name="instagramLink"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Instagram Link</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="text"
+                    placeholder="Instagram link here"
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <Separator />
+          <FormField
+            control={form.control}
+            name="contactNumbers"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contact Numbers</FormLabel>
+                <FormControl>
+                  <ul>
+                    {field.value
+                      ? field.value.map((number) => (
+                          <li
+                            key={number}
+                            className="text-sm cursor-pointer w-[15rem] flex gap-2 items-center"
+                          >
+                            <span>{number}</span>
+                            <Button
+                              variant="ghost"
+                              type="button"
+                              className="text-red-600"
+                              onClick={() =>
+                                field.onChange(
+                                  field.value?.filter((no) => no !== number)
+                                )
+                              }
+                            >
+                              <Trash2 />
+                            </Button>
+                          </li>
+                        ))
+                      : "Empty"}
+                    <Input
+                      type="text"
+                      placeholder="Enter number here"
+                      className="w-[13rem]"
+                      value={contactInput}
+                      onChange={(e) => setContactInput(e.target.value)}
+                    />
+                    <Button
+                      className="my-2"
+                      onClick={() => {
+                        if (contactInput.length > 3) {
+                          field.onChange([...field.value!, contactInput]);
+                          setContactInput("");
+                        }
+                      }}
+                      type="button"
+                    >
+                      Add
+                    </Button>
+                  </ul>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <Separator />
+          <FormField
+            control={form.control}
             name="foodsOffered"
             render={({ field }) => <SearchFoodItemInput />}
           />
+
           <Separator />
           <FormField
             control={form.control}
