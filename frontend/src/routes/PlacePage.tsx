@@ -65,8 +65,6 @@ const PlacePage = () => {
           <div className="flex flex-col gap-2 items-start">
             <ImagesList placeId={placeId as string} />
 
-            <PlaceMenu placeId={placeId as string} />
-
             <UploadImages placeId={placeId as string} />
           </div>
 
@@ -83,14 +81,31 @@ const PlacePage = () => {
       </div>
       <div className="flex flex-col md:flex-row gap-2 w-full">
         <PlaceInformationCard place={place} />
-        <FoodsMenuCard
+        <div className="flex-1 flex-col md:flex-row gap-2 items-center z-0">
+          <MapContainer
+            center={[place.lat, place.lon]}
+            zoom={14}
+            scrollWheelZoom={false}
+            className="w-[70%] h-[15rem]"
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={[place.lat, place.lon]}>
+              <Popup>Place Located Here!</Popup>
+            </Marker>
+          </MapContainer>
+          <p className="font-medium text-lg">Get Directions!</p>
+        </div>
+        {/* <FoodsMenuCard
           foodsOffered={place.foodsOffered || []}
           header="Foods Menu"
           description="Delicious foods served by this place"
-        />
+        /> */}
       </div>
       <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-2">
-        <div className="border rounded-md flex flex-col gap-2 px-5 py-3 grid-cols-1">
+        <div className="border rounded-md flex flex-col gap-2 px-5 py-3 col-span-1 h-fit">
           {place.websiteLink && (
             <>
               <a
@@ -137,22 +152,9 @@ const PlacePage = () => {
             <p>Contact number not specified</p>
           )}
         </div>
-        <div className="flex flex-col md:flex-row gap-2 items-center grid-cols-2">
-          <MapContainer
-            center={[place.lat, place.lon]}
-            zoom={14}
-            scrollWheelZoom={false}
-            className="w-full md:w-[50%] h-[15rem]"
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <Marker position={[place.lat, place.lon]}>
-              <Popup>Place Located Here!</Popup>
-            </Marker>
-          </MapContainer>
-          <p className="font-medium text-lg">Get Directions!</p>
+        <div className="grid col-span-2 border rounded-md px-5 py-3">
+          <h1 className="text-xl font-semibold text-center mb-3">Menu</h1>
+          <PlaceMenu placeId={placeId as string} />
         </div>
       </div>
       <Separator />

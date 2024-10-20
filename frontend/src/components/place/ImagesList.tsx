@@ -32,7 +32,6 @@ const ImagesList = ({ placeId }: Props) => {
   } = useGetPlaceImages(placeId as string, filterQuery);
   const [activeImageIdx, setActiveImageIdx] = useState<number>(0);
   const { myUser } = useGetMyUserData();
-  const [openImgDialog, setOpenImgDialog] = useState(false);
 
   const debounced = useDebouncedCallback(
     (query: string) => setFilterQuery(query),
@@ -75,11 +74,7 @@ const ImagesList = ({ placeId }: Props) => {
             {!isImagesLoading &&
               placeImages &&
               placeImages.map((image, index) => (
-                <Dialog
-                  key={image.id}
-                  open={openImgDialog}
-                  onOpenChange={setOpenImgDialog}
-                >
+                <Dialog key={image.id}>
                   <DialogTrigger onClick={() => setActiveImageIdx(index)}>
                     <div className="overflow-hidden aspect-square hover:rounded-md hover:shadow-2xl">
                       <img
@@ -88,20 +83,20 @@ const ImagesList = ({ placeId }: Props) => {
                       />
                     </div>
                   </DialogTrigger>
-                  <DialogContent className="max-w-full md:mx-w-[80%] p-0 border-black min-h-screen md:min-h-fit [&>button]:hidden">
+                  <DialogContent
+                    CustomClose={
+                      <X className="stroke-black text-black h-6 w-6 bg-gray-300 rounded-full px-1 py-1">
+                        Close
+                      </X>
+                    }
+                    className="max-w-full md:mx-w-[80%] p-0 border-black min-h-screen md:min-h-fit"
+                  >
                     <DialogTitle className="hidden">
                       <VisuallyHidden.Root>
                         Image Information
                       </VisuallyHidden.Root>
                     </DialogTitle>
                     <div className="relative h-[90vh] w-full grid md:grid-cols-12">
-                      <Button
-                        className="absolute -translate-x-1 translate-y-1 top-0 right-0 bg-gray-400 bg-opacity-60 text-white font-semibold drop-shadow-md cursor-pointer"
-                        variant="ghost"
-                        onClick={() => setOpenImgDialog(false)}
-                      >
-                        Close
-                      </Button>
                       <img
                         src={placeImages[activeImageIdx].imageUrl}
                         className="w-full h-full object-contain col-span-8 bg-black"

@@ -1,4 +1,4 @@
-import { SquareMenu } from "lucide-react";
+import { X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -57,124 +57,89 @@ const PlaceMenu = ({ placeId }: Props) => {
   };
 
   return (
-    <Dialog>
-      <DialogTrigger className="border bg-transparent text-white font-semibold py-2 px-4 rounded-md bg-opacity-80 w-fit flex gap-2">
-        <SquareMenu />
-        Show Menu
-      </DialogTrigger>
-      <DialogContent className="max-w-full md:max-w-[80%] h-screen md:max-h-[95%] overflow-y-scroll">
-        {myUser?.moderationLvl == USER_LEVELS.MODERATOR && (
-          <>
-            <Input
-              type="file"
-              id="menu-input"
-              className="hidden"
-              multiple
-              onChange={(e) => {
-                if (e.target.files) setImages(Array.from(e.target.files));
-              }}
-            />
-            <Label
-              htmlFor="menu-input"
-              className="px-4 border-black border-2 py-3 w-fit h-fit rounded-md cursor-pointer"
-            >
-              {images == null
-                ? "Upload Menu Photos"
-                : `${images.length} photos selected`}
-            </Label>
-            {images != null && (
-              <Button
-                type="button"
-                onClick={handleUpload}
-                disabled={isUploading}
-                className="w-fit"
-              >
-                {!isUploading ? "Upload Selected Images" : "Uploading"}
-              </Button>
-            )}
-          </>
-        )}
-        <div className="min-h-[14rem] md:min-h-[20rem]">
-          <div className="grid gap-2 grid-cols-2 md:grid-cols-4">
-            {isImagesLoading && <h2>Photos are loading</h2>}
+    <div className="min-h-[14rem] md:min-h-[20rem] max-h-[18rem] overflow-y-scroll">
+      <div className="grid gap-2 grid-cols-2 md:grid-cols-4">
+        {isImagesLoading && <h2>Photos are loading</h2>}
 
-            {!isImagesLoading &&
-              menuImages &&
-              menuImages.map((image) => (
-                <Dialog key={image.id}>
-                  <DialogTrigger>
-                    <div className="overflow-hidden aspect-square hover:rounded-md hover:shadow-2xl">
-                      <img
-                        src={image.imageUrl}
-                        className="w-full h-full object-cover"
-                      />
+        {!isImagesLoading &&
+          menuImages &&
+          menuImages.map((image) => (
+            <Dialog key={image.id}>
+              <DialogTrigger>
+                <div className="overflow-hidden aspect-square hover:rounded-md hover:shadow-2xl">
+                  <img
+                    src={image.imageUrl}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </DialogTrigger>
+              <DialogContent
+                CustomClose={<X className="w-5 h-5 text-white" />}
+                className="max-w-full md:max-w-[80%] p-0 border-none bg-transparent"
+              >
+                <DialogTitle className="hidden">
+                  <VisuallyHidden.Root>Image Information</VisuallyHidden.Root>
+                </DialogTitle>
+                <Carousel
+                  opts={{ loop: true }}
+                  className="bg-transparent border-none shadow-none"
+                >
+                  <CarouselContent>
+                    {menuImages
+                      .slice(menuImages.indexOf(image))
+                      .map((image) => (
+                        <CarouselItem
+                          key={image.id}
+                          className="w-[80%] h-[90vh]"
+                        >
+                          <img
+                            src={image.imageUrl}
+                            className="h-full w-full object-contain"
+                          />
+                        </CarouselItem>
+                      ))}
+                    {menuImages
+                      .slice(0, menuImages.indexOf(image))
+                      .map((image) => (
+                        <CarouselItem
+                          key={image.id}
+                          className="w-[80%] h-[90vh]"
+                        >
+                          <img
+                            src={image.imageUrl}
+                            className="h-full w-full object-contain"
+                          />
+                        </CarouselItem>
+                      ))}
+                  </CarouselContent>
+                  <CarouselPrevious />
+                  <CarouselNext />
+                  {myUser?.moderationLvl == 2 && (
+                    <div className="flex w-full items-center justify-center py-1">
+                      <Button
+                        className="border border-red-600 text-red-600"
+                        variant="ghost"
+                        disabled={isDeleting}
+                        onClick={() => deleteMenuImage(image.cloudinaryId)}
+                      >
+                        Delete Photo
+                      </Button>
                     </div>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-full md:max-w-[80%] p-0 border-none">
-                    <DialogTitle className="hidden">
-                      <VisuallyHidden.Root>
-                        Image Information
-                      </VisuallyHidden.Root>
-                    </DialogTitle>
-                    <Carousel opts={{ loop: true }}>
-                      <CarouselContent>
-                        {menuImages
-                          .slice(menuImages.indexOf(image))
-                          .map((image) => (
-                            <CarouselItem
-                              key={image.id}
-                              className="w-[80%] h-[90vh]"
-                            >
-                              <img
-                                src={image.imageUrl}
-                                className="h-full w-full object-contain"
-                              />
-                            </CarouselItem>
-                          ))}
-                        {menuImages
-                          .slice(0, menuImages.indexOf(image))
-                          .map((image) => (
-                            <CarouselItem
-                              key={image.id}
-                              className="w-[80%] h-[90vh]"
-                            >
-                              <img
-                                src={image.imageUrl}
-                                className="h-full w-full object-contain"
-                              />
-                            </CarouselItem>
-                          ))}
-                      </CarouselContent>
-                      <CarouselPrevious />
-                      <CarouselNext />
-                      {myUser?.moderationLvl == 2 && (
-                        <div className="flex w-full items-center justify-center py-1">
-                          <Button
-                            className="border border-red-600 text-red-600"
-                            variant="ghost"
-                            disabled={isDeleting}
-                            onClick={() => deleteMenuImage(image.cloudinaryId)}
-                          >
-                            Delete Photo
-                          </Button>
-                        </div>
-                      )}
-                    </Carousel>
-                    <DialogDescription className="hidden">
-                      <VisuallyHidden.Root>
-                        Description goes here
-                      </VisuallyHidden.Root>
-                    </DialogDescription>
-                  </DialogContent>
-                </Dialog>
-              ))}
-          </div>
-          {!isImagesLoading && !menuImages && (
-            <h2 className="font-bold text-xl">No menu photos found</h2>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+                  )}
+                </Carousel>
+                <DialogDescription className="hidden">
+                  <VisuallyHidden.Root>
+                    Description goes here
+                  </VisuallyHidden.Root>
+                </DialogDescription>
+              </DialogContent>
+            </Dialog>
+          ))}
+      </div>
+      {!isImagesLoading && !menuImages && (
+        <h2 className="font-bold text-xl">No menu photos found</h2>
+      )}
+    </div>
   );
 };
 
