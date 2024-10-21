@@ -11,6 +11,9 @@ import { modMiddleware } from "../middlewares/modMiddleware";
 import upload from "../multer";
 import { PLACE_CONFIG } from "../utils/config";
 
+/* Get all available features available */
+router.get("/feature/all", placeController.getAllFeatures);
+
 /* Delete image of a place */
 router.delete(
   "/image",
@@ -135,6 +138,25 @@ router.delete(
   "/:placeId/review",
   authMiddleware,
   placeReviewController.deletePlaceReview
+);
+
+/* Get all features of a place */
+router.get("/:placeId/feature", placeController.getAllFeaturesOfPlace);
+
+/* Add one feature to a place */
+router.post(
+  "/:placeId/feature",
+  authMiddleware,
+  verifyAdminMiddleware,
+  placeController.addFeatureToPlace
+);
+
+/* Add one feature to a place */
+router.delete(
+  "/:placeId/feature",
+  authMiddleware,
+  verifyAdminMiddleware,
+  placeController.removeFeatureFromPlace
 );
 
 /* Get place data */

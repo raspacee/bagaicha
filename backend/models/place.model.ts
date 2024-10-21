@@ -113,7 +113,7 @@ const getTopPlaces = async (
   WHERE 
     ($1::text[] IS NULL OR ($1::text[] && "foodsOffered"))
     AND 
-    ($2::text[] IS NULL OR ($2::text[] && "placeFeatures"))
+    ($2::text[] IS NULL)
   )
   SELECT place.*, pd.distance, pr.*
   FROM "place"

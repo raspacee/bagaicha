@@ -16,6 +16,7 @@ import { Save, Trash2 } from "lucide-react";
 import { useUpdatePlaceData } from "@/api/PlaceApi";
 import OperatingHourForm from "./OperatingHourForm";
 import { useState } from "react";
+import PlaceFeatureForm from "./PlaceFeatureForm";
 
 type Props = {
   place: PlaceWithRating;
@@ -233,10 +234,12 @@ const UpdatePlaceForm = ({ place }: Props) => {
           </Button>
         </form>
       </FormProvider>
-      <Separator />
+      <Separator className="my-2" />
       <div className="flex flex-col gap-3 w-full">
         <OperatingHourForm placeId={place.id} />
       </div>
+      <Separator className="my-2" />
+      <PlaceFeatureForm placeId={place.id} />
     </>
   );
 };

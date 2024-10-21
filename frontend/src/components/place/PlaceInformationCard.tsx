@@ -34,7 +34,6 @@ const PlaceInformationCard = ({ place }: Props) => {
     <Card className="flex-1">
       <CardHeader>
         <CardTitle>Place Information</CardTitle>
-        <CardDescription>Hover on the icon to know more</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         <div className="flex flex-row items-center gap-2">
@@ -115,18 +114,11 @@ const PlaceInformationCard = ({ place }: Props) => {
         </div>
 
         <div className="flex flex-row items-center gap-2">
-          <TooltipProvider delayDuration={50}>
-            <Tooltip>
-              <TooltipTrigger>
-                <Cake size={22} />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Opened On</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Cake size={22} />
           <p className="text-sm text-muted-foreground">
-            {DateTime.fromISO(place.createdAt).toFormat("DDD")}
+            {`Page created on ${DateTime.fromISO(place.createdAt).toFormat(
+              "DDD"
+            )}`}
           </p>
         </div>
       </CardContent>

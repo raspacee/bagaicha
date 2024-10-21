@@ -413,6 +413,16 @@ export type PlaceWithRating = Place & {
   totalReviews: number;
 };
 
+/* For creation of place feature by admin */
+export const createFeatureSchema = z.object({
+  featureName: z.string(),
+});
+export type CreateFeatureForm = z.infer<typeof createFeatureSchema>;
+
+export type FetchedFeature = CreateFeatureForm & {
+  id: number;
+};
+
 export type {
   JwtUserData,
   Comment,

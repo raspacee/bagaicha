@@ -4,6 +4,7 @@ import UserModel from "../models/user.model";
 import OwnershipRequestModel from "../models/ownershipRequest.model";
 import PlaceImageModel from "../models/placeImage.model";
 import OperatingHourModel from "../models/operatingHour.model";
+import PlaceFeatureModel from "../models/placeFeature.model";
 import { uploadImage } from "../utils/image";
 import {
   AddPlaceForm,
@@ -422,6 +423,63 @@ const getMenuImages = async (req: Request, res: Response) => {
   }
 };
 
+const getAllFeaturesOfPlace = async (req: Request, res: Response) => {
+  try {
+    const { placeId } = req.params;
+    const features = await PlaceFeatureModel.getFeatures(placeId);
+    return res.status(200).json(features);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Error while getting feature",
+    });
+  }
+};
+
+const addFeatureToPlace = async (req: Request, res: Response) => {
+  try {
+    const { placeId } = req.params;
+    const featureId = parseInt(req.body.featureId);
+
+    /* TODO: check for duplicate */
+    await PlaceFeatureModel.createFeatureToPlace(placeId, featureId);
+    return res.status(201).json();
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Error while adding feature to place",
+    });
+  }
+};
+
+const removeFeatureFromPlace = async (req: Request, res: Response) => {
+  try {
+    const { placeId } = req.params;
+    const featureId = parseInt(req.body.featureId);
+
+    /* TODO: check for existence */
+    await PlaceFeatureModel.deleteFeatureFromPlace(placeId, featureId);
+    return res.status(204).json();
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Error while removing feature from place",
+    });
+  }
+};
+
+const getAllFeatures = async (req: Request, res: Response) => {
+  try {
+    const allFeatures = await PlaceFeatureModel.getAllDatabaseFeatures();
+    return res.status(200).send(allFeatures);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Error while getting all features",
+    });
+  }
+};
+
 export default {
   getPlace,
   getPlaceSuggestions,
@@ -442,4 +500,8 @@ export default {
   getOperatingHour,
   addMenuImages,
   getMenuImages,
+  getAllFeaturesOfPlace,
+  addFeatureToPlace,
+  removeFeatureFromPlace,
+  getAllFeatures,
 };
