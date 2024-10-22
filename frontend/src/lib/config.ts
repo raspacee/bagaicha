@@ -13,3 +13,37 @@ export const DAYS = [
 export const USER_LEVELS = {
   MODERATOR: 2,
 };
+
+export const FOOD_CUISINES = [
+  "Nepali",
+  "Italian",
+  "Chinese",
+  "Mexican",
+  "Indian",
+  "Japanese",
+  "French",
+  "Korean",
+  "American",
+  "British",
+  "Fusion",
+  "European",
+  "Asian",
+  "Other",
+];
+
+export const FOOD_CATEGORIES = [
+  "Appetizer",
+  "Main Course",
+  "Desserts",
+  "Salad",
+  "Soup",
+  "Beverage",
+  "Vegetarian",
+  "Seafood",
+  "Non-Veg",
+  "Regional Specialties",
+  "Traditional Dishes",
+  "Fusion Cuisine",
+  "Fast Food",
+  "Other",
+];

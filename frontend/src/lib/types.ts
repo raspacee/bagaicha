@@ -1,6 +1,6 @@
 import { foodItems } from "@/config/foods";
 import { z } from "zod";
-import { DAYS } from "./config";
+import { DAYS, FOOD_CATEGORIES, FOOD_CUISINES } from "./config";
 
 /* User type when logged in */
 type UserInterface = {
@@ -537,6 +537,30 @@ export const createFeatureSchema = z.object({
 export type CreateFeatureForm = z.infer<typeof createFeatureSchema>;
 
 export type FetchedFeature = CreateFeatureForm & {
+  id: number;
+};
+
+export const createFoodSchema = z.object({
+  name: z
+    .string({ required_error: "Food name is required" })
+    .min(3, { message: "Atleast 3 characters is required" }),
+  category: z
+    .string({ required_error: "Category is required" })
+    .refine((value) => FOOD_CATEGORIES.includes(value), {
+      message: "Invalid food category",
+    }),
+  cuisine: z
+    .string({ required_error: "Cuisine is required" })
+    .refine((value) => FOOD_CUISINES.includes(value), {
+      message: "Invalid food cuisine",
+    }),
+  price: z
+    .number({ required_error: "Price is required (in Rs.)" })
+    .gt(0, { message: "Price should be greater than 0" }),
+});
+export type CreateFoodForm = z.infer<typeof createFoodSchema>;
+
+export type FetchedFood = CreateFoodForm & {
   id: number;
 };
 

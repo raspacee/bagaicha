@@ -24,13 +24,29 @@ import { useFetchPlaceFeatures } from "@/api/FeatureApi";
 import { Badge } from "@/components/ui/badge";
 import { useGetMyUserData } from "@/api/UserApi";
 import { Button } from "@/components/ui/button";
+import { useFetchPlaceFoods } from "@/api/FoodApi";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const PlacePage = () => {
   const { placeId } = useParams();
-  const { data, isLoading: isUserLoading } = useAuthenticateUser();
   const { myUser } = useGetMyUserData();
   const { place, isLoading } = useGetPlaceData(placeId as string);
   const { placeFeatures, isLoading: isFeaturesLoading } = useFetchPlaceFeatures(
+    placeId as string
+  );
+  const { foods, isLoading: isFoodsLoading } = useFetchPlaceFoods(
     placeId as string
   );
 
@@ -83,7 +99,7 @@ const PlacePage = () => {
             {myUser && <UploadImages placeId={placeId as string} />}
           </div>
 
-          {!isUserLoading && myUser?.id === place.ownedBy && (
+          {myUser?.id === place.ownedBy && (
             <Link
               to="edit"
               className="my-4 border bg-transparent text-white font-semibold py-2 px-5 rounded-md bg-opacity-80 flex gap-2 w-fit"
@@ -193,6 +209,25 @@ const PlacePage = () => {
         <div className="grid col-span-2 border rounded-md px-5 py-3">
           <h1 className="text-xl font-semibold text-center mb-3">Menu</h1>
           <PlaceMenu placeId={placeId as string} />
+        </div>
+      </div>
+      <Separator />
+      <div className="w-full">
+        <h1 className="font-semibold mb-2 text-lg">
+          Foods Offered By This Place
+        </h1>
+        <div className="w-full flex flex-row gap-2 flex-wrap max-h-[22rem] overflow-y-scroll">
+          {foods &&
+            foods.map((food) => (
+              <Card className="w-[10rem] md:w-[13rem] h-[12rem] overflow-y-scroll">
+                <CardHeader>
+                  <CardTitle>{food.name}</CardTitle>
+                  <CardDescription>Rs.{food.price}</CardDescription>
+                  <CardDescription>{food.category}</CardDescription>
+                  <CardDescription>{food.cuisine}</CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
         </div>
       </div>
       <Separator />

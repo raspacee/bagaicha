@@ -3,8 +3,10 @@ const router = express.Router();
 
 import placeController from "../controllers/place.controller";
 import placeReviewController from "../controllers/placeReview.controller";
+import foodController from "../controllers/food.controller";
 import {
   authMiddleware,
+  isAdminOrOwnerMiddleware,
   verifyAdminMiddleware,
 } from "../middlewares/auth.middleware";
 import { modMiddleware } from "../middlewares/modMiddleware";
@@ -151,12 +153,39 @@ router.post(
   placeController.addFeatureToPlace
 );
 
-/* Add one feature to a place */
+/* Delete feature from a place */
 router.delete(
   "/:placeId/feature",
   authMiddleware,
   verifyAdminMiddleware,
   placeController.removeFeatureFromPlace
+);
+
+/* Get all foods of a place */
+router.get("/:placeId/food", foodController.getFoodsOfPlace);
+
+/* Add a food item to a place */
+router.post(
+  "/:placeId/food",
+  authMiddleware,
+  isAdminOrOwnerMiddleware,
+  foodController.addFoodToPlace
+);
+
+/* Delete a food item of a place */
+router.delete(
+  "/:placeId/food",
+  authMiddleware,
+  isAdminOrOwnerMiddleware,
+  foodController.deleteFoodOfPlace
+);
+
+/* Update a food item of a place */
+router.put(
+  "/:placeId/food",
+  authMiddleware,
+  isAdminOrOwnerMiddleware,
+  foodController.updateFoodOfPlace
 );
 
 /* Get place data */

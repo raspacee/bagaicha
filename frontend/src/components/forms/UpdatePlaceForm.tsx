@@ -17,6 +17,7 @@ import { useUpdatePlaceData } from "@/api/PlaceApi";
 import OperatingHourForm from "./OperatingHourForm";
 import { useState } from "react";
 import PlaceFeatureForm from "./PlaceFeatureForm";
+import PlaceFoodForm from "./PlaceFoodForm";
 
 type Props = {
   place: PlaceWithRating;
@@ -240,6 +241,9 @@ const UpdatePlaceForm = ({ place }: Props) => {
       </div>
       <Separator className="my-2" />
       <PlaceFeatureForm placeId={place.id} />
+      <Separator className="my-2" />
+      <PlaceFoodForm placeId={place.id} />
+      <div className="h-[10rem]"></div>
     </>
   );
 };
