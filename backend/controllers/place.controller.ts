@@ -18,6 +18,7 @@ import {
   UserLocation,
 } from "../types";
 import { DAYS, DB_CODES } from "../utils/config";
+import placeImageModel from "../models/placeImage.model";
 
 const getPlace = async (req: Request, res: Response, next: NextFunction) => {
   const placeId = req.params.placeId as string;
@@ -180,9 +181,22 @@ const createPlace = async (req: Request, res: Response) => {
   try {
     const form: AddPlaceForm = req.body as AddPlaceForm;
 
-    const [imageUrl] = await uploadImage(req.file as Express.Multer.File);
+    const images = req.files as Express.Multer.File[];
+    if (images.length < 2)
+      return res.status(400).json({ message: "Atleast 2 image is required" });
 
-    const createdPlace = await PlaceModel.createMyPlace(form, imageUrl);
+    const createdPlace = await PlaceModel.createMyPlace(form);
+
+    for (const image of images) {
+      const [imageUrl, cloudinaryId] = await uploadImage(image);
+      await placeImageModel.addImageToDB(
+        imageUrl,
+        createdPlace.id,
+        req.jwtUserData!.userId,
+        "",
+        cloudinaryId
+      );
+    }
 
     return res.status(201).json(createdPlace);
   } catch (err) {

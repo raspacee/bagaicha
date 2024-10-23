@@ -69,18 +69,14 @@ const updatePlaceById = async (data: EditPlaceForm, placeId: string) => {
   UPDATE place
   SET 
     "name" = $1,
-    "placeFeatures" = $2,
-    "foodsOffered" = $3,
-    "coverImgUrl" = $4,
-    "websiteLink" = $5,
-    "instagramLink" = $6,
-    "contactNumbers" = $7
-  WHERE "id" = $8;
+    "coverImgUrl" = $2,
+    "websiteLink" = $3,
+    "instagramLink" = $4,
+    "contactNumbers" = $5
+  WHERE "id" = $6;
   `;
   const values = [
     data.name,
-    JSON.parse(data.placeFeatures as any),
-    JSON.parse(data.foodsOffered as any),
     data.coverImgUrl,
     JSON.parse(data.websiteLink as any),
     JSON.parse(data.instagramLink as any),
@@ -111,7 +107,7 @@ const getTopPlaces = async (
     haversine(place.lat::double precision, place.lon::double precision, $3::double precision, $4::double precision) AS distance
   FROM place
   WHERE 
-    ($1::text[] IS NULL OR ($1::text[] && "foodsOffered"))
+    ($1::text[] IS NULL)
     AND 
     ($2::text[] IS NULL)
   )
@@ -156,30 +152,36 @@ const getTotalSearchResults = async (
 };
 
 const createMyPlace = async (
-  data: AddPlaceForm,
-  imageUrl: string
+  data: AddPlaceForm
 ): Promise<CreatePlaceResponse> => {
   const id = uuid();
   const date = new Date().toISOString();
   const text = `
   INSERT INTO "place" (
-  "id", "osmId", "name", "lat", "lon", "placeFeatures", "coverImgUrl",
-  "foodsOffered", "ownedBy", "createdAt"
+  "id", "osmId", "name", "lat", "lon",
+  "road", "neighbourhood", "city", "state",
+  "ownedBy", "createdAt", "websiteLink",
+  "instagramLink"
   ) 
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
   RETURNING "id";`;
 
   const values = [
     id,
     "Custom",
     data.name,
-    parseFloat(data.lat),
-    parseFloat(data.lon),
-    JSON.parse(data.placeFeatures as any),
-    imageUrl,
-    JSON.parse(data.foodsOffered as any),
-    JSON.parse(data.ownedBy as any),
+    parseFloat(data.lat as any),
+    parseFloat(data.lon as any),
+    data.road,
+    data.neighbourhood,
+    data.city,
+    data.state,
+    data.ownedBy != "undefined" && data.ownedBy
+      ? JSON.parse(data.ownedBy)
+      : null,
     date,
+    data.websiteLink || null,
+    data.instagramLink || null,
   ];
   const result = await pool.query(text, values);
   return {

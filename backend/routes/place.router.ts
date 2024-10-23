@@ -195,7 +195,7 @@ router.get("/:placeId", placeController.getPlace);
 router.post(
   "/",
   authMiddleware,
-  upload.single("imageFile"),
+  upload.array("imageFiles[]", 10),
   placeController.createPlace
 );
 

@@ -100,18 +100,17 @@ type FoodsOffered = z.infer<typeof foodsOfferedSchema>;
 const placeSchema = z.object({
   id: z.string().uuid(),
   osmId: z.string().max(20),
-  name: z.string().min(2).max(250),
-  lat: z.number(),
-  lon: z.number(),
-  road: z.string().optional(),
-  neighbourhood: z.string().min(4),
-  city: z.string().min(4),
-  state: z.string().min(4),
-  openingTime: z.string().time().optional(),
-  closingTime: z.string().time().optional(),
-  placeFeatures: z.array(placeFeatureSchema).optional(),
+  name: z
+    .string({ message: "Name is required" })
+    .min(2, { message: "Name should be atleast 2 characters" })
+    .max(250),
+  lat: z.number({ message: "Valid latitude is required" }).gt(0),
+  lon: z.number({ message: "Valid longitude is required" }).gt(0),
+  road: z.string().min(2, { message: "Road is required" }),
+  neighbourhood: z.string().min(2, { message: "Neighbourhood is required" }),
+  city: z.string().min(2, { message: "City is required" }),
+  state: z.string().min(4, { message: "State is required" }),
   coverImgUrl: z.string().url().optional(),
-  foodsOffered: z.array(foodsOfferedSchema).optional(),
   ownedBy: z.string().uuid().optional(),
   createdAt: z.string().datetime(),
   websiteLink: z.string().optional(),
@@ -119,7 +118,52 @@ const placeSchema = z.object({
   contactNumbers: z.array(z.string()).optional(),
 });
 
-type Place = z.infer<typeof placeSchema>;
+export const editPlaceFormSchema = placeSchema
+  .pick({
+    name: true,
+    websiteLink: true,
+    instagramLink: true,
+    contactNumbers: true,
+  })
+  .extend({
+    coverImgUrl: z.string().url().nullable().optional(),
+    newCoverImgFile: z
+      .instanceof(File, { message: "Image is required" })
+      .optional(),
+  })
+  .refine((data) => data.coverImgUrl || data.newCoverImgFile, {
+    message: "Atleast url or new image is required",
+    path: ["newCoverImgFile"],
+  });
+
+export type EditPlaceForm = z.infer<typeof editPlaceFormSchema>;
+
+export type Place = z.infer<typeof placeSchema>;
+
+export const addPlaceFormSchema = placeSchema
+  .pick({
+    name: true,
+    ownedBy: true,
+    road: true,
+    city: true,
+    neighbourhood: true,
+    state: true,
+    lat: true,
+    lon: true,
+    websiteLink: true,
+    instagramLink: true,
+  })
+  .extend({
+    imageFiles: z
+      .array(z.instanceof(File, { message: "Image is required" }))
+      .min(2, { message: "You must upload at least 2 images" }),
+  });
+
+export type AddPlaceForm = z.infer<typeof addPlaceFormSchema>;
+
+export type CreatePlaceResponse = {
+  id: string;
+};
 
 export const createUserSchema = z.object({
   firstName: z
@@ -243,27 +287,6 @@ export enum UserModerationLevel {
   Moderator,
   Admin,
 }
-export const editPlaceFormSchema = placeSchema
-  .pick({
-    name: true,
-    placeFeatures: true,
-    foodsOffered: true,
-    websiteLink: true,
-    instagramLink: true,
-    contactNumbers: true,
-  })
-  .extend({
-    coverImgUrl: z.string().url().nullable().optional(),
-    newCoverImgFile: z
-      .instanceof(File, { message: "Image is required" })
-      .optional(),
-  })
-  .refine((data) => data.coverImgUrl || data.newCoverImgFile, {
-    message: "Atleast url or new image is required",
-    path: ["newCoverImgFile"],
-  });
-
-export type EditPlaceForm = z.infer<typeof editPlaceFormSchema>;
 
 export type UserLocation = {
   lat: number;
@@ -295,25 +318,6 @@ export const editPostFormSchema = postSchema.pick({
 });
 
 export type EditPostForm = z.infer<typeof editPostFormSchema>;
-
-export const addPlaceFormSchema = placeSchema
-  .pick({
-    name: true,
-    ownedBy: true,
-    placeFeatures: true,
-    foodsOffered: true,
-  })
-  .extend({
-    imageFile: z.instanceof(File, { message: "Image is required" }),
-    lat: z.string().min(1),
-    lon: z.string().min(1),
-  });
-
-export type AddPlaceForm = z.infer<typeof addPlaceFormSchema>;
-
-export type CreatePlaceResponse = {
-  id: string;
-};
 
 export type FetchFeedResponse = {
   posts: FeedPost[];
@@ -454,7 +458,6 @@ export type {
   FeedPost,
   CreatePostForm,
   CommentForm,
-  Place,
   FoodsOffered,
   Day,
   PlaceFeature,
