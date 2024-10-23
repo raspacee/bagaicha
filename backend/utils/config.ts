@@ -53,3 +53,5 @@ export const FOOD_CATEGORIES = [
   "Fast Food",
   "Other",
 ];
+
+export const NEPALI_PHONE_REGEX = /^(98|97|0[1-9])\d{8}$/;

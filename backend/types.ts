@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { foodItems } from "./config/foods";
-import { DAYS, FOOD_CATEGORIES, FOOD_CUISINES } from "./utils/config";
+import {
+  DAYS,
+  FOOD_CATEGORIES,
+  FOOD_CUISINES,
+  NEPALI_PHONE_REGEX,
+} from "./utils/config";
 
 type JwtUserData = {
   userId: string;
@@ -113,9 +118,25 @@ const placeSchema = z.object({
   coverImgUrl: z.string().url().optional(),
   ownedBy: z.string().uuid().optional(),
   createdAt: z.string().datetime(),
-  websiteLink: z.string().optional(),
-  instagramLink: z.string().optional(),
-  contactNumbers: z.array(z.string()).optional(),
+  websiteLink: z
+    .string()
+    .optional()
+    .refine((link) => link === "" || z.string().url().safeParse(link).success, {
+      message: "Valid URL is required",
+    }),
+  instagramLink: z
+    .string()
+    .optional()
+    .refine((link) => link === "" || z.string().url().safeParse(link).success, {
+      message: "Valid URL is required",
+    }),
+  contactNumbers: z
+    .array(
+      z.string().refine((num) => NEPALI_PHONE_REGEX.test(num), {
+        message: "Invalid Nepali Phone Number",
+      })
+    )
+    .optional(),
 });
 
 export const editPlaceFormSchema = placeSchema
