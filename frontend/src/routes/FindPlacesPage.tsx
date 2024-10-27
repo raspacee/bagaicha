@@ -28,14 +28,18 @@ import {
   FindPlaceSearchState,
   placeFeatureSchema,
 } from "@/lib/types";
+import { SelectedFoodsContext } from "@/main";
 import { Check, ChevronDown, ChevronUp, LoaderCircle } from "lucide-react";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useState } from "react";
 
 const FindPlacesPage = () => {
+  const context = useContext(SelectedFoodsContext);
+  if (!context) return <h1>Context provider not used properly</h1>;
+
   const [searchState, setSearchState] = useState<FindPlaceSearchState>({
     selectedDistance: null,
     selectedFeatures: [],
-    selectedFoods: [],
+    selectedFoods: context.selectedFoods,
     userLocation: null,
   });
   const [pageState, setPageState] = useState({

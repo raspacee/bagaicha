@@ -1,11 +1,22 @@
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { TOP_POPULAR_FOODS } from "@/lib/config";
+import { SelectedFoodsContext } from "@/main";
 import { Check } from "lucide-react";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
   const [selectedFoods, setSelectedFoods] = useState<string[]>([]);
+  const context = useContext(SelectedFoodsContext);
+  if (!context) return <h1>Context Provider not used</h1>;
+
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    context.updateSelectedFoods(selectedFoods);
+    navigate("/find-places");
+  };
 
   return (
     <div className="w-full min-h-screen">
@@ -52,7 +63,10 @@ const HomePage = () => {
             );
           })}
         </div>
-        <Button className="text-lg mt-5 bg-blue-600 hover:bg-blue-800 rounded-full w-[6rem] font-semibold">
+        <Button
+          onClick={handleClick}
+          className="text-lg mt-5 bg-blue-600 hover:bg-blue-800 rounded-full w-[6rem] font-semibold"
+        >
           Find
         </Button>
       </div>

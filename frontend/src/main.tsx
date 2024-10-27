@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createContext, ReactNode, useState } from "react";
 import ReactDOM from "react-dom/client";
 import {
   createBrowserRouter,
@@ -38,6 +38,38 @@ import OAuth2CallbackPage from "./routes/OAuth2CallbackPage";
 import CreateReviewPage from "./routes/CreateReviewPage";
 import HomePage from "./routes/HomePage";
 
+interface SelectedFoodsContextType {
+  selectedFoods: string[];
+  updateSelectedFoods: (foods: string[]) => void;
+}
+
+export const SelectedFoodsContext = createContext<
+  SelectedFoodsContextType | undefined
+>(undefined);
+
+interface ProviderProps {
+  children: ReactNode;
+}
+
+const SelectedFoodsProvider = ({ children }: ProviderProps) => {
+  const [selectedFoods, setSelectedFoods] = useState<string[]>([]);
+
+  const updateSelectedFoods = (foods: string[]) => {
+    setSelectedFoods(foods);
+  };
+
+  const value: SelectedFoodsContextType = {
+    selectedFoods,
+    updateSelectedFoods,
+  };
+
+  return (
+    <SelectedFoodsContext.Provider value={value}>
+      {children}
+    </SelectedFoodsContext.Provider>
+  );
+};
+
 const router = createBrowserRouter([
   {
     path: "/feed",
@@ -51,7 +83,9 @@ const router = createBrowserRouter([
     path: "/home",
     element: (
       <MainLayout>
-        <HomePage />
+        <SelectedFoodsProvider>
+          <HomePage />
+        </SelectedFoodsProvider>
       </MainLayout>
     ),
   },
@@ -71,7 +105,9 @@ const router = createBrowserRouter([
     path: "find-places",
     element: (
       <MainLayout>
-        <FindPlacesPage />
+        <SelectedFoodsProvider>
+          <FindPlacesPage />
+        </SelectedFoodsProvider>
       </MainLayout>
     ),
   },
