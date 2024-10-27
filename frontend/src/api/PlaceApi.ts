@@ -6,6 +6,7 @@ import {
   OperatingHourForm,
   Place,
   PlaceImage,
+  PlaceWithListingInfo,
   PlaceWithRating,
 } from "@/lib/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -163,25 +164,22 @@ const getUserPosition = (): Promise<GeolocationPosition> => {
   });
 };
 
-const useGetTopPlaces = (searchState: FindPlaceSearchState) => {
-  const getTopPlacesRequest = async (): Promise<PlaceWithRating[]> => {
-    const userLocation = await getUserPosition();
+const useGetTopPlaces = (searchState: FindPlaceSearchState, page: number) => {
+  const getTopPlacesRequest = async (): Promise<{
+    places: PlaceWithListingInfo[];
+    totalPages: number;
+  }> => {
+    const body: FindPlaceSearchState = { ...searchState };
+    if (body.selectedFeatures?.length == 0) body.selectedFeatures = null;
+    if (body.selectedFoods?.length == 0) body.selectedFoods = null;
 
-    const params = new URLSearchParams();
-    params.set("selectedFoods", searchState.selectedFoods.join(","));
-    params.set("selectedFeatures", searchState.selectedFeatures.join(","));
-    params.set(
-      "selectedDistance",
-      JSON.stringify(searchState.selectedDistance)
-    );
-    params.set("lat", userLocation.coords.latitude.toString());
-    params.set("lon", userLocation.coords.longitude.toString());
-    const response = await fetch(
-      `${BASE_API_URL}/place/top?${params.toString()}`,
-      {
-        method: "GET",
-      }
-    );
+    const response = await fetch(`${BASE_API_URL}/place/top?page=${page}`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
     if (!response.ok) {
       const data = await response.json();
       throw new Error(data.message);
@@ -189,12 +187,8 @@ const useGetTopPlaces = (searchState: FindPlaceSearchState) => {
     return response.json();
   };
 
-  const {
-    data: places,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["topPlaces", searchState],
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["topPlaces", searchState, page],
     queryFn: getTopPlacesRequest,
   });
 
@@ -202,7 +196,7 @@ const useGetTopPlaces = (searchState: FindPlaceSearchState) => {
     toast.error(error.message);
   }
 
-  return { places, isLoading };
+  return { places: data?.places, totalPages: data?.totalPages, isLoading };
 };
 
 const useCreatePlace = () => {

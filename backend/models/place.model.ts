@@ -2,14 +2,12 @@ import { pool } from "../db/index";
 import {
   AddPlaceForm,
   CreatePlaceResponse,
-  Distance,
   EditPlaceForm,
-  FoodsOffered,
+  FindPlaceSearchState,
   Place,
-  PlaceFeature,
+  PlaceWithListingInfo,
   PlaceWithRating,
   SearchResultTotalCount,
-  UserLocation,
 } from "../types";
 import { v4 as uuid } from "uuid";
 
@@ -87,49 +85,91 @@ const updatePlaceById = async (data: EditPlaceForm, placeId: string) => {
 };
 
 const getTopPlaces = async (
-  selectedFoods: FoodsOffered[] | null,
-  selectedFeatures: PlaceFeature[] | null,
-  selectedDistance: Distance,
-  userCoordinates: UserLocation
-): Promise<PlaceWithRating[]> => {
+  searchState: FindPlaceSearchState,
+  offset: number = 0
+): Promise<PlaceWithListingInfo[]> => {
   const text = `
-  WITH "placeRating" AS (
-    SELECT 
-        "placeId",
-        COUNT(*) AS "totalReviews", 
-        AVG(rating) AS "rating"
-    FROM "placeReview" 
-    GROUP BY "placeId"
-  ),
-  "PlaceDistance" AS (
-  SELECT 
-    id,
-    haversine(place.lat::double precision, place.lon::double precision, $3::double precision, $4::double precision) AS distance
-  FROM place
-  WHERE 
-    ($1::text[] IS NULL)
-    AND 
-    ($2::text[] IS NULL)
+  WITH "distance" AS (
+    SELECT "id" AS "placeId",
+        CASE
+            WHEN null IS null THEN null
+            ELSE round((ST_DistanceSphere(ST_MakePoint(lon, lat), ST_MakePoint($3::numeric, $4::numeric)) / 100)::numeric, 2)
+        END AS "distanceFromUser"
+    FROM place
   )
-  SELECT place.*, pd.distance, pr.*
-  FROM "place"
-  INNER JOIN "PlaceDistance" AS pd ON place.id = pd.id
-  LEFT JOIN "placeRating" AS pr ON place.id = pr."placeId"
-  WHERE
-    ($5::double precision IS NULL OR distance < $5::double precision)
-  ORDER BY distance ASC
-  LIMIT 10;
+
+  SELECT 
+      p.*, 
+      f."foodsArray", 
+      pf."featuresArray", 
+      d."distanceFromUser", 
+      pr."averageRating" AS rating
+  FROM 
+      "place" AS p
+  LEFT JOIN 
+      "foodsView" AS f ON p.id = f."placeId"
+  LEFT JOIN 
+      "featuresView" AS pf ON p.id = pf."placeId"
+  LEFT JOIN 
+      "distance" AS d ON p.id = d."placeId"
+  INNER JOIN 
+      "placeRatingView" AS pr ON p.id = pr."placeId"
+  WHERE 
+      (($1::varchar[] IS NULL) OR ($1::varchar[] && f."foodsArray"::varchar[]))
+      AND (($2::varchar[] IS NULL) OR ($2::varchar[] && pf."featuresArray"::varchar[]))
+      AND (($5::integer IS NULL OR $3::numeric IS NULL OR $4::numeric IS NULL) OR (d."distanceFromUser" < $5::integer))
+  ORDER BY 
+      "averageRating" DESC
+  LIMIT 15 OFFSET $6;
 `;
+  console.log(searchState);
   const values = [
-    selectedFoods,
-    selectedFeatures,
-    userCoordinates.lat,
-    userCoordinates.lon,
-    selectedDistance,
+    searchState.selectedFoods,
+    searchState.selectedFeatures?.map((feature) => feature.featureName) || null,
+    searchState.userLocation?.lon,
+    searchState.userLocation?.lat,
+    searchState.selectedDistance,
+    offset,
   ];
   const result = await pool.query(text, values);
-  if (result.rowCount == 0) return [];
   return result.rows;
+};
+
+const getTotalTopPlacesResults = async (
+  searchState: FindPlaceSearchState
+): Promise<number> => {
+  const text = `
+  WITH "distance" AS (
+    SELECT "id" AS "placeId",
+        CASE
+            WHEN null IS null THEN null
+            ELSE round((ST_DistanceSphere(ST_MakePoint(lon, lat), ST_MakePoint($3::numeric, $4::numeric)) / 100)::numeric, 2)
+        END AS "distanceFromUser"
+    FROM place
+  )
+
+  SELECT COUNT(*)
+  FROM "place" AS p
+  LEFT JOIN "foodsView" AS f ON p.id = f."placeId"
+  LEFT JOIN "featuresView" AS pf ON p.id = pf."placeId"
+  LEFT JOIN "distance" AS d ON p.id = d."placeId"
+  INNER JOIN "placeRatingView" AS pr ON p.id = pr."placeId"
+  WHERE 
+      (($1::text[] IS NULL) OR ($1::text[] && f."foodsArray"::text[]))
+      AND (($2::varchar[] IS NULL) OR ($2::varchar[] && pf."featuresArray"::varchar[]))
+      AND (
+          ($5::integer IS NULL OR $3::numeric IS NULL OR $4::numeric IS NULL)
+          OR (d."distanceFromUser" < $5::integer)
+      )`;
+  const values = [
+    searchState.selectedFoods,
+    searchState.selectedFeatures?.map((feature) => feature.featureName) || null,
+    searchState.userLocation?.lon,
+    searchState.userLocation?.lat,
+    searchState.selectedDistance,
+  ];
+  const result = await pool.query(text, values);
+  return result.rows[0].count;
 };
 
 const getTotalSearchResults = async (
@@ -207,6 +247,7 @@ const exporter = {
   getPlaceSuggestionsByQuery,
   updatePlaceById,
   getTopPlaces,
+  getTotalTopPlacesResults,
   getTotalSearchResults,
   createMyPlace,
   getPlacesOfUser,

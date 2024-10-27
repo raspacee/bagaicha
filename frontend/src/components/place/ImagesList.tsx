@@ -39,7 +39,7 @@ const ImagesList = ({ placeId }: Props) => {
   );
 
   const onPrev = () => {
-    if (activeImageIdx > 1) setActiveImageIdx(activeImageIdx - 1);
+    if (activeImageIdx >= 1) setActiveImageIdx(activeImageIdx - 1);
   };
 
   const onNext = () => {
@@ -110,7 +110,7 @@ const ImagesList = ({ placeId }: Props) => {
                           onNext={onNext}
                         />
                       )}
-                      {activeImageIdx > 1 && (
+                      {activeImageIdx >= 1 && (
                         <button
                           onClick={onPrev}
                           className={`absolute top-1/2 left-0 -translate-y-1/2 bg-gray-500 h-10 w-10 flex items-center justify-center rounded-full bg-opacity-60 translate-x-2`}

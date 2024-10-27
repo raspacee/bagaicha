@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Cookies from "universal-cookie";
 import { AUTH_TOKEN_NAME } from "../lib/config";
-import { FeedPost, FetchedUser } from "@/lib/types";
+import { FeedPost, FetchedUser, UserLocation } from "@/lib/types";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -149,12 +149,15 @@ export const useUpdateUserProfile = () => {
   return { updateUser, isPending };
 };
 
-export const getUserLocation = (): Promise<GeolocationPosition | null> => {
+export const getUserLocation = (): Promise<UserLocation | null> => {
   return new Promise((resolve, reject) => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          resolve(position);
+          resolve({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
         },
         (err) => {
           toast.error("Error while getting location");

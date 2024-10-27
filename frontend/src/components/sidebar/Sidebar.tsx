@@ -33,12 +33,6 @@ export default function SidebarLeft() {
       icon: <BookOpen size={36} />,
     },
     {
-      showAuthAlert: true,
-      label: "My Profile",
-      url: `/user/${myUser?.id}`,
-      icon: <User size={36} className="text-blue-900" />,
-    },
-    {
       showAuthAlert: false,
       label: "Find Places",
       url: `/find-places`,

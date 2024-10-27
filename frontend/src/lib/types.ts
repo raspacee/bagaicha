@@ -1,6 +1,11 @@
 import { foodItems } from "@/config/foods";
 import { z } from "zod";
-import { DAYS, FOOD_CATEGORIES, FOOD_CUISINES } from "./config";
+import {
+  DAYS,
+  FOOD_CATEGORIES,
+  FOOD_CUISINES,
+  NEPALI_PHONE_REGEX,
+} from "./config";
 
 /* User type when logged in */
 type UserInterface = {
@@ -9,11 +14,6 @@ type UserInterface = {
   first_name: string;
   last_name: string;
   profile_picture_url: string;
-};
-
-type LocationType = {
-  lat: number;
-  long: number;
 };
 
 type AddPlaceType = {
@@ -140,28 +140,43 @@ export type FoodsOffered = z.infer<typeof foodsOfferedSchema>;
 const placeSchema = z.object({
   id: z.string().uuid(),
   osmId: z.string().max(20),
-  name: z.string().min(2).max(250),
-  lat: z.number(),
-  lon: z.number(),
-  road: z.string().optional(),
-  neighbourhood: z.string().min(4),
-  city: z.string().min(4),
-  state: z.string().min(4),
-  placeFeatures: z.array(placeFeatureSchema).nullable().optional(),
+  name: z
+    .string({ message: "Name is required" })
+    .min(2, { message: "Name should be atleast 2 characters" })
+    .max(250),
+  lat: z.number({ message: "Valid latitude is required" }).gt(0),
+  lon: z.number({ message: "Valid longitude is required" }).gt(0),
+  road: z.string().min(2, { message: "Road is required" }),
+  neighbourhood: z.string().min(2, { message: "Neighbourhood is required" }),
+  city: z.string().min(2, { message: "City is required" }),
+  state: z.string().min(4, { message: "State is required" }),
   coverImgUrl: z.string().url().optional(),
-  foodsOffered: z.array(foodsOfferedSchema).nullable().optional(),
   ownedBy: z.string().uuid().optional(),
   createdAt: z.string().datetime(),
-  websiteLink: z.string().optional(),
-  instagramLink: z.string().optional(),
-  contactNumbers: z.array(z.string()).optional(),
+  websiteLink: z
+    .string()
+    .optional()
+    .refine((link) => link === "" || z.string().url().safeParse(link).success, {
+      message: "Valid URL is required",
+    }),
+  instagramLink: z
+    .string()
+    .optional()
+    .refine((link) => link === "" || z.string().url().safeParse(link).success, {
+      message: "Valid URL is required",
+    }),
+  contactNumbers: z
+    .array(
+      z.string().refine((num) => NEPALI_PHONE_REGEX.test(num), {
+        message: "Invalid Nepali Phone Number",
+      })
+    )
+    .optional(),
 });
 
 export const editPlaceFormSchema = placeSchema
   .pick({
     name: true,
-    placeFeatures: true,
-    foodsOffered: true,
     websiteLink: true,
     instagramLink: true,
     contactNumbers: true,
@@ -180,6 +195,31 @@ export const editPlaceFormSchema = placeSchema
 export type EditPlaceForm = z.infer<typeof editPlaceFormSchema>;
 
 export type Place = z.infer<typeof placeSchema>;
+
+export const addPlaceFormSchema = placeSchema
+  .pick({
+    name: true,
+    ownedBy: true,
+    road: true,
+    city: true,
+    neighbourhood: true,
+    state: true,
+    lat: true,
+    lon: true,
+    websiteLink: true,
+    instagramLink: true,
+  })
+  .extend({
+    imageFiles: z
+      .array(z.instanceof(File, { message: "Image is required" }))
+      .min(2, { message: "You must upload at least 2 images" }),
+  });
+
+export type AddPlaceForm = z.infer<typeof addPlaceFormSchema>;
+
+export type CreatePlaceResponse = {
+  id: string;
+};
 
 const commentSchema = z.object({
   id: z.string().uuid(),
@@ -339,12 +379,6 @@ export type JwtUserData = {
 
 export type Distance = 1 | 2 | 5 | 10 | null;
 
-export type FindPlaceSearchState = {
-  selectedFoods: FoodsOffered[];
-  selectedFeatures: PlaceFeature[];
-  selectedDistance: Distance;
-};
-
 export type SearchResultsResponse = {
   place: {
     totalItems: number;
@@ -364,31 +398,31 @@ export type SearchState = {
   postPage: number;
 };
 
+export type UserLocation = {
+  lat: number;
+  lon: number;
+};
+
+export type FindPlaceSearchState = {
+  selectedFoods: string[] | null;
+  selectedFeatures: FetchedFeature[] | null;
+  selectedDistance: Distance;
+  userLocation: UserLocation | null;
+};
+
+export type PlaceWithListingInfo = Place & {
+  rating: number;
+  foodsArray: string[] | null;
+  featuresArray: string[] | null;
+  distanceFromUser: number | null;
+};
+
 export const editPostFormSchema = postSchema.pick({
   body: true,
   rating: true,
 });
 
 export type EditPostForm = z.infer<typeof editPostFormSchema>;
-
-export const addPlaceFormSchema = placeSchema
-  .pick({
-    name: true,
-    ownedBy: true,
-    placeFeatures: true,
-    foodsOffered: true,
-  })
-  .extend({
-    imageFile: z.instanceof(File, { message: "Image is required" }),
-    lat: z.string().min(1),
-    lon: z.string().min(1),
-  });
-
-export type AddPlaceForm = z.infer<typeof addPlaceFormSchema>;
-
-export type CreatePlaceResponse = {
-  id: string;
-};
 
 export type FetchFeedResponse = {
   posts: FeedPost[];
@@ -566,7 +600,6 @@ export type FetchedFood = CreateFoodForm & {
 
 export type {
   UserInterface,
-  LocationType,
   FetchOptionType,
   Notification,
   FilterType,

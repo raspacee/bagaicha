@@ -10,6 +10,7 @@ import {
   AddPlaceForm,
   Distance,
   EditPlaceForm,
+  FindPlaceSearchState,
   FoodsOffered,
   OperatingHourForm,
   operatingHourSchema,
@@ -39,27 +40,19 @@ const getPlace = async (req: Request, res: Response, next: NextFunction) => {
 
 const getMyTopPlaces = async (req: Request, res: Response) => {
   try {
-    const features = req.query.selectedFeatures as string;
-    const selectedFeatures =
-      features !== "" ? (features?.split(",") as PlaceFeature[]) : null;
-    const foods = req.query.selectedFoods as string;
-    const selectedFoods =
-      foods !== "" ? (foods?.split(",") as FoodsOffered[]) : null;
-    const selectedDistance: Distance = JSON.parse(
-      req.query.selectedDistance as string
-    );
-    const userCoordinates: UserLocation = {
-      lat: parseInt(req.query.lat as string),
-      lon: parseInt(req.query.lon as string),
-    };
+    let page = parseInt(req.query.page as string);
+    let searchState: FindPlaceSearchState = req.body;
+    searchState.selectedFoods =
+      searchState.selectedFoods?.map((food) => food.toLowerCase()) || null;
 
-    const places = await PlaceModel.getTopPlaces(
-      selectedFoods,
-      selectedFeatures,
-      selectedDistance,
-      userCoordinates
-    );
-    return res.json(places);
+    const ITEMS_IN_PAGE = 15;
+    if (!page) page = 1;
+    const offset = (page - 1) * ITEMS_IN_PAGE;
+
+    const places = await PlaceModel.getTopPlaces(searchState, offset);
+    const totalItems = await PlaceModel.getTotalTopPlacesResults(searchState);
+    const totalPages = Math.ceil(totalItems / ITEMS_IN_PAGE);
+    return res.json({ places, totalPages });
   } catch (err) {
     console.error(err);
     return res.status(500).json({

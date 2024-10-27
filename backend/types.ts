@@ -438,6 +438,13 @@ export type PlaceWithRating = Place & {
   totalReviews: number;
 };
 
+export type PlaceWithListingInfo = Place & {
+  rating: number;
+  foodsArray: string[] | null;
+  featuresArray: string[] | null;
+  distanceFromUser: number | null;
+};
+
 /* For creation of place feature by admin */
 export const createFeatureSchema = z.object({
   featureName: z.string(),
@@ -468,6 +475,13 @@ export type CreateFoodForm = z.infer<typeof createFoodSchema>;
 
 export type FetchedFood = CreateFoodForm & {
   id: number;
+};
+
+export type FindPlaceSearchState = {
+  selectedFoods: string[] | null;
+  selectedFeatures: FetchedFeature[] | null;
+  selectedDistance: Distance;
+  userLocation: UserLocation | null;
 };
 
 export type {

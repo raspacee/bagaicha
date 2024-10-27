@@ -19,15 +19,15 @@ import { foodItems } from "@/config/foods";
 import FoodsMenuCard from "../place/FoodsMenuCard";
 
 type Props = {
-  foodsList: FoodsOffered[];
-  onChange: (foodsList: FoodsOffered[]) => void;
+  foodsList: string[];
+  onChange: (foodsList: string[]) => void;
 };
 
 const FilterByFoods = ({ foodsList, onChange }: Props) => {
   const [open, setOpen] = useState(false);
 
   const handleSelect = (value: string) => {
-    const selectedFood = value as FoodsOffered;
+    const selectedFood = value;
     if (!foodsList.includes(selectedFood)) {
       const newFoodsList = [...foodsList, selectedFood];
       onChange(newFoodsList);
@@ -35,7 +35,7 @@ const FilterByFoods = ({ foodsList, onChange }: Props) => {
     setOpen(false);
   };
 
-  const handleDeleteFoodItem = (food: FoodsOffered) => {
+  const handleDeleteFoodItem = (food: string) => {
     const newFoodsList = foodsList.filter((item) => item !== food);
     onChange(newFoodsList);
   };

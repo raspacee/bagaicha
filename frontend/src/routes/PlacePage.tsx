@@ -3,7 +3,6 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Link, useParams } from "react-router-dom";
 import PlaceInformationCard from "@/components/place/PlaceInformationCard";
 import FoodsMenuCard from "@/components/place/FoodsMenuCard";
-import { useAuthenticateUser } from "@/api/AuthApi";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import UploadImages from "@/components/post/UploadImages";
@@ -31,13 +30,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 
 const PlacePage = () => {
   const { placeId } = useParams();
@@ -56,6 +48,23 @@ const PlacePage = () => {
 
   if (!place) {
     return <h1>Place not found</h1>;
+  }
+
+  let website: string;
+  try {
+    website = place.websiteLink
+      ? new URL(place.websiteLink).hostname
+      : "Website Not Provided";
+  } catch (error) {
+    website = "Invalid Website Link";
+  }
+  let instagram: string;
+  try {
+    instagram = place.instagramLink
+      ? new URL(place.instagramLink).pathname.replace(new RegExp("/", "g"), "")
+      : "Instagram Not Provided";
+  } catch (error) {
+    instagram = "Invalid Instagram Link";
   }
 
   return (
@@ -168,9 +177,7 @@ const PlacePage = () => {
             <span
               className={`${place.websiteLink && "text-blue-600 font-bold "}`}
             >
-              {place.websiteLink
-                ? new URL(place.websiteLink).hostname
-                : "Website Not Provided"}
+              {website}
             </span>
             <ExternalLink />
           </a>
@@ -183,12 +190,7 @@ const PlacePage = () => {
             <span
               className={`${place.instagramLink && "text-blue-600 font-bold "}`}
             >
-              {place.instagramLink
-                ? new URL(place.instagramLink).pathname.replace(
-                    new RegExp("/", "g"),
-                    ""
-                  )
-                : "Instagram Not Provided"}
+              {instagram}
             </span>
             <Instagram />
           </a>
@@ -218,15 +220,19 @@ const PlacePage = () => {
         </h1>
         <div className="w-full flex flex-row gap-2 flex-wrap max-h-[22rem] overflow-y-scroll">
           {foods &&
-            foods.map((food) => (
-              <Card className="w-[10rem] md:w-[13rem] h-[12rem] overflow-y-scroll">
-                <CardHeader>
-                  <CardTitle>{food.name}</CardTitle>
-                  <CardDescription>Rs.{food.price}</CardDescription>
-                  <CardDescription>{food.category}</CardDescription>
-                  <CardDescription>{food.cuisine}</CardDescription>
-                </CardHeader>
-              </Card>
+            (foods.length > 0 ? (
+              foods.map((food) => (
+                <Card className="w-[10rem] md:w-[13rem] h-[12rem] overflow-y-scroll">
+                  <CardHeader>
+                    <CardTitle>{food.name}</CardTitle>
+                    <CardDescription>Rs.{food.price}</CardDescription>
+                    <CardDescription>{food.category}</CardDescription>
+                    <CardDescription>{food.cuisine}</CardDescription>
+                  </CardHeader>
+                </Card>
+              ))
+            ) : (
+              <p className="text-muted-foreground">Foods Not Added Yet</p>
             ))}
         </div>
       </div>

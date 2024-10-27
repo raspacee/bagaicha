@@ -5,11 +5,15 @@ import {
 } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
-import { FormControl, FormField, FormItem, FormMessage } from "../ui/form";
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "../ui/form";
 import { FormLabel } from "@mui/material";
 import { Separator } from "../ui/separator";
-import SearchFoodItemInput from "./SearchFoodItemInput";
-import SearchPlaceFeatureInput from "./SearchPlaceFeatureInput";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Save, Trash2 } from "lucide-react";
@@ -28,12 +32,10 @@ const UpdatePlaceForm = ({ place }: Props) => {
     resolver: zodResolver(editPlaceFormSchema),
     defaultValues: {
       name: place.name,
-      foodsOffered: place.foodsOffered,
       coverImgUrl: place.coverImgUrl,
-      placeFeatures: place.placeFeatures,
-      contactNumbers: place.contactNumbers,
-      instagramLink: place.instagramLink,
-      websiteLink: place.websiteLink,
+      contactNumbers: place.contactNumbers || [],
+      instagramLink: place.instagramLink || "",
+      websiteLink: place.websiteLink || "",
     },
   });
   const { updatePlace, isPending } = useUpdatePlaceData();
@@ -44,11 +46,6 @@ const UpdatePlaceForm = ({ place }: Props) => {
   const onSubmit = (formDataJson: EditPlaceForm) => {
     const formData = new FormData();
     formData.append("name", formDataJson.name);
-    formData.append(
-      "placeFeatures",
-      JSON.stringify(formDataJson.placeFeatures)
-    );
-    formData.append("foodsOffered", JSON.stringify(formDataJson.foodsOffered));
     if (formDataJson.newCoverImgFile) {
       formData.append("image", formDataJson.newCoverImgFile);
     } else {
@@ -153,6 +150,9 @@ const UpdatePlaceForm = ({ place }: Props) => {
                     placeholder="Instagram link here"
                   />
                 </FormControl>
+                <FormDescription className="text-red-500 text-xs">
+                  {form.formState.errors.instagramLink?.message}
+                </FormDescription>
               </FormItem>
             )}
           />
@@ -166,43 +166,54 @@ const UpdatePlaceForm = ({ place }: Props) => {
                 <FormControl>
                   <ul>
                     {field.value
-                      ? field.value.map((number) => (
-                          <li
-                            key={number}
-                            className="text-sm cursor-pointer w-[15rem] flex gap-2 items-center"
-                          >
-                            <span>{number}</span>
-                            <Button
-                              variant="ghost"
-                              type="button"
-                              className="text-red-600"
-                              onClick={() =>
-                                field.onChange(
-                                  field.value?.filter((no) => no !== number)
-                                )
-                              }
+                      ? field.value.map((number, index) => (
+                          <>
+                            <li
+                              key={number}
+                              className="text-sm cursor-pointer w-[15rem] flex gap-2 items-center"
                             >
-                              <Trash2 />
-                            </Button>
-                          </li>
+                              <span className="w-[80%]">{number}</span>
+                              <Button
+                                variant="ghost"
+                                type="button"
+                                className="text-red-600"
+                                onClick={() =>
+                                  field.onChange(
+                                    field.value?.filter((no) => no !== number)
+                                  )
+                                }
+                              >
+                                <Trash2 />
+                              </Button>
+                            </li>
+                            <FormDescription className="text-xs text-red-500">
+                              {
+                                form.formState.errors.contactNumbers?.[index]
+                                  ?.message
+                              }
+                            </FormDescription>
+                          </>
                         ))
                       : "Empty"}
                     <Input
                       type="text"
                       placeholder="Enter number here"
-                      className="w-[13rem]"
+                      className={`w-[13rem] mt-1 ${
+                        field.value!.length >= 3 && "hidden"
+                      }`}
                       value={contactInput}
                       onChange={(e) => setContactInput(e.target.value)}
                     />
                     <Button
-                      className="my-2"
+                      className={`my-2 ${field.value!.length >= 3 && "hidden"}`}
                       onClick={() => {
-                        if (contactInput.length > 3) {
+                        if (field.value!.length < 3) {
                           field.onChange([...field.value!, contactInput]);
                           setContactInput("");
                         }
                       }}
                       type="button"
+                      disabled={contactInput.length > 3}
                     >
                       Add
                     </Button>
@@ -210,19 +221,6 @@ const UpdatePlaceForm = ({ place }: Props) => {
                 </FormControl>
               </FormItem>
             )}
-          />
-          <Separator />
-          <FormField
-            control={form.control}
-            name="foodsOffered"
-            render={({ field }) => <SearchFoodItemInput />}
-          />
-
-          <Separator />
-          <FormField
-            control={form.control}
-            name="placeFeatures"
-            render={({ field }) => <SearchPlaceFeatureInput />}
           />
           <Separator />
           <Button

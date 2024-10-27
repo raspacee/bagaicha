@@ -36,6 +36,7 @@ import ResetPasswordPage from "./routes/ResetPasswordPage";
 import GenericLayout from "./layouts/GenericLayout";
 import OAuth2CallbackPage from "./routes/OAuth2CallbackPage";
 import CreateReviewPage from "./routes/CreateReviewPage";
+import HomePage from "./routes/HomePage";
 
 const router = createBrowserRouter([
   {
@@ -47,8 +48,16 @@ const router = createBrowserRouter([
     ),
   },
   {
+    path: "/home",
+    element: (
+      <MainLayout>
+        <HomePage />
+      </MainLayout>
+    ),
+  },
+  {
     path: "/",
-    element: <Navigate to="/feed" replace />,
+    element: <Navigate to="/home" replace />,
   },
   {
     path: "place/:placeId",

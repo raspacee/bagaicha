@@ -1,11 +1,10 @@
-import { PlaceWithRating } from "@/lib/types";
+import { PlaceWithListingInfo } from "@/lib/types";
 import { Rating } from "@mui/material";
 import { Dot } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Separator } from "../ui/separator";
 
 type Props = {
-  place: PlaceWithRating;
+  place: PlaceWithListingInfo;
 };
 
 const PlaceListItem = ({ place }: Props) => {
@@ -32,11 +31,12 @@ const PlaceListItem = ({ place }: Props) => {
             </span>
           </p>
           <p className="px-1 text-muted-foreground font-normal">{`${
-            place.totalReviews || 0
+            // place.totalReviews || 0
+            0
           } reviews`}</p>
         </div>
         <div className="flex flex-row gap-1 flex-wrap mt-2">
-          {place.placeFeatures &&
+          {/* {place.placeFeatures &&
             place.placeFeatures.slice(0, 3).map((feature, index) =>
               index == place.placeFeatures!.slice(0, 3).length - 1 ? (
                 <span key={feature}>{feature}</span>
@@ -45,7 +45,7 @@ const PlaceListItem = ({ place }: Props) => {
                   {feature} <Dot />
                 </span>
               )
-            )}
+            )} */}
         </div>
       </div>
     </div>

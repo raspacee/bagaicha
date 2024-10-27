@@ -38,7 +38,7 @@ router.get("/:placeId/image", placeController.getImages);
 /* Get information of a single image */
 router.get("/image/:imageId", placeController.getImageInfo);
 
-router.get("/top", placeController.getMyTopPlaces);
+router.post("/top", placeController.getMyTopPlaces);
 
 router.get(
   "/ownership",

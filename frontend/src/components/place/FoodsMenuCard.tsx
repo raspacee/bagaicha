@@ -10,10 +10,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { FoodsOffered, Place } from "@/lib/types";
 
 type Props = {
-  foodsOffered: FoodsOffered[] | undefined;
+  foodsOffered: string[] | undefined;
   description: string;
   header?: string;
-  onClick?: (food: FoodsOffered) => void;
+  onClick?: (food: string) => void;
 };
 
 const FoodsMenuCard = ({

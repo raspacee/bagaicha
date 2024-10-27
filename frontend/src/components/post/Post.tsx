@@ -78,7 +78,7 @@ export default function Post({ post, renderedFromFeed }: Props) {
             </p>
           </Link>
         </div>
-        <div className="flex gap-1 px-1 mt-1 md:mt-0">
+        <div className="flex gap-1 px-1 mt-1 md:mt-0 items-center">
           <span className="font-normal text-sm text-muted-foreground">
             {date.toRelative()}
           </span>
